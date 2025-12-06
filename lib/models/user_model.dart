@@ -4,7 +4,7 @@ class UserProfile {
   final String? lastName;
   final String? email;
   final String role;
-  final ProfileData profile;
+  final ProfileData? profile; // ✅ Ubah jadi nullable
 
   UserProfile({
     required this.username,
@@ -12,7 +12,7 @@ class UserProfile {
     this.lastName,
     this.email,
     required this.role,
-    required this.profile,
+    this.profile, // ✅ Ubah jadi optional
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -22,7 +22,10 @@ class UserProfile {
       lastName: json['last_name'],
       email: json['email'],
       role: json['role'],
-      profile: ProfileData.fromJson(json['profile'], json['role']),
+      // ✅ Handle jika json['profile'] null
+      profile: json['profile'] != null 
+          ? ProfileData.fromJson(json['profile'], json['role']) 
+          : null,
     );
   }
 
@@ -34,15 +37,17 @@ class UserProfile {
       return '$firstName $lastName';
     } else if (firstName != null) {
       return firstName!;
+    } else if (lastName != null) {
+      return lastName!;
     }
     return username;
   }
 }
 
 class ProfileData {
-  final String id;
-  final String city;
-  final String phone;
+  final String? id;
+  final String? city;
+  final String? phone;
   final String? description;
   final String? profilePhoto;
   
@@ -51,9 +56,9 @@ class ProfileData {
   final int? hourlyFee;
 
   ProfileData({
-    required this.id,
-    required this.city,
-    required this.phone,
+    this.id,
+    this.city,
+    this.phone,
     this.description,
     this.profilePhoto,
     this.sport,

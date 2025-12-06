@@ -108,12 +108,13 @@ class _MyHomePageState extends State<MyHomePage> {
               CircleAvatar(
                 radius: 60,
                 backgroundColor: const Color(0xFFE8B923),
-                backgroundImage: profile?.profile.profilePhoto != null && 
-                                 profile!.profile.profilePhoto!.isNotEmpty
-                    ? NetworkImage(profile.profile.profilePhoto!)
+                // ✅ Tambahkan ? setelah profile
+                backgroundImage: profile?.profile?.profilePhoto != null && 
+                                 profile!.profile!.profilePhoto!.isNotEmpty
+                    ? NetworkImage(profile.profile!.profilePhoto!)
                     : null,
-                child: profile?.profile.profilePhoto == null || 
-                        profile!.profile.profilePhoto!.isEmpty
+                child: profile?.profile?.profilePhoto == null || 
+                        profile!.profile!.profilePhoto!.isEmpty
                     ? Text(
                         profile?.username.substring(0, 1).toUpperCase() ?? 'U',
                         style: const TextStyle(
@@ -176,15 +177,16 @@ class _MyHomePageState extends State<MyHomePage> {
               _buildInfoCard(
                 icon: Icons.location_city,
                 label: 'City',
-                value: profile?.profile.city ?? '-',
+                value: profile?.profile?.city ?? '-', 
               ),
               const SizedBox(height: 12),
               
               _buildInfoCard(
                 icon: Icons.phone,
                 label: 'Phone',
-                value: profile?.profile.phone ?? '-',
+                value: profile?.profile?.phone ?? '-', 
               ),
+
               const SizedBox(height: 12),
               
               _buildInfoCard(
@@ -199,23 +201,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 _buildInfoCard(
                   icon: Icons.sports,
                   label: 'Sport',
-                  value: profile?.profile.sportLabel ?? '-',
+                  value: profile?.profile?.sportLabel ?? '-', // ✅ Tambahkan ?
                 ),
                 const SizedBox(height: 12),
                 _buildInfoCard(
                   icon: Icons.attach_money,
                   label: 'Hourly Fee',
-                  value: 'Rp ${profile?.profile.hourlyFee?.toString() ?? '0'}',
+                  value: 'Rp ${profile?.profile?.hourlyFee?.toString() ?? '0'}', // ✅ Tambahkan ?
                 ),
               ],
               
-              if (profile?.profile.description != null && 
-                  profile!.profile.description!.isNotEmpty) ...[
+              if (profile?.profile?.description != null && 
+                  profile!.profile!.description!.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 _buildInfoCard(
                   icon: Icons.description,
                   label: 'Description',
-                  value: profile.profile.description!,
+                  value: profile.profile!.description!,
                 ),
               ],
             ],
