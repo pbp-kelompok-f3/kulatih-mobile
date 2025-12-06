@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/main.dart';
-import 'package:kulatih_mobile/albert-user/screens/register.dart';
+import 'package:kulatih_mobile/models/user_provider.dart';
+import 'package:kulatih_mobile/albert-user/screens/register_member.dart';
+import 'package:kulatih_mobile/albert-user/screens/register_coach.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,67 +20,142 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final request = context.watch<CookieRequest>();
+    final userProvider = context.watch<UserProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login - KuLatih'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Card(
-            elevation: 8,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Login',
+      backgroundColor: const Color(0xFF1A1625),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                RichText(
+                  text: const TextSpan(
                     style: TextStyle(
-                      fontSize: 24.0,
+                      fontFamily: 'BebasNeue',
+                      fontSize: 64,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  const SizedBox(height: 30.0),
-                  TextField(
-                    controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Username',
-                      hintText: 'Masukkan username',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                    children: [
+                      TextSpan(
+                        text: 'KU',
+                        style: TextStyle(color: Colors.white),
                       ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      TextSpan(
+                        text: 'LATIH',
+                        style: TextStyle(color: Color(0xFFE8B923)),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Sign In to Continue',
+                  style: TextStyle(
+                    fontFamily: 'BeVietnamPro',
+                    color: Colors.white70,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 48),
+
+                TextField(
+                  controller: _usernameController,
+                  style: const TextStyle(
+                    fontFamily: 'BeVietnamPro',
+                    color: Colors.white,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Username',
+                    hintStyle: const TextStyle(
+                      fontFamily: 'BeVietnamPro',
+                      color: Colors.white54,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.1),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE8B923),
+                        width: 2,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE8B923),
+                        width: 2,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE8B923),
+                        width: 2,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
                     ),
                   ),
-                  const SizedBox(height: 12.0),
-                  TextField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'Masukkan password',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                      ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                    ),
-                    obscureText: true,
+                ),
+                const SizedBox(height: 16),
+
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  style: const TextStyle(
+                    fontFamily: 'BeVietnamPro',
+                    color: Colors.white,
                   ),
-                  const SizedBox(height: 24.0),
-                  ElevatedButton(
+                  decoration: InputDecoration(
+                    hintText: 'Password',
+                    hintStyle: const TextStyle(
+                      fontFamily: 'BeVietnamPro',
+                      color: Colors.white54,
+                    ),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.1),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE8B923),
+                        width: 2,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE8B923),
+                        width: 2,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Color(0xFFE8B923),
+                        width: 2,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
                     onPressed: () async {
                       String username = _usernameController.text;
                       String password = _passwordController.text;
 
-                      // Sesuai dengan endpoint Django Anda
                       final response = await request.login(
                         "http://localhost:8000/auth/login/",
                         {
@@ -89,22 +166,33 @@ class _LoginPageState extends State<LoginPage> {
 
                       if (request.loggedIn) {
                         String message = response['message'];
-                        String uname = response['username'];
+                        
+                        // Save user data to provider
+                        userProvider.login(response);
                         
                         if (context.mounted) {
+                          String roleName = userProvider.isCoach ? 'Coach' : 'Member';
+                          
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const MyHomePage(
-                                title: 'KuLatih',
+                              builder: (context) => MyHomePage(
+                                title: 'KuLatih - $roleName',
                               ),
                             ),
                           );
+                          
                           ScaffoldMessenger.of(context)
                             ..hideCurrentSnackBar()
                             ..showSnackBar(
                               SnackBar(
-                                content: Text("$message Selamat datang, $uname!"),
+                                content: Text(
+                                  "$message Welcome, ${userProvider.userProfile?.fullName ?? username}!",
+                                  style: const TextStyle(
+                                    fontFamily: 'BeVietnamPro',
+                                  ),
+                                ),
+                                backgroundColor: const Color(0xFFE8B923),
                               ),
                             );
                         }
@@ -113,11 +201,30 @@ class _LoginPageState extends State<LoginPage> {
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: const Text('Login Gagal'),
-                              content: Text(response['message']),
+                              backgroundColor: const Color(0xFF2A2438),
+                              title: const Text(
+                                'Login Failed',
+                                style: TextStyle(
+                                  fontFamily: 'BebasNeue',
+                                  color: Colors.white,
+                                ),
+                              ),
+                              content: Text(
+                                response['message'],
+                                style: const TextStyle(
+                                  fontFamily: 'BeVietnamPro',
+                                  color: Colors.white70,
+                                ),
+                              ),
                               actions: [
                                 TextButton(
-                                  child: const Text('OK'),
+                                  child: const Text(
+                                    'OK',
+                                    style: TextStyle(
+                                      fontFamily: 'BeVietnamPro',
+                                      color: Color(0xFFE8B923),
+                                    ),
+                                  ),
                                   onPressed: () {
                                     Navigator.pop(context);
                                   },
@@ -129,33 +236,70 @@ class _LoginPageState extends State<LoginPage> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 50),
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      backgroundColor: const Color(0xFFE8B923),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: const Text('Login'),
-                  ),
-                  const SizedBox(height: 36.0),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const RegisterPage(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      'Belum punya akun? Daftar',
+                    child: const Text(
+                      'Login',
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 16.0,
+                        fontFamily: 'BebasNeue',
+                        fontSize: 24,
+                        color: Color(0xFF1A1625),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 24),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const RegisterMemberPage(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Member Sign Up',
+                        style: TextStyle(
+                          fontFamily: 'BeVietnamPro',
+                          color: Colors.white,
+                          fontSize: 16,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const RegisterCoachPage(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Coach Sign Up',
+                        style: TextStyle(
+                          fontFamily: 'BeVietnamPro',
+                          color: Colors.white,
+                          fontSize: 16,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
