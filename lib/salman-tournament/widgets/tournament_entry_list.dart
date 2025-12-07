@@ -5,33 +5,42 @@ import 'package:kulatih_mobile/salman-tournament/page/tournament_details.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
-class TournamentEntryListPage extends StatefulWidget {
-  const TournamentEntryListPage({super.key});
+class TournamentEntryList extends StatefulWidget {
+  final String query;
+
+  const TournamentEntryList({
+    super.key,
+    required this.query,
+  });
 
   @override
-  State<TournamentEntryListPage> createState() => _TournamentEntryListPageState();
+  State<TournamentEntryList> createState() => _TournamentEntryListState();
 }
 
-class _TournamentEntryListPageState extends State<TournamentEntryListPage> {
+class _TournamentEntryListState extends State<TournamentEntryList> {
   bool isLoading = true;
-  List<Tournament> tournaments = [];
+  List<Tournament> allTournaments = [];
 
-  Future<void> fetchTournaments(CookieRequest request) async {
+  Future<void> _fetchTournaments() async {
     setState(() => isLoading = true);
 
-    final response = await request.get(
+    final request = context.read<CookieRequest>();
+    final raw = await request.get(
       'http://localhost:8000/tournament/json/tournaments/',
     );
 
-    // Response adalah List<TournamentEntry>
-    List<Tournament> list = [];
-    for (var entry in response) {
-      TournamentEntry tEntry = TournamentEntry.fromJson(entry);
-      list.addAll(tEntry.tournaments); // karena model berisi role + list tournament
+    final Map<String, dynamic> normalized =
+        raw is Map ? Map<String, dynamic>.from(raw) : <String, dynamic>{};
+
+    if (raw is List) {
+      normalized['role'] = 'unknown';
+      normalized['tournaments'] = raw;
     }
 
+    final entry = TournamentEntry.fromJson(normalized);
+
     setState(() {
-      tournaments = list;
+      allTournaments = entry.tournaments;
       isLoading = false;
     });
   }
@@ -39,57 +48,61 @@ class _TournamentEntryListPageState extends State<TournamentEntryListPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      final request = context.read<CookieRequest>();
-      fetchTournaments(request);
-    });
+    Future.microtask(_fetchTournaments);
   }
 
   @override
   Widget build(BuildContext context) {
-    final request = context.watch<CookieRequest>();
+    final q = widget.query.trim().toLowerCase();
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF121212),
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: const Text("Tournament List"),
-      ),
+    final filtered = q.isEmpty
+        ? allTournaments
+        : allTournaments.where((t) => t.nama.toLowerCase().contains(q)).toList();
 
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                color: Colors.orangeAccent,
-              ),
-            )
-          : tournaments.isEmpty
-              ? const Center(
-                  child: Text(
-                    "No tournaments available.",
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: tournaments.length,
-                  itemBuilder: (context, index) {
-                    final tour = tournaments[index];
+    if (isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 60),
+          child: CircularProgressIndicator(color: Colors.orangeAccent),
+        ),
+      );
+    }
 
-                    return TournamentEntryCard(
-                      tournament: tour,
-                      index: index,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => TournamentDetailPage(tournament: tour),
-                          ),
-                        );
-                      },
-                    );
-                  },
+    if (filtered.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 60),
+          child: Text(
+            "No tournaments found.",
+            style: TextStyle(color: Colors.white70, fontSize: 16),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: ListView.builder(
+        padding: const EdgeInsets.only(bottom: 40),
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: filtered.length,
+        itemBuilder: (context, index) {
+          final tournament = filtered[index];
+
+          return TournamentEntryCard(
+            tournament: tournament,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TournamentDetailPage(tournament: tournament),
                 ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
