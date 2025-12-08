@@ -174,6 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
       Center(child: Text("Bookings Page", style: TextStyle(color: Colors.white))),
       ForumMainPage(),
       Center(child: Text("Community Page", style: TextStyle(color: Colors.white))),
+      
     ];
 
     return Scaffold(
