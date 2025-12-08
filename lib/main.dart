@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kulatih_mobile/izzati-forum/pages/forum_main.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:kulatih_mobile/albert-user/screens/login.dart';
@@ -171,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // PAGE 1 - 4
       TournamentMainPage(),
       Center(child: Text("Bookings Page", style: TextStyle(color: Colors.white))),
-      Center(child: Text("Forum Page", style: TextStyle(color: Colors.white))),
+      ForumMainPage(),
       Center(child: Text("Community Page", style: TextStyle(color: Colors.white))),
     ];
 
