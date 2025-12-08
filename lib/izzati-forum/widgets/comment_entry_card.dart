@@ -1,5 +1,10 @@
+import 'package:flutter/material.dart';
+import 'package:kulatih_mobile/izzati-forum/models/comment_models.dart';
+import '../styles/colors.dart';
+import '../styles/text.dart';
+
 class CommentEntryCard extends StatelessWidget {
-  final CommentEntry entry;
+  final ItemComment entry;
   final int level;
 
   const CommentEntryCard({
@@ -20,14 +25,14 @@ class CommentEntryCard extends StatelessWidget {
           // HEADER
           Row(
             children: [
-              CircleAvatar(radius: 14, backgroundColor: Colors.white30),
+              const CircleAvatar(radius: 14, backgroundColor: Colors.white30),
               const SizedBox(width: 10),
 
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(entry.author, style: heading(14, color: AppColor.yellow)),
-                  Text(entry.time, style: body(11, color: Colors.white54)),
+                  Text(entry.created, style: body(11, color: Colors.white54)), // ✅ FIX
                 ],
               ),
             ],

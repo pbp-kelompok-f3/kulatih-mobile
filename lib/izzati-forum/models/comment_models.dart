@@ -11,7 +11,7 @@ String commentEntryToJson(CommentEntry data) => json.encode(data.toJson());
 class CommentEntry {
     bool ok;
     int count;
-    List<Item> items;
+    List<ItemComment> items;
 
     CommentEntry({
         required this.ok,
@@ -22,7 +22,7 @@ class CommentEntry {
     factory CommentEntry.fromJson(Map<String, dynamic> json) => CommentEntry(
         ok: json["ok"],
         count: json["count"],
-        items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
+        items: List<ItemComment>.from(json["items"].map((x) => ItemComment.fromJson(x))),
     );
 
     Map<String, dynamic> toJson() => {
@@ -32,7 +32,7 @@ class CommentEntry {
     };
 }
 
-class Item {
+class ItemComment {
     int id;
     String author;
     int authorId;
@@ -40,11 +40,11 @@ class Item {
     int? parent;
     DateTime createdIso;
     String created;
-    List<Item> replies;
+    List<ItemComment> replies;
     int repliesCount;
     bool isOwner;
 
-    Item({
+    ItemComment({
         required this.id,
         required this.author,
         required this.authorId,
@@ -57,7 +57,7 @@ class Item {
         required this.isOwner,
     });
 
-    factory Item.fromJson(Map<String, dynamic> json) => Item(
+    factory ItemComment.fromJson(Map<String, dynamic> json) => ItemComment(
         id: json["id"],
         author: json["author"],
         authorId: json["author_id"],
@@ -65,7 +65,7 @@ class Item {
         parent: json["parent"],
         createdIso: DateTime.parse(json["created_iso"]),
         created: json["created"],
-        replies: List<Item>.from(json["replies"].map((x) => Item.fromJson(x))),
+        replies: List<ItemComment>.from(json["replies"].map((x) => ItemComment.fromJson(x))),
         repliesCount: json["replies_count"],
         isOwner: json["is_owner"],
     );

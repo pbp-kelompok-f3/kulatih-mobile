@@ -71,7 +71,7 @@ class _ForumCreatePageState extends State<ForumCreatePage> {
                   debugPrint("DEBUG: Creating post = $_content");
 
                   final response = await request.postJson(
-                    "http://127.0.0.1:8000/forum/json/create/",
+                    "http://localhost:8000/forum/json/create/",
                     jsonEncode({"content": _content}),
                   );
 
