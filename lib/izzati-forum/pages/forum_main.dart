@@ -7,6 +7,7 @@ import '../styles/text.dart';
 import '../widgets/forum_entry_list.dart';
 import 'forum_details.dart'; // kalau mau push ke detail nanti
 import '../models/forum_models.dart';
+import 'forum_create.dart';
 
 class ForumMainPage extends StatefulWidget {
   const ForumMainPage({super.key});
@@ -49,8 +50,21 @@ class _ForumMainPageState extends State<ForumMainPage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColor.yellow,
         foregroundColor: AppColor.indigoDark,
-        onPressed: () {
-          // TODO: buka modal create post
+            onPressed: () async {
+                final created = await Navigator.push(
+                context,
+                    MaterialPageRoute(
+                        builder: (_) => const ForumCreatePage(),
+                    ),
+                );
+
+                // kalau dari create page kita kirim true, refresh list
+                if (created == true) {
+                setState(() {
+                    final req = context.read<CookieRequest>();
+                    _futurePosts = fetchPosts(req);
+                });
+            }
         },
         child: const Icon(Icons.add, size: 28),
       ),
