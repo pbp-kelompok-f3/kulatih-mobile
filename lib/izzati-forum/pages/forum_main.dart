@@ -27,7 +27,7 @@ class _ForumMainPageState extends State<ForumMainPage> {
 
   Future<ForumEntry> fetchPosts(CookieRequest request) async {
     final response = await request.get(
-      "http://127.0.0.1:8000/forum/api/posts/",
+      "http://127.0.0.1:8000/forum/json/",
     );
     return ForumEntry.fromJson(response);
   }
