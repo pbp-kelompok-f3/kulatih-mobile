@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:kulatih_mobile/albert-user/screens/login.dart';
+import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking.dart';
 
 void main() {
@@ -8,46 +12,36 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return MultiProvider(
+      providers: [
+        Provider(
+          create: (_) => CookieRequest(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => UserProvider(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'KuLatih',
+        theme: ThemeData(
+          useMaterial3: true,
+          fontFamily: 'BeVietnamPro',
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFFE8B923),
+            brightness: Brightness.dark,
+          ),
+        ),
+        home: const LoginPage(),
+        debugShowCheckedModeBanner: false,
       ),
-      home: const BookingPage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -55,69 +49,229 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final request = context.watch<CookieRequest>();
+    final userProvider = context.watch<UserProvider>();
+    final profile = userProvider.userProfile;
+    
     return Scaffold(
+      backgroundColor: const Color(0xFF1A1625),
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        backgroundColor: const Color(0xFF1A1625),
+        title: RichText(
+          text: const TextSpan(
+            style: TextStyle(fontFamily: 'BebasNeue', fontSize: 32),
+            children: [
+              TextSpan(text: 'KU', style: TextStyle(color: Colors.white)),
+              TextSpan(text: 'LATIH', style: TextStyle(color: Color(0xFFE8B923))),
+            ],
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () async {
+              final response = await request.logout(
+                "http://localhost:8000/auth/logout/",
+              );
+              
+              if (context.mounted) {
+                if (response['status']) {
+                  String username = userProvider.username ?? 'User';
+                  userProvider.logout();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        "Goodbye, $username!",
+                        style: const TextStyle(fontFamily: 'BeVietnamPro'),
+                      ),
+                      backgroundColor: const Color(0xFFE8B923),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        ],
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Profile Photo
+              CircleAvatar(
+                radius: 60,
+                backgroundColor: const Color(0xFFE8B923),
+                // ✅ Tambahkan ? setelah profile
+                backgroundImage: profile?.profile?.profilePhoto != null && 
+                                 profile!.profile!.profilePhoto!.isNotEmpty
+                    ? NetworkImage(profile.profile!.profilePhoto!)
+                    : null,
+                child: profile?.profile?.profilePhoto == null || 
+                        profile!.profile!.profilePhoto!.isEmpty
+                    ? Text(
+                        profile?.username.substring(0, 1).toUpperCase() ?? 'U',
+                        style: const TextStyle(
+                          fontFamily: 'BebasNeue',
+                          fontSize: 48,
+                          color: Color(0xFF1A1625),
+                        ),
+                      )
+                    : null,
+              ),
+              const SizedBox(height: 24),
+              
+              Text(
+                profile?.fullName ?? 'User',
+                style: const TextStyle(
+                  fontFamily: 'BebasNeue',
+                  fontSize: 32,
+                  color: Color(0xFFE8B923),
+                ),
+              ),
+              const SizedBox(height: 8),
+              
+              Text(
+                '@${profile?.username ?? 'username'}',
+                style: const TextStyle(
+                  fontFamily: 'BeVietnamPro',
+                  fontSize: 18,
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 8),
+              
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: userProvider.isCoach 
+                      ? const Color(0xFFE8B923).withOpacity(0.2)
+                      : Colors.blue.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: userProvider.isCoach 
+                        ? const Color(0xFFE8B923)
+                        : Colors.blue,
+                  ),
+                ),
+                child: Text(
+                  userProvider.isCoach ? 'COACH' : 'MEMBER',
+                  style: TextStyle(
+                    fontFamily: 'BebasNeue',
+                    fontSize: 16,
+                    color: userProvider.isCoach 
+                        ? const Color(0xFFE8B923)
+                        : Colors.blue,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              
+              // Profile Details
+              _buildInfoCard(
+                icon: Icons.location_city,
+                label: 'City',
+                value: profile?.profile?.city ?? '-', 
+              ),
+              const SizedBox(height: 12),
+              
+              _buildInfoCard(
+                icon: Icons.phone,
+                label: 'Phone',
+                value: profile?.profile?.phone ?? '-', 
+              ),
+
+              const SizedBox(height: 12),
+              
+              _buildInfoCard(
+                icon: Icons.email,
+                label: 'Email',
+                value: profile?.email ?? '-',
+              ),
+              
+              // Coach-specific info
+              if (userProvider.isCoach) ...[
+                const SizedBox(height: 12),
+                _buildInfoCard(
+                  icon: Icons.sports,
+                  label: 'Sport',
+                  value: profile?.profile?.sportLabel ?? '-', // ✅ Tambahkan ?
+                ),
+                const SizedBox(height: 12),
+                _buildInfoCard(
+                  icon: Icons.attach_money,
+                  label: 'Hourly Fee',
+                  value: 'Rp ${profile?.profile?.hourlyFee?.toString() ?? '0'}', // ✅ Tambahkan ?
+                ),
+              ],
+              
+              if (profile?.profile?.description != null && 
+                  profile!.profile!.description!.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _buildInfoCard(
+                  icon: Icons.description,
+                  label: 'Description',
+                  value: profile.profile!.description!,
+                ),
+              ],
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+  
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFFE8B923).withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFFE8B923), size: 24),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontFamily: 'BeVietnamPro',
+                    fontSize: 12,
+                    color: Colors.white54,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontFamily: 'BeVietnamPro',
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

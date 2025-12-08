@@ -35,6 +35,8 @@ String bookingStatusToText(BookingStatus status) {
       return 'Cancelled';
     case BookingStatus.completed:
       return 'Completed';
+    default:
+      return 'Unknown';
   }
 }
 
@@ -47,7 +49,7 @@ class Booking {
   final DateTime endTime;
   final BookingStatus status;
 
-  const Booking({
+  Booking({
     required this.id,
     required this.coachName,
     required this.sport,
@@ -57,37 +59,19 @@ class Booking {
     required this.status,
   });
 
-  // nanti dipakai kalau sudah sambung ke backend
   factory Booking.fromJson(Map<String, dynamic> json) {
-    return Booking(
-      id: json['id'] as int,
-      coachName: json['coach_name'] as String,
-      sport: (json['sport'] as String?) ?? 'Sport',
-      location: (json['location'] as String?) ?? '',
-      startTime: DateTime.parse(json['start_time'] as String),
-      endTime: DateTime.parse(json['end_time'] as String),
-      status: bookingStatusFromString(json['status'] as String),
-    );
-  }
+    final date = json['date'];
+    final start = json['start_time'];
+    final end = json['end_time'];
 
-  // <<< INI YANG DIPAKE DI _cancelBooking DAN RESCHEDULE >>>
-  Booking copyWith({
-    int? id,
-    String? coachName,
-    String? sport,
-    String? location,
-    DateTime? startTime,
-    DateTime? endTime,
-    BookingStatus? status,
-  }) {
     return Booking(
-      id: id ?? this.id,
-      coachName: coachName ?? this.coachName,
-      sport: sport ?? this.sport,
-      location: location ?? this.location,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
-      status: status ?? this.status,
+      id: json['id'],
+      coachName: json['coach_name'] ?? '',
+      sport: json['sport'] ?? '',
+      location: json['location'] ?? '',
+      startTime: DateTime.parse("$date $start"),
+      endTime: DateTime.parse("$date $end"),
+      status: bookingStatusFromString(json['status']),
     );
   }
 }

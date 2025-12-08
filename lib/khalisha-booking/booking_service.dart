@@ -1,101 +1,109 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 
 class BookingService {
-  // GANTI baseUrl ini sesuai backend kamu
-  // kalau lagi jalan di lokal:
-  // - emulator Android: http://10.0.2.2:8000
-  // - Flutter web di browser: http://127.0.0.1:8000
-  final String baseUrl = 'http://127.0.0.1:8000';
+  // Emulator Android → pakai 10.0.2.2
+  final String baseUrl = "http://10.0.2.2:8000";
 
-  Future<List<Booking>> fetchMemberBookings() async {
-    final url = Uri.parse('$baseUrl/api/bookings/member/'); // GANTI path-nya
+  // ============================
+  // GET ALL BOOKINGS
+  // ============================
+  Future<List<Booking>> getBookings() async {
+    final url = Uri.parse("$baseUrl/booking/api/list/");
     final response = await http.get(url);
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to load bookings: ${response.statusCode}');
+      throw Exception("Failed to fetch bookings: ${response.body}");
     }
 
     final data = jsonDecode(response.body);
 
-    // asumsi backend mengirim list JSON
-    return (data as List)
-        .map((item) => Booking.fromJson(item as Map<String, dynamic>))
-        .toList();
+    if (!data.containsKey("bookings")) {
+      throw Exception("Invalid response structure: 'bookings' not found");
+    }
+
+    final list = data["bookings"] as List;
+
+    return list.map((json) => Booking.fromJson(json)).toList();
   }
 
-  Future<List<Booking>> fetchCoachBookings() async {
-    final url = Uri.parse('$baseUrl/api/bookings/coach/'); // GANTI path
+  // ============================
+  // GET DETAIL BOOKING (OPTIONAL)
+  // ============================
+  Future<Booking> getBookingDetail(int id) async {
+    final url = Uri.parse("$baseUrl/booking/api/detail/$id/");
     final response = await http.get(url);
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to load coach bookings: ${response.statusCode}');
+      throw Exception("Failed to fetch detail: ${response.body}");
     }
 
     final data = jsonDecode(response.body);
-
-    return (data as List)
-        .map((item) => Booking.fromJson(item as Map<String, dynamic>))
-        .toList();
+    return Booking.fromJson(data);
   }
 
+  // ============================
+  // CREATE BOOKING
+  // ============================
   Future<void> createBooking({
     required int coachId,
     required String location,
     required DateTime startTime,
-    required DateTime endTime,
   }) async {
-    final url = Uri.parse('$baseUrl/api/bookings/create/'); // GANTI path
+    final url = Uri.parse("$baseUrl/booking/api/create/");
+
+    final payload = {
+      "coach_id": coachId,
+      "location": location,
+      "date": startTime.toIso8601String(),
+    };
+
     final response = await http.post(
       url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'coach_id': coachId,
-        'location': location,
-        'start_time': startTime.toIso8601String(),
-        'end_time': endTime.toIso8601String(),
-      }),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(payload),
     );
 
-    if (response.statusCode != 201 && response.statusCode != 200) {
-      throw Exception('Failed to create booking: ${response.body}');
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception("Create failed: ${response.body}");
     }
   }
 
-  Future<void> cancelBooking(int bookingId) async {
-    final url = Uri.parse('$baseUrl/api/bookings/$bookingId/cancel/'); // GANTI
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-    );
+  // ============================
+  // CANCEL BOOKING
+  // ============================
+  Future<void> cancelBooking(int id) async {
+    final url = Uri.parse("$baseUrl/booking/api/cancel/$id/");
+
+    final response = await http.post(url);
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to cancel booking: ${response.body}');
+      throw Exception("Cancel failed: ${response.body}");
     }
   }
 
+  // ============================
+  // RESCHEDULE BOOKING
+  // ============================
   Future<void> rescheduleBooking({
     required int bookingId,
-    required DateTime newStartTime,
-    required DateTime newEndTime,
+    required DateTime newDate,
   }) async {
-    final url =
-        Uri.parse('$baseUrl/api/bookings/$bookingId/reschedule/'); // GANTI
+    final url = Uri.parse("$baseUrl/booking/api/reschedule/$bookingId/");
+
+    final payload = {
+      "date": newDate.toIso8601String(),
+    };
+
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'start_time': newStartTime.toIso8601String(),
-        'end_time': newEndTime.toIso8601String(),
-      }),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(payload),
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to reschedule booking: ${response.body}');
+      throw Exception("Reschedule failed: ${response.body}");
     }
   }
 }

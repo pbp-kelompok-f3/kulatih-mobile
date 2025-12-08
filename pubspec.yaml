@@ -30,11 +30,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  intl: ^0.19.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  http: ^1.2.2 
+  provider: ^6.1.5+1
+  pbp_django_auth: ^0.4.0
 
 dev_dependencies:
   flutter_test:
@@ -88,3 +90,15 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+fonts:
+  - family: BebasNeue
+    fonts:
+      - asset: assets/fonts/BebasNeue-Regular.ttf
+  - family: BeVietnamPro
+    fonts:
+      - asset: assets/fonts/BeVietnamPro-Regular.ttf
+      - asset: assets/fonts/BeVietnamPro-Bold.ttf
+        weight: 700
+      - asset: assets/fonts/BeVietnamPro-Medium.ttf
+        weight: 500
