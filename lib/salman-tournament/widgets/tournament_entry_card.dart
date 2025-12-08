@@ -38,7 +38,7 @@ class TournamentEntryCard extends StatelessWidget {
               ),
               child: (tournament.poster.isEmpty)
     ? Image.asset(
-        "images/tournament_bg.png",
+        "assets/images/tournament_bg.png",
         height: 220,
         width: double.infinity,
         fit: BoxFit.cover,
