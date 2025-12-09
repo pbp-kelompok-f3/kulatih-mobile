@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'review_models.dart';
+import '../models/review_models.dart';
 import 'review_theme.dart';
 
 class ReviewCard extends StatelessWidget {

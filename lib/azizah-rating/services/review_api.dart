@@ -1,16 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'review_models.dart';
+import '../models/review_models.dart';
 
 class ReviewApi {
   ReviewApi({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
 
-  /// Ganti ke base URL deploy / lokal kalian
-  static const String baseUrl =
-      'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id';
+  static const String baseUrl = 'http://10.0.2.2:8000';
 
   Uri _uri(String path, [Map<String, dynamic>? query]) {
     final uri = Uri.parse(baseUrl).replace(
@@ -105,8 +103,6 @@ class ReviewApi {
     final data = jsonDecode(utf8.decode(res.bodyBytes))
         as Map<String, dynamic>;
 
-    // Response create_review_json tidak ada nested coach/reviewer,
-    // jadi kita ambil detail lagi supaya konsisten dengan ReviewDetail.
     final newId = int.tryParse(data['id']?.toString() ?? '');
     if (newId == null) {
       throw Exception('Invalid review id in create response');
@@ -138,7 +134,6 @@ class ReviewApi {
 
     final data = jsonDecode(utf8.decode(res.bodyBytes))
         as Map<String, dynamic>;
-    // data sederhana, tapi supaya konsisten ambil detail lagi
     return getReviewDetail(reviewId);
   }
 

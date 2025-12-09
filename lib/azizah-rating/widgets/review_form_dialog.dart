@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'review_api.dart';
+import '../services/review_api.dart';
 import 'review_theme.dart';
 
 class ReviewFormDialog {

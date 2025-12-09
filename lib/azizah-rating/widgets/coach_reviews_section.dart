@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'review_api.dart';
-import 'review_models.dart';
+import '../services/review_api.dart';
+import '../models/review_models.dart';
 import 'review_card.dart';
 import 'review_theme.dart';
-import 'reviews_list_page.dart';
-import 'review_detail_page.dart';
+import '../screens/reviews_list_page.dart';
+import '../screens/review_detail_page.dart';
 
 class CoachReviewsSection extends StatefulWidget {
   final String coachId;
@@ -94,7 +94,6 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            // Di mobile: ga ada filter di section ini
           ],
         ),
         const SizedBox(height: 12),

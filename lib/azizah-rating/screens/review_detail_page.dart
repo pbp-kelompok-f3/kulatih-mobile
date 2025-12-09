@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'review_api.dart';
-import 'review_models.dart';
-import 'review_theme.dart';
-import 'review_form_dialog.dart';
+import '../services/review_api.dart';
+import '../models/review_models.dart';
+import '../widgets/review_theme.dart';
+import '../widgets/review_form_dialog.dart';
 
 class ReviewDetailPage extends StatefulWidget {
   final int reviewId;
