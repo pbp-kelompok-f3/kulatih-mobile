@@ -44,7 +44,7 @@ class TournamentEntryCard extends StatelessWidget {
         fit: BoxFit.cover,
       )
     : Image.network(
-        tournament.poster,
+        'http://localhost:8000/tournament/proxy-image/?url=${Uri.encodeComponent(tournament.poster)}',
         height: 220,
         width: double.infinity,
         fit: BoxFit.cover,
