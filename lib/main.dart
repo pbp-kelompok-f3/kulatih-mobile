@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:kulatih_mobile/izzati-forum/pages/forum_main.dart';
+import 'package:kulatih_mobile/khalisha-booking/screens/booking_list_page.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:kulatih_mobile/albert-user/screens/login.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/navigationbar.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking.dart';
+import 'package:kulatih_mobile/salman-tournament/page/tournament_main.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,12 +20,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider(
-          create: (_) => CookieRequest(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => UserProvider(),
-        ),
+        Provider(create: (_) => CookieRequest()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: MaterialApp(
         title: 'KuLatih',
@@ -50,14 +49,146 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     final request = context.watch<CookieRequest>();
     final userProvider = context.watch<UserProvider>();
     final profile = userProvider.userProfile;
-    
+    List<Widget> pages = [
+      SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              radius: 60,
+              backgroundColor: const Color(0xFFE8B923),
+              backgroundImage: profile?.profile?.profilePhoto != null &&
+                      profile!.profile!.profilePhoto!.isNotEmpty
+                  ? NetworkImage(profile.profile!.profilePhoto!)
+                  : null,
+              child: profile?.profile?.profilePhoto == null ||
+                      profile!.profile!.profilePhoto!.isEmpty
+                  ? Text(
+                      profile?.username.substring(0, 1).toUpperCase() ?? 'U',
+                      style: const TextStyle(
+                        fontFamily: 'BebasNeue',
+                        fontSize: 48,
+                        color: Color(0xFF1A1625),
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(height: 24),
+
+            Text(
+              profile?.fullName ?? 'User',
+              style: const TextStyle(
+                fontFamily: 'BebasNeue',
+                fontSize: 32,
+                color: Color(0xFFE8B923),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            Text(
+              '@${profile?.username ?? 'username'}',
+              style: const TextStyle(
+                fontFamily: 'BeVietnamPro',
+                fontSize: 18,
+                color: Colors.white70,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: userProvider.isCoach
+                    ? const Color(0xFFE8B923).withOpacity(0.2)
+                    : Colors.blue.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: userProvider.isCoach
+                      ? const Color(0xFFE8B923)
+                      : Colors.blue,
+                ),
+              ),
+              child: Text(
+                userProvider.isCoach ? 'COACH' : 'MEMBER',
+                style: TextStyle(
+                  fontFamily: 'BebasNeue',
+                  fontSize: 16,
+                  color: userProvider.isCoach
+                      ? const Color(0xFFE8B923)
+                      : Colors.blue,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            _buildInfoCard(
+                icon: Icons.location_city,
+                label: 'City',
+                value: profile?.profile?.city ?? '-'),
+            const SizedBox(height: 12),
+
+            _buildInfoCard(
+                icon: Icons.phone,
+                label: 'Phone',
+                value: profile?.profile?.phone ?? '-'),
+            const SizedBox(height: 12),
+
+            _buildInfoCard(
+                icon: Icons.email,
+                label: 'Email',
+                value: profile?.email ?? '-'),
+
+            if (userProvider.isCoach) ...[
+              const SizedBox(height: 12),
+              _buildInfoCard(
+                  icon: Icons.sports,
+                  label: 'Sport',
+                  value: profile?.profile?.sportLabel ?? '-'),
+              const SizedBox(height: 12),
+              _buildInfoCard(
+                  icon: Icons.attach_money,
+                  label: 'Hourly Fee',
+                  value:
+                      'Rp ${profile?.profile?.hourlyFee?.toString() ?? '0'}'),
+            ],
+
+            if (profile?.profile?.description != null &&
+                profile!.profile!.description!.isNotEmpty)
+              _buildInfoCard(
+                  icon: Icons.description,
+                  label: 'Description',
+                  value: profile.profile!.description!),
+          ],
+        ),
+      ),
+
+      // PAGE 1 - 4
+      TournamentMainPage(),
+      BookingListPage(),
+      ForumMainPage(),
+      Center(child: Text("Community Page", style: TextStyle(color: Colors.white))),
+      
+    ];
+
     return Scaffold(
       backgroundColor: const Color(0xFF1A1625),
+      body: pages[currentIndex],
+
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: currentIndex,
+        onTap: (index) {
+          setState(() => currentIndex = index);
+        },
+      ),
+
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1625),
         title: RichText(
@@ -73,168 +204,19 @@ class _MyHomePageState extends State<MyHomePage> {
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () async {
-              final response = await request.logout(
-                "http://localhost:8000/auth/logout/",
-              );
-              
-              if (context.mounted) {
-                if (response['status']) {
-                  String username = userProvider.username ?? 'User';
-                  userProvider.logout();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        "Goodbye, $username!",
-                        style: const TextStyle(fontFamily: 'BeVietnamPro'),
-                      ),
-                      backgroundColor: const Color(0xFFE8B923),
-                    ),
-                  );
-                }
+              final response = await request.logout("http://localhost:8000/auth/logout/");
+              if (context.mounted && response['status']) {
+                userProvider.logout();
+                Navigator.pushReplacement(
+                    context, MaterialPageRoute(builder: (_) => const LoginPage()));
               }
             },
-          ),
+          )
         ],
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Profile Photo
-              CircleAvatar(
-                radius: 60,
-                backgroundColor: const Color(0xFFE8B923),
-                // ✅ Tambahkan ? setelah profile
-                backgroundImage: profile?.profile?.profilePhoto != null && 
-                                 profile!.profile!.profilePhoto!.isNotEmpty
-                    ? NetworkImage(profile.profile!.profilePhoto!)
-                    : null,
-                child: profile?.profile?.profilePhoto == null || 
-                        profile!.profile!.profilePhoto!.isEmpty
-                    ? Text(
-                        profile?.username.substring(0, 1).toUpperCase() ?? 'U',
-                        style: const TextStyle(
-                          fontFamily: 'BebasNeue',
-                          fontSize: 48,
-                          color: Color(0xFF1A1625),
-                        ),
-                      )
-                    : null,
-              ),
-              const SizedBox(height: 24),
-              
-              Text(
-                profile?.fullName ?? 'User',
-                style: const TextStyle(
-                  fontFamily: 'BebasNeue',
-                  fontSize: 32,
-                  color: Color(0xFFE8B923),
-                ),
-              ),
-              const SizedBox(height: 8),
-              
-              Text(
-                '@${profile?.username ?? 'username'}',
-                style: const TextStyle(
-                  fontFamily: 'BeVietnamPro',
-                  fontSize: 18,
-                  color: Colors.white70,
-                ),
-              ),
-              const SizedBox(height: 8),
-              
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: userProvider.isCoach 
-                      ? const Color(0xFFE8B923).withOpacity(0.2)
-                      : Colors.blue.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: userProvider.isCoach 
-                        ? const Color(0xFFE8B923)
-                        : Colors.blue,
-                  ),
-                ),
-                child: Text(
-                  userProvider.isCoach ? 'COACH' : 'MEMBER',
-                  style: TextStyle(
-                    fontFamily: 'BebasNeue',
-                    fontSize: 16,
-                    color: userProvider.isCoach 
-                        ? const Color(0xFFE8B923)
-                        : Colors.blue,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              
-              // Profile Details
-              _buildInfoCard(
-                icon: Icons.location_city,
-                label: 'City',
-                value: profile?.profile?.city ?? '-', 
-              ),
-              const SizedBox(height: 12),
-              
-              _buildInfoCard(
-                icon: Icons.phone,
-                label: 'Phone',
-                value: profile?.profile?.phone ?? '-', 
-              ),
-
-              const SizedBox(height: 12),
-              
-              _buildInfoCard(
-                icon: Icons.email,
-                label: 'Email',
-                value: profile?.email ?? '-',
-              ),
-              
-              // Coach-specific info
-              if (userProvider.isCoach) ...[
-                const SizedBox(height: 12),
-                _buildInfoCard(
-                  icon: Icons.sports,
-                  label: 'Sport',
-                  value: profile?.profile?.sportLabel ?? '-', // ✅ Tambahkan ?
-                ),
-                const SizedBox(height: 12),
-                _buildInfoCard(
-                  icon: Icons.attach_money,
-                  label: 'Hourly Fee',
-                  value: 'Rp ${profile?.profile?.hourlyFee?.toString() ?? '0'}', // ✅ Tambahkan ?
-                ),
-              ],
-              
-              if (profile?.profile?.description != null && 
-                  profile!.profile!.description!.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                _buildInfoCard(
-                  icon: Icons.description,
-                  label: 'Description',
-                  value: profile.profile!.description!,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: 0,
-        onTap: (index){
-          
-        }
       ),
     );
   }
-  
+
   Widget _buildInfoCard({
     required IconData icon,
     required String label,
@@ -257,23 +239,17 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontFamily: 'BeVietnamPro',
-                    fontSize: 12,
-                    color: Colors.white54,
-                  ),
-                ),
+                Text(label,
+                    style: const TextStyle(
+                        fontFamily: 'BeVietnamPro',
+                        fontSize: 12,
+                        color: Colors.white54)),
                 const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontFamily: 'BeVietnamPro',
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
+                Text(value,
+                    style: const TextStyle(
+                        fontFamily: 'BeVietnamPro',
+                        fontSize: 16,
+                        color: Colors.white)),
               ],
             ),
           ),

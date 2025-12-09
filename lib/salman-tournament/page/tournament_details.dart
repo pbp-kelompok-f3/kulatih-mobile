@@ -26,22 +26,22 @@ class TournamentDetailPage extends StatelessWidget {
           children: [
 
             // POSTER IMAGE
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-              child: Image.network(
-                tournament.poster,
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+            child: Image.network(
+              tournament.poster,
+              height: 240,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Image.asset(
+                '/images/tournament_bg.png', // path ke asset kamu
                 height: 240,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  height: 240,
-                  color: Colors.grey.shade900,
-                  child: const Center(
-                    child: Icon(Icons.broken_image, color: Colors.white54),
-                  ),
-                ),
               ),
             ),
+          ),
+
 
             const SizedBox(height: 16),
 
