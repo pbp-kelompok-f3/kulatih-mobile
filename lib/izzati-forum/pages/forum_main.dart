@@ -12,13 +12,20 @@ class ForumMainPage extends StatefulWidget {
   const ForumMainPage({super.key});
 
   @override
-  State<ForumMainPage> createState() => _ForumMainPageState();
+  State<ForumMainPage> createState() => ForumMainPageState();
 }
 
-class _ForumMainPageState extends State<ForumMainPage> {
+class ForumMainPageState extends State<ForumMainPage> {
   late Future<ForumEntry> _futurePosts;
   bool _loaded = false;
 
+  void refreshPosts() {
+    final req = context.read<CookieRequest>();
+    setState(() {
+      _futurePosts = fetchPosts(req);
+    });
+  }
+  
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -114,8 +121,15 @@ class _ForumMainPageState extends State<ForumMainPage> {
                       ),
                     );
                   }
-
-                  return ForumEntryList(posts: snapshot.data!.items);
+                  return ForumEntryList(
+                    posts: snapshot.data!.items,
+                    onRefresh: () {
+                      setState(() {
+                        final req = context.read<CookieRequest>();
+                        _futurePosts = fetchPosts(req);
+                      });
+                    },
+                  );
                 },
               ),
             ),

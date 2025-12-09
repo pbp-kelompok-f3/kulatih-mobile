@@ -6,11 +6,18 @@ import '../styles/text.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import '../pages/forum_edit.dart';
+import '../pages/forum_main.dart';
+import 'dart:convert';
 
 class ForumEntryCard extends StatefulWidget {
   final Item post;
+  final VoidCallback? onRefresh;
 
-  const ForumEntryCard({super.key, required this.post});
+  const ForumEntryCard({
+    super.key,
+    required this.post,
+    this.onRefresh,
+  });
 
   @override
   State<ForumEntryCard> createState() => _ForumEntryCardState();
@@ -65,9 +72,13 @@ class _ForumEntryCardState extends State<ForumEntryCard> {
     final req = context.read<CookieRequest>();
     final url = "http://localhost:8000/forum/json/${widget.post.id}/delete/";
 
-    final res = await req.post(url, {});
+    final res = await req.postJson(url, jsonEncode({}));
 
     if (res["ok"] == true) {
+      // refresh list di main page
+      final main = context.findAncestorStateOfType<ForumMainPageState>();
+      main?.refreshPosts();
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Post deleted")),
@@ -115,9 +126,15 @@ class _ForumEntryCardState extends State<ForumEntryCard> {
           // POST CONTENT
           Expanded(
             child: GestureDetector(
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => ForumDetailsPage(post: p)));
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ForumDetailsPage(post: p)),
+                );
+
+                if (widget.onRefresh != null) {
+                  widget.onRefresh!();
+                }
               },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,6 +166,17 @@ class _ForumEntryCardState extends State<ForumEntryCard> {
                   Text(
                     p.content,
                     style: body(14, color: Colors.white.withOpacity(.85)),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.comment, size: 16, color: AppColor.yellow),
+                      const SizedBox(width: 6),
+                      Text(
+                        "Comments (${p.comments})",
+                        style: body(13, color: AppColor.yellow),
+                      ),
+                    ],
                   ),
                 ],
               ),
