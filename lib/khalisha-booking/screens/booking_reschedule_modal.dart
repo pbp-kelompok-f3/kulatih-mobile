@@ -16,7 +16,6 @@ class _RescheduleModalState extends State<RescheduleModal> {
 
   DateTime? _newDate;
   TimeOfDay? _newStart;
-  TimeOfDay? _newEnd;
 
   bool _loading = false;
 
@@ -40,18 +39,10 @@ class _RescheduleModalState extends State<RescheduleModal> {
     if (t != null) setState(() => _newStart = t);
   }
 
-  Future<void> _pickEnd() async {
-    final t = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(widget.booking.endTime),
-    );
-    if (t != null) setState(() => _newEnd = t);
-  }
-
   Future<void> _submit() async {
-    if (_newDate == null || _newStart == null || _newEnd == null) {
+    if (_newDate == null || _newStart == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please pick date & both times")),
+        const SnackBar(content: Text("Please select new date & time")),
       );
       return;
     }
@@ -64,26 +55,16 @@ class _RescheduleModalState extends State<RescheduleModal> {
       _newStart!.minute,
     );
 
-    final newEndTime = DateTime(
-      _newDate!.year,
-      _newDate!.month,
-      _newDate!.day,
-      _newEnd!.hour,
-      _newEnd!.minute,
-    );
-
     setState(() => _loading = true);
 
     try {
       await _service.rescheduleBooking(
-        bookingId: widget.booking.id,
-        newStartTime: newStartTime,
-        newEndTime: newEndTime,
+        id: widget.booking.id,
+        newStart: newStartTime,
       );
 
-      if (context.mounted) {
-        Navigator.pop(context, true);
-      }
+      if (context.mounted) Navigator.pop(context, true);
+
     } catch (e) {
       setState(() => _loading = false);
       ScaffoldMessenger.of(context)
@@ -134,14 +115,6 @@ class _RescheduleModalState extends State<RescheduleModal> {
                   : "${_newStart!.hour.toString().padLeft(2, '0')}:${_newStart!.minute.toString().padLeft(2, '0')}",
               _pickStart,
             ),
-            const SizedBox(height: 12),
-
-            _picker(
-              _newEnd == null
-                  ? "Select End Time"
-                  : "${_newEnd!.hour.toString().padLeft(2, '0')}:${_newEnd!.minute.toString().padLeft(2, '0')}",
-              _pickEnd,
-            ),
             const SizedBox(height: 20),
 
             _loading
@@ -152,8 +125,10 @@ class _RescheduleModalState extends State<RescheduleModal> {
                       backgroundColor: const Color(0xFFD4BC4E),
                       minimumSize: const Size(double.infinity, 48),
                     ),
-                    child: const Text("Submit",
-                        style: TextStyle(color: Colors.black)),
+                    child: const Text(
+                      "Submit",
+                      style: TextStyle(color: Colors.black),
+                    ),
                   ),
           ],
         ),

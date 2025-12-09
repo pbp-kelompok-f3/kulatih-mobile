@@ -1,76 +1,104 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
+import 'booking_model.dart';
 
 class BookingService {
-  final String baseUrl = "http://10.0.2.2:8000";
+  static const String baseUrl = "http://10.0.2.2:8000/booking/api";
 
+  /* =====================================================================
+     GET BOOKINGS
+     ===================================================================== */
   Future<List<Booking>> getBookings() async {
-    final url = Uri.parse("$baseUrl/booking/api/list/");
+    final url = Uri.parse("$baseUrl/list/");
     final response = await http.get(url);
 
     if (response.statusCode != 200) {
-      throw Exception("Failed to fetch bookings: ${response.body}");
+      throw Exception("Failed to fetch bookings (${response.statusCode})");
     }
 
     final data = jsonDecode(response.body);
-    final list = data["bookings"] as List;
+
+    if (!data.containsKey("bookings")) {
+      throw Exception("Invalid response format: missing 'bookings'");
+    }
+
+    final list = data["bookings"] as List<dynamic>;
     return list.map((e) => Booking.fromJson(e)).toList();
   }
 
-  Future<void> createBooking({
-    required int coachId,
+  /* =====================================================================
+     CREATE BOOKING
+     Django expects EXACTLY:
+       - coach_id: int/string
+       - location: string
+       - date: "YYYY-MM-DD"
+       - start_time: "HH:MM"
+     ===================================================================== */
+  Future<bool> createBooking({
+    required String coachId,
     required String location,
-    required DateTime startTime,
+    required DateTime dateTime,
   }) async {
-    final url = Uri.parse("$baseUrl/booking/api/create/");
-    final body = jsonEncode({
+    final url = Uri.parse("$baseUrl/create/");
+
+    final body = {
       "coach_id": coachId,
       "location": location,
-      "date": startTime.toIso8601String(),
-    });
+      "date":
+          "${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}",
+      "start_time":
+          "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}",
+    };
 
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
-      body: body,
+      body: jsonEncode(body),
     );
 
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception("Create failed: ${response.body}");
-    }
+    if (response.statusCode == 200) return true;
+
+    throw Exception("Create booking failed: ${response.body}");
   }
 
-  Future<void> cancelBooking(int id) async {
-    final url = Uri.parse("$baseUrl/booking/api/cancel/$id/");
+  /* =====================================================================
+     CANCEL BOOKING
+     ===================================================================== */
+  Future<bool> cancelBooking(int id) async {
+    final url = Uri.parse("$baseUrl/cancel/$id/");
     final response = await http.post(url);
 
-    if (response.statusCode != 200) {
-      throw Exception("Cancel failed: ${response.body}");
-    }
+    if (response.statusCode == 200) return true;
+
+    throw Exception("Cancel failed (${response.statusCode}): ${response.body}");
   }
 
-  /// *** RESCHEDULE BOOKING — FINAL VERSION ***
-  Future<void> rescheduleBooking({
-    required int bookingId,
-    required DateTime newStartTime,
-    required DateTime newEndTime,
+  /* =====================================================================
+     RESCHEDULE BOOKING
+     Django expects EXACTLY:
+        new_start: "YYYY-MM-DD HH:MM"
+     No ISO, no seconds, no timezone.
+     ===================================================================== */
+  Future<bool> rescheduleBooking({
+    required int id,
+    required DateTime newStart,
   }) async {
-    final url = Uri.parse("$baseUrl/booking/api/reschedule/$bookingId/");
+    final url = Uri.parse("$baseUrl/reschedule/$id/");
 
-    final body = jsonEncode({
-      "new_start_time": newStartTime.toIso8601String(),
-      "new_end_time": newEndTime.toIso8601String(),
-    });
+    final formatted =
+        "${newStart.year}-${newStart.month.toString().padLeft(2, '0')}-${newStart.day.toString().padLeft(2, '0')} "
+        "${newStart.hour.toString().padLeft(2, '0')}:${newStart.minute.toString().padLeft(2, '0')}";
+
+    final body = {"new_start": formatted};
 
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
-      body: body,
+      body: jsonEncode(body),
     );
 
-    if (response.statusCode != 200) {
-      throw Exception("Reschedule failed: ${response.body}");
-    }
+    if (response.statusCode == 200) return true;
+
+    throw Exception("Reschedule failed: ${response.body}");
   }
 }

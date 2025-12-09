@@ -8,9 +8,12 @@ enum BookingStatus {
   completed,
 }
 
-/// Convert backend string → enum
+/* ============================================================
+   STATUS PARSING
+   ============================================================ */
+
 BookingStatus bookingStatusFromString(String value) {
-  switch (value.toLowerCase()) {
+  switch (value.toLowerCase().trim()) {
     case 'confirmed':
       return BookingStatus.confirmed;
     case 'rescheduled':
@@ -21,36 +24,42 @@ BookingStatus bookingStatusFromString(String value) {
     case 'completed':
       return BookingStatus.completed;
     case 'pending':
+      return BookingStatus.pending;
     default:
       return BookingStatus.pending;
   }
 }
 
-/// Convert enum → pretty text
 String bookingStatusToText(BookingStatus status) {
   switch (status) {
     case BookingStatus.pending:
-      return 'Pending';
+      return "Pending";
     case BookingStatus.confirmed:
-      return 'Confirmed';
+      return "Confirmed";
     case BookingStatus.rescheduled:
-      return 'Rescheduled';
+      return "Rescheduled";
     case BookingStatus.cancelled:
-      return 'Cancelled';
+      return "Cancelled";
     case BookingStatus.completed:
-      return 'Completed';
+      return "Completed";
   }
 }
+
+/* ============================================================
+   BOOKING MODEL
+   ============================================================ */
 
 class Booking {
   final int id;
   final String coachName;
   final String sport;
   final String location;
+
   final DateTime startTime;
   final DateTime endTime;
+
   final BookingStatus status;
-  final String? imageUrl; // optional untuk avatar coach
+  final String? imageUrl;
 
   Booking({
     required this.id,
@@ -63,44 +72,59 @@ class Booking {
     this.imageUrl,
   });
 
-  /// Factory from backend JSON
+  /* ============================================================
+     FACTORY FROM JSON
+     ============================================================ */
+
   factory Booking.fromJson(Map<String, dynamic> json) {
     final date = json['date'];
     final start = json['start_time'];
     final end = json['end_time'];
+
+    DateTime safeParse(String value) {
+      try {
+        return DateTime.parse(value);
+      } catch (_) {
+        // fallback remove microseconds
+        final cleaned = value.split('.').first;
+        return DateTime.parse(cleaned);
+      }
+    }
+
+    final startDT = safeParse("$date $start");
+    final endDT = end != null
+        ? safeParse("$date $end")
+        : startDT.add(const Duration(hours: 1)); // backend fallback
 
     return Booking(
       id: json['id'],
       coachName: json['coach_name'] ?? '',
       sport: json['sport'] ?? '',
       location: json['location'] ?? '',
-      startTime: DateTime.parse("$date $start"),
-      endTime: DateTime.parse("$date $end"),
+      startTime: startDT,
+      endTime: endDT,
       status: bookingStatusFromString(json['status']),
-      imageUrl: json['image_url'], // opsional
+      imageUrl: json['image_url'],
     );
   }
 
   /* ============================================================
-      FORMATTED GETTERS (untuk UI clean)
+     FORMATTED GETTERS (for UI)
      ============================================================ */
 
-  /// Example → "Sunday, 09 Feb 2025"
   String get formattedDate =>
       DateFormat('EEEE, dd MMM yyyy').format(startTime);
 
-  /// Example → "15:00 - 17:00 WIB"
   String get formattedTimeRange {
     final s = DateFormat('HH:mm').format(startTime);
     final e = DateFormat('HH:mm').format(endTime);
     return "$s - $e WIB";
   }
 
-  /// Example → "Sunday, 09 Feb 2025 · 15:00 - 17:00 WIB"
   String get formattedDateTime => "$formattedDate · $formattedTimeRange";
 
   /* ============================================================
-      STATUS HELPERS
+     STATUS HELPERS
      ============================================================ */
 
   bool get isUpcoming =>
@@ -115,8 +139,9 @@ class Booking {
       endTime.isBefore(DateTime.now());
 
   /* ============================================================
-      COPYWITH
+     COPYWITH
      ============================================================ */
+
   Booking copyWith({
     int? id,
     String? coachName,

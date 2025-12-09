@@ -6,9 +6,14 @@ import 'package:kulatih_mobile/khalisha-booking/widgets/booking_status_badge.dar
 class BookingCard extends StatelessWidget {
   final Booking booking;
   final bool historyMode;
+
   final VoidCallback onCancel;
   final VoidCallback onReschedule;
   final VoidCallback onViewDetails;
+
+  // EXTRA CALLBACKS FOR HISTORY MODE
+  final VoidCallback? onBookAgain;
+  final VoidCallback? onViewReview;
 
   const BookingCard({
     super.key,
@@ -17,6 +22,8 @@ class BookingCard extends StatelessWidget {
     required this.onCancel,
     required this.onReschedule,
     required this.onViewDetails,
+    this.onBookAgain,
+    this.onViewReview,
   });
 
   @override
@@ -31,7 +38,7 @@ class BookingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// DATE + STATUS
+          // DATE + STATUS
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -45,7 +52,7 @@ class BookingCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          /// COACH ROW
+          // COACH ROW
           Row(
             children: [
               const CircleAvatar(
@@ -53,7 +60,6 @@ class BookingCard extends StatelessWidget {
                 backgroundImage: AssetImage("assets/default_user.png"),
               ),
               const SizedBox(width: 12),
-
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -76,7 +82,7 @@ class BookingCard extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          /// LOCATION
+          // LOCATION
           Row(
             children: [
               const Icon(Icons.location_on, color: AppColors.textLight, size: 16),
@@ -98,6 +104,7 @@ class BookingCard extends StatelessWidget {
     );
   }
 
+  /* ---------------- UPCOMING BUTTONS ---------------- */
   Widget _upcomingButtons() {
     return Row(
       children: [
@@ -108,16 +115,26 @@ class BookingCard extends StatelessWidget {
     );
   }
 
+  /* ---------------- HISTORY BUTTONS ---------------- */
   Widget _historyButtons() {
     return Row(
       children: [
-        _btn("View Review", AppColors.gold, onViewDetails),
-        _btn("Book Again", Colors.grey.shade700, onReschedule),
+        _btn(
+          "View Your Review",
+          AppColors.gold,
+          onViewReview ?? onViewDetails,
+        ),
+        _btn(
+          "Book Again",
+          Colors.grey.shade700,
+          onBookAgain ?? onReschedule,
+        ),
       ],
     );
   }
 
-  Widget _btn(String label, Color bg, VoidCallback onTap) {
+  /* ---------------- BUTTON BUILDER ---------------- */
+  Widget _btn(String label, Color bg, VoidCallback? onTap) {
     return Expanded(
       child: InkWell(
         onTap: onTap,

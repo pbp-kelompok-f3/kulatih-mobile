@@ -6,11 +6,13 @@ import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
 class BookingFormPage extends StatefulWidget {
   final bool isReschedule;
   final Booking? initialBooking;
+  final String? coachId; // from coach detail page
 
   const BookingFormPage({
     super.key,
     required this.isReschedule,
     this.initialBooking,
+    this.coachId,
   });
 
   @override
@@ -23,7 +25,6 @@ class _BookingFormPageState extends State<BookingFormPage> {
 
   DateTime? _selectedDate;
   TimeOfDay? _startTime;
-  TimeOfDay? _endTime;
 
   bool _isLoading = false;
   final BookingService _service = BookingService();
@@ -32,61 +33,48 @@ class _BookingFormPageState extends State<BookingFormPage> {
   void initState() {
     super.initState();
 
-    // PREFILL for reschedule
     if (widget.isReschedule && widget.initialBooking != null) {
       final b = widget.initialBooking!;
+
       _locationController.text = b.location;
-      _selectedDate = DateTime(
-        b.startTime.year,
-        b.startTime.month,
-        b.startTime.day,
-      );
+      _selectedDate = DateTime(b.startTime.year, b.startTime.month, b.startTime.day);
       _startTime = TimeOfDay.fromDateTime(b.startTime);
-      _endTime = TimeOfDay.fromDateTime(b.endTime);
     }
   }
 
-  // ======================= PICKERS =======================
+  // ------------------------ PICKERS ------------------------
 
   Future<void> _pickDate() async {
-    final result = await showDatePicker(
+    final picked = await showDatePicker(
       context: context,
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
       initialDate: _selectedDate ?? DateTime.now(),
     );
-
-    if (result != null) setState(() => _selectedDate = result);
+    if (picked != null) setState(() => _selectedDate = picked);
   }
 
   Future<void> _pickStartTime() async {
-    final t = await showTimePicker(
+    final picked = await showTimePicker(
       context: context,
       initialTime: _startTime ?? TimeOfDay.now(),
     );
-    if (t != null) setState(() => _startTime = t);
+    if (picked != null) setState(() => _startTime = picked);
   }
 
-  Future<void> _pickEndTime() async {
-    final t = await showTimePicker(
-      context: context,
-      initialTime: _endTime ?? TimeOfDay.now(),
-    );
-    if (t != null) setState(() => _endTime = t);
-  }
-
-  // ======================= SUBMIT =======================
+  // ------------------------ SUBMIT ------------------------
 
   Future<void> _submit() async {
-    if (_selectedDate == null || _startTime == null || _endTime == null) {
+    if (_selectedDate == null || _startTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields")),
+        const SnackBar(content: Text("Please complete all fields")),
       );
       return;
     }
 
     if (!_formKey.currentState!.validate()) return;
 
+    // Build DateTime object
     final startDt = DateTime(
       _selectedDate!.year,
       _selectedDate!.month,
@@ -95,56 +83,31 @@ class _BookingFormPageState extends State<BookingFormPage> {
       _startTime!.minute,
     );
 
-    final endDt = DateTime(
-      _selectedDate!.year,
-      _selectedDate!.month,
-      _selectedDate!.day,
-      _endTime!.hour,
-      _endTime!.minute,
-    );
-
     setState(() => _isLoading = true);
 
     try {
       if (widget.isReschedule) {
-        // CALL BACKEND
+        // ========================= RESCHEDULE =========================
         await _service.rescheduleBooking(
-          bookingId: widget.initialBooking!.id,
-          newStartTime: startDt,
-          newEndTime: endDt,
+          id: widget.initialBooking!.id,
+          newStart: startDt,
         );
 
-        // RETURN updated object
-        Navigator.pop(
-          context,
-          widget.initialBooking!.copyWith(
-            startTime: startDt,
-            endTime: endDt,
-            status: BookingStatus.rescheduled,
-          ),
-        );
+        Navigator.pop(context, true); // caller will reload list
+
       } else {
-        // DUMMY COACH ID → diganti nanti dari Coach Detail Page
-        const coachId = 1;
+        // ========================= CREATE BOOKING =========================
+        if (widget.coachId == null) {
+          throw Exception("Missing coachId for booking creation.");
+        }
 
         await _service.createBooking(
-          coachId: coachId,
+          coachId: widget.coachId!,
           location: _locationController.text,
-          startTime: startDt,
+          dateTime: startDt,
         );
 
-        Navigator.pop(
-          context,
-          Booking(
-            id: DateTime.now().millisecondsSinceEpoch,
-            coachName: "Coach Name",
-            sport: "Football",
-            location: _locationController.text,
-            startTime: startDt,
-            endTime: endDt,
-            status: BookingStatus.confirmed,
-          ),
-        );
+        Navigator.pop(context, true);
       }
     } catch (e) {
       ScaffoldMessenger.of(context)
@@ -154,7 +117,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
     setState(() => _isLoading = false);
   }
 
-  // ======================= UI HELPERS =======================
+  // ------------------------ UI HELPERS ------------------------
 
   Widget _input(String label, Widget child) {
     return Column(
@@ -162,10 +125,9 @@ class _BookingFormPageState extends State<BookingFormPage> {
       children: [
         Text(label,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            )),
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
         child,
         const SizedBox(height: 16),
@@ -203,7 +165,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
     );
   }
 
-  // ======================= BUILD =======================
+  // ------------------------ BUILD ------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -215,10 +177,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
         : DateFormat('dd MMM yyyy').format(_selectedDate!);
 
     final startText =
-        _startTime == null ? "Start time" : _startTime!.format(context);
-
-    final endText =
-        _endTime == null ? "End time" : _endTime!.format(context);
+        _startTime == null ? "Choose time" : _startTime!.format(context);
 
     return Scaffold(
       backgroundColor: indigo,
@@ -247,12 +206,20 @@ class _BookingFormPageState extends State<BookingFormPage> {
                       v == null || v.isEmpty ? "Location required" : null,
                 ),
               ),
-              _input("Date", GestureDetector(onTap: _pickDate, child: _pickerBox(dateText))),
-              _input("Start Time", GestureDetector(onTap: _pickStartTime, child: _pickerBox(startText))),
-              _input("End Time", GestureDetector(onTap: _pickEndTime, child: _pickerBox(endText))),
+              _input(
+                "Date",
+                GestureDetector(onTap: _pickDate, child: _pickerBox(dateText)),
+              ),
+              _input(
+                "Start Time",
+                GestureDetector(
+                    onTap: _pickStartTime, child: _pickerBox(startText)),
+              ),
+
               const SizedBox(height: 20),
+
               _isLoading
-                  ? const CircularProgressIndicator()
+                  ? const CircularProgressIndicator(color: gold)
                   : ElevatedButton(
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(

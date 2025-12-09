@@ -12,7 +12,7 @@ class BookingStatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: _mapStatusColor(status),
+        color: _colorFor(status),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
@@ -26,16 +26,19 @@ class BookingStatusBadge extends StatelessWidget {
     );
   }
 
-  Color _mapStatusColor(BookingStatus st) {
+  // ---------------- STATUS → COLOR ---------------- //
+  Color _colorFor(BookingStatus st) {
     switch (st) {
+      case BookingStatus.pending:
+        return AppColors.statusPending;      // Yellow
       case BookingStatus.confirmed:
-        return Colors.green;
+        return AppColors.statusConfirmed;    // Green
       case BookingStatus.rescheduled:
-        return Colors.purple;
+        return AppColors.statusRescheduled;  // Purple
       case BookingStatus.completed:
-        return Colors.blue;
+        return AppColors.statusCompleted;    // Blue
       case BookingStatus.cancelled:
-        return Colors.grey;
+        return AppColors.statusCancelled;    // Grey
       default:
         return Colors.orange;
     }

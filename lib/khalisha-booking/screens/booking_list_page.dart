@@ -36,7 +36,7 @@ class _BookingListPageState extends State<BookingListPage>
         _loading = false;
       });
     } catch (e) {
-      print("Error fetching bookings: $e");
+      debugPrint("Error fetching bookings: $e");
       setState(() => _loading = false);
     }
   }
@@ -45,21 +45,21 @@ class _BookingListPageState extends State<BookingListPage>
   List<Booking> get upcoming {
     final now = DateTime.now();
     return _bookings.where((b) {
-      final isFuture = b.startTime.isAfter(now);
-      final isActive = b.status == BookingStatus.pending ||
+      final activeStatus =
+          b.status == BookingStatus.pending ||
           b.status == BookingStatus.confirmed ||
           b.status == BookingStatus.rescheduled;
-      return isFuture && isActive;
+      return activeStatus && b.startTime.isAfter(now);
     }).toList();
   }
 
   List<Booking> get history {
     final now = DateTime.now();
     return _bookings.where((b) {
-      final isPast = b.endTime.isBefore(now);
-      final isHistory = b.status == BookingStatus.completed ||
+      final pastStatus =
+          b.status == BookingStatus.completed ||
           b.status == BookingStatus.cancelled;
-      return isPast || isHistory;
+      return pastStatus || b.endTime.isBefore(now);
     }).toList();
   }
 
@@ -69,7 +69,7 @@ class _BookingListPageState extends State<BookingListPage>
     await _fetchBookings();
   }
 
-  /* ---------------- RESCHEDULE ---------------- */
+  /* ---------------- OPEN RESCHEDULE ---------------- */
   Future<void> _openReschedule(Booking booking) async {
     final result = await showDialog(
       context: context,
@@ -95,19 +95,15 @@ class _BookingListPageState extends State<BookingListPage>
             const SizedBox(height: 20),
 
             /// HEADER
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: const [
-                  Text(
-                    "MY BOOKINGS",
-                    style: TextStyle(
-                      color: gold,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                "MY BOOKINGS",
+                style: TextStyle(
+                  color: gold,
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
 
@@ -215,7 +211,6 @@ class _BookingListPageState extends State<BookingListPage>
                 backgroundImage: AssetImage("assets/default_user.png"),
               ),
               const SizedBox(width: 12),
-
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -241,15 +236,12 @@ class _BookingListPageState extends State<BookingListPage>
 
           const SizedBox(height: 14),
 
-          /// LOCATION
+          /// LOCATION ROW
           Row(
             children: [
               const Icon(Icons.location_on, color: Colors.white70, size: 16),
               const SizedBox(width: 6),
-              Text(
-                b.location,
-                style: const TextStyle(color: Colors.white70),
-              ),
+              Text(b.location, style: const TextStyle(color: Colors.white70)),
             ],
           ),
 
@@ -304,28 +296,20 @@ class _BookingListPageState extends State<BookingListPage>
   Widget _upcomingButtons(Booking b) {
     return Row(
       children: [
-        _btn(
-          "Cancel",
-          Colors.red,
-          () => _cancelBooking(b),
-        ),
+        _btn("Cancel", Colors.red, () => _cancelBooking(b)),
         _btn(
           "View Details",
           const Color(0xFFD4BC4E),
-          () {
-            Navigator.push(
+          () async {
+            final updated = await Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => BookingDetailPage(booking: b),
-              ),
+              MaterialPageRoute(builder: (_) => BookingDetailPage(booking: b)),
             );
+
+            if (updated == true) _fetchBookings();
           },
         ),
-        _btn(
-          "Reschedule",
-          Colors.grey,
-          () => _openReschedule(b),
-        ),
+        _btn("Reschedule", Colors.grey, () => _openReschedule(b)),
       ],
     );
   }
