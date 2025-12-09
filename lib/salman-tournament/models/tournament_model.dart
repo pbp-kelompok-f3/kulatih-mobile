@@ -11,20 +11,24 @@ String tournamentEntryToJson(TournamentEntry data) => json.encode(data.toJson())
 class TournamentEntry {
     String role;
     List<Tournament> tournaments;
+    String namaUser;
 
     TournamentEntry({
         required this.role,
         required this.tournaments,
+        required this.namaUser,
     });
 
     factory TournamentEntry.fromJson(Map<String, dynamic> json) => TournamentEntry(
         role: json["role"],
         tournaments: List<Tournament>.from(json["tournaments"].map((x) => Tournament.fromJson(x))),
+        namaUser: json["namaUser"],
     );
 
     Map<String, dynamic> toJson() => {
         "role": role,
         "tournaments": List<dynamic>.from(tournaments.map((x) => x.toJson())),
+        "namaUser": namaUser,
     };
 }
 
@@ -37,6 +41,7 @@ class Tournament {
     String poster;
     String deskripsi;
     String pembuat;
+    String pembuatFoto;
     List<Participant> participants;
     int participantCount;
 
@@ -49,6 +54,7 @@ class Tournament {
         required this.poster,
         required this.deskripsi,
         required this.pembuat,
+        required this.pembuatFoto,
         required this.participants,
         required this.participantCount,
     });
@@ -62,6 +68,7 @@ class Tournament {
         poster: json["poster"],
         deskripsi: json["deskripsi"],
         pembuat: json["pembuat"],
+        pembuatFoto: json["pembuat_foto"],
         participants: List<Participant>.from(json["participants"].map((x) => Participant.fromJson(x))),
         participantCount: json["participant_count"],
     );
@@ -75,6 +82,7 @@ class Tournament {
         "poster": poster,
         "deskripsi": deskripsi,
         "pembuat": pembuat,
+        "pembuat_foto": pembuatFoto,
         "participants": List<dynamic>.from(participants.map((x) => x.toJson())),
         "participant_count": participantCount,
     };
