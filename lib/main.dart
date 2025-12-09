@@ -5,8 +5,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:kulatih_mobile/albert-user/screens/login.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/navigationbar.dart';
-import 'package:kulatih_mobile/salman-tournament/page/tournament_main.dart';
-
+import 'package:kulatih_mobile/khalisha-booking/booking.dart';
 
 void main() {
   runApp(const MyApp());
