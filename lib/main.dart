@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/izzati-forum/pages/forum_main.dart';
+import 'package:kulatih_mobile/khalisha-booking/screens/booking_list_page.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:kulatih_mobile/albert-user/screens/login.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/navigationbar.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking.dart';
+import 'package:kulatih_mobile/salman-tournament/page/tournament_main.dart';
 
 void main() {
   runApp(const MyApp());
@@ -170,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       // PAGE 1 - 4
       TournamentMainPage(),
-      Center(child: Text("Bookings Page", style: TextStyle(color: Colors.white))),
+      BookingListPage(),
       ForumMainPage(),
       Center(child: Text("Community Page", style: TextStyle(color: Colors.white))),
       
