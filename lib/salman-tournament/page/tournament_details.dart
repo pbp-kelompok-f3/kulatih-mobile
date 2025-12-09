@@ -4,6 +4,8 @@ import 'package:kulatih_mobile/salman-tournament/widgets/tournament_assign.dart'
 import 'package:kulatih_mobile/salman-tournament/page/tournament_edit.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart'; // Jangan lupa import ini
 import 'package:provider/provider.dart'; // Jangan lupa import ini
+import 'package:kulatih_mobile/salman-tournament/page/tournament_delete.dart';
+import 'package:kulatih_mobile/salman-tournament/page/tournament_main.dart';
 
 class TournamentDetailPage extends StatefulWidget {
   final Tournament tournament;
@@ -36,8 +38,18 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
   // 2. Fungsi Helper Format Tanggal
   String formatTanggal(DateTime t) {
     const bulan = [
-      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-      "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
     ];
     return "${t.day} ${bulan[t.month - 1]} ${t.year}";
   }
@@ -55,8 +67,9 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
       );
 
       // Parsing JSON manual (Sesuai struktur JSON kamu sebelumnya)
-      final Map<String, dynamic> normalized =
-          response is Map ? Map<String, dynamic>.from(response) : {};
+      final Map<String, dynamic> normalized = response is Map
+          ? Map<String, dynamic>.from(response)
+          : {};
 
       if (response is List) {
         normalized['role'] = 'unknown';
@@ -78,7 +91,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
           _tournamentData = updatedData;
           _isRefreshing = false;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Data turnamen diperbarui!")),
         );
@@ -92,9 +105,9 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
   @override
   Widget build(BuildContext context) {
     final isCoach = widget.role == 'coach';
-    
+
     // PENTING: Gunakan _tournamentData (State) bukan widget.tournament
-    final data = _tournamentData; 
+    final data = _tournamentData;
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
@@ -108,11 +121,14 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
             const Padding(
               padding: EdgeInsets.all(16.0),
               child: SizedBox(
-                width: 20, 
-                height: 20, 
-                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
               ),
-            )
+            ),
         ],
       ),
       body: SingleChildScrollView(
@@ -146,7 +162,8 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
               // NAMA TOURNAMENT
               Row(
                 children: [
-                  Expanded( // Pake Expanded biar text panjang ga error overflow
+                  Expanded(
+                    // Pake Expanded biar text panjang ga error overflow
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -173,7 +190,12 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                   ),
                 ],
               ),
-              const Divider(color: Colors.white24, thickness: 1, indent: 16, endIndent: 16),
+              const Divider(
+                color: Colors.white24,
+                thickness: 1,
+                indent: 16,
+                endIndent: 16,
+              ),
 
               const SizedBox(height: 8),
 
@@ -205,11 +227,18 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    const Icon(Icons.event, color: Colors.orangeAccent, size: 18),
+                    const Icon(
+                      Icons.event,
+                      color: Colors.orangeAccent,
+                      size: 18,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       formatTanggal(data.tanggal),
-                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -222,18 +251,30 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    const Icon(Icons.location_on, color: Colors.orangeAccent, size: 18),
+                    const Icon(
+                      Icons.location_on,
+                      color: Colors.orangeAccent,
+                      size: 18,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       data.lokasi,
-                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
               ),
 
               const SizedBox(height: 16),
-              const Divider(color: Colors.white24, thickness: 1, indent: 16, endIndent: 16),
+              const Divider(
+                color: Colors.white24,
+                thickness: 1,
+                indent: 16,
+                endIndent: 16,
+              ),
               const SizedBox(height: 16),
 
               // PEMBUAT
@@ -251,7 +292,10 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                           'http://localhost:8000/tournament/proxy-image/?url=${Uri.encodeComponent(data.pembuatFoto)}',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            return Image.asset("images/tournament_bg.png", fit: BoxFit.cover);
+                            return Image.asset(
+                              "images/tournament_bg.png",
+                              fit: BoxFit.cover,
+                            );
                           },
                         ),
                       ),
@@ -260,10 +304,21 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Diselenggarakan oleh", style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w400)),
+                        const Text(
+                          "Diselenggarakan oleh",
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                         Text(
                           data.pembuat.toUpperCase(),
-                          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -285,7 +340,11 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     data.deskripsi,
-                    style: const TextStyle(color: Colors.black87, fontSize: 15, height: 1.5),
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 15,
+                      height: 1.5,
+                    ),
                     textAlign: TextAlign.left,
                   ),
                 ),
@@ -310,7 +369,8 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => TournamentEditPage(tournament: data),
+                            builder: (_) =>
+                                TournamentEditPage(tournament: data),
                           ),
                         );
 
@@ -327,7 +387,14 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                           children: [
                             Icon(Icons.edit, color: Colors.white),
                             SizedBox(width: 8),
-                            Text("Edit Turnamen", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text(
+                              "Edit Turnamen",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -350,19 +417,46 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: const Text("Hapus Turnamen"),
-                            content: const Text("Yakin ingin menghapus turnamen ini? Tindakan ini tidak bisa dibatalkan."),
+                            content: const Text(
+                              "Yakin ingin menghapus turnamen ini? Tindakan ini tidak bisa dibatalkan.",
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
                                 child: const Text("Batal"),
                               ),
                               TextButton(
-                                onPressed: () {
-                                  // TODO: Tambahkan logic API Delete di sini
-                                  Navigator.pop(context); // Tutup dialog
-                                  Navigator.pop(context, true); // Balik ke list (bisa trigger refresh list juga)
+                                onPressed: () async {
+                                  // Panggil service untuk delete tournament
+                                  final bool success =
+                                      await TournamentDeleteService.deleteTournament(
+                                        context: context,
+                                        tournamentId: data.id,
+                                      );
+
+                                  if (!context.mounted) return;
+
+                                  if (success) {
+                                    // Opsi 1: Ganti halaman detail langsung dengan Main Page
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            TournamentMainPage(),
+                                      ),
+                                    );
+
+                                    // Opsi 2: Jika Main Page selalu ada di stack, bisa pakai ini:
+                                    // Navigator.of(context).pop(true);
+
+                                    // Opsi 3: Jika ingin memastikan Main Page adalah root
+                                    // Navigator.of(context).popUntil((route) => route.isFirst);
+                                  }
                                 },
-                                child: const Text("Hapus", style: TextStyle(color: Colors.red)),
+                                child: const Text(
+                                  "Hapus",
+                                  style: TextStyle(color: Colors.red),
+                                ),
                               ),
                             ],
                           ),
@@ -376,7 +470,14 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                           children: [
                             Icon(Icons.delete_forever, color: Colors.white),
                             SizedBox(width: 8),
-                            Text("Hapus Turnamen", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text(
+                              "Hapus Turnamen",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -389,7 +490,10 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     children: [
-                      const Text("Bergabunglah dan tunjukkan kemampuanmu!", style: TextStyle(color: Colors.white70, fontSize: 14)),
+                      const Text(
+                        "Bergabunglah dan tunjukkan kemampuanmu!",
+                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                      ),
                       const SizedBox(height: 12),
                       Material(
                         color: const Color(0xFF10266A),
@@ -397,7 +501,11 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                         child: InkWell(
                           borderRadius: BorderRadius.circular(50),
                           onTap: () {
-                            TournamentAssigner.assignToTournament(context, data.id, data.nama);
+                            TournamentAssigner.assignToTournament(
+                              context,
+                              data.id,
+                              data.nama,
+                            );
                           },
                           child: Container(
                             width: double.infinity,
@@ -405,9 +513,19 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text("Daftar Sekarang", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                                Text(
+                                  "Daftar Sekarang",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                                 SizedBox(width: 8),
-                                Icon(Icons.keyboard_arrow_right_rounded, color: Colors.white),
+                                Icon(
+                                  Icons.keyboard_arrow_right_rounded,
+                                  color: Colors.white,
+                                ),
                               ],
                             ),
                           ),
@@ -422,20 +540,49 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
 
               // --- LIST PESERTA ---
               if (data.participants.isEmpty) ...[
-                const Divider(color: Colors.white24, thickness: 1, indent: 16, endIndent: 16),
+                const Divider(
+                  color: Colors.white24,
+                  thickness: 1,
+                  indent: 16,
+                  endIndent: 16,
+                ),
                 const Padding(
                   padding: EdgeInsets.only(left: 16, right: 16, bottom: 12),
-                  child: Text("LIST OF PARTICIPANT", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                  child: Text(
+                    "LIST OF PARTICIPANT",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text("No participants yet.", style: TextStyle(color: Colors.white70, fontSize: 14)),
+                  child: Text(
+                    "No participants yet.",
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
                 ),
               ] else ...[
-                const Divider(color: Colors.white24, thickness: 1, indent: 16, endIndent: 16),
+                const Divider(
+                  color: Colors.white24,
+                  thickness: 1,
+                  indent: 16,
+                  endIndent: 16,
+                ),
                 const Padding(
                   padding: EdgeInsets.only(left: 16, right: 16, bottom: 12),
-                  child: Text("LIST OF PARTICIPANT", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                  child: Text(
+                    "LIST OF PARTICIPANT",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -444,22 +591,33 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                       final member = participant.member;
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(color: const Color(0xFF1E1E1E), borderRadius: BorderRadius.circular(12)),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E1E1E),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: ListTile(
                           leading: CircleAvatar(
-                            backgroundImage: NetworkImage('http://localhost:8000/tournament/proxy-image/?url=${Uri.encodeComponent(member.photo)}'),
+                            backgroundImage: NetworkImage(
+                              'http://localhost:8000/tournament/proxy-image/?url=${Uri.encodeComponent(member.photo)}',
+                            ),
                             onBackgroundImageError: (_, __) {},
                             backgroundColor: Colors.grey.shade800,
                           ),
-                          title: Text(member.username, style: const TextStyle(color: Colors.white)),
-                          subtitle: Text(member.city, style: const TextStyle(color: Colors.white70)),
+                          title: Text(
+                            member.username,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          subtitle: Text(
+                            member.city,
+                            style: const TextStyle(color: Colors.white70),
+                          ),
                         ),
                       );
                     }).toList(),
                   ),
                 ),
               ],
-              
+
               const SizedBox(height: 30),
             ],
           ),
