@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
-import 'package:kulatih_mobile/khalisha-booking/screens/booking_detail_page.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal.dart';
 
 class BookingListPage extends StatefulWidget {
@@ -45,28 +44,40 @@ class _BookingListPageState extends State<BookingListPage>
   List<Booking> get upcoming {
     final now = DateTime.now();
     return _bookings.where((b) {
-      final activeStatus =
-          b.status == BookingStatus.pending ||
-          b.status == BookingStatus.confirmed ||
-          b.status == BookingStatus.rescheduled;
-      return activeStatus && b.startTime.isAfter(now);
+      return (b.status == BookingStatus.pending ||
+              b.status == BookingStatus.confirmed ||
+              b.status == BookingStatus.rescheduled) &&
+          b.startTime.isAfter(now);
     }).toList();
   }
 
   List<Booking> get history {
     final now = DateTime.now();
     return _bookings.where((b) {
-      final pastStatus =
+      return b.status == BookingStatus.cancelled ||
           b.status == BookingStatus.completed ||
-          b.status == BookingStatus.cancelled;
-      return pastStatus || b.endTime.isBefore(now);
+          b.endTime.isBefore(now);
     }).toList();
   }
 
   /* ---------------- CANCEL ---------------- */
   Future<void> _cancelBooking(Booking booking) async {
-    await _service.cancelBooking(booking.id);
-    await _fetchBookings();
+    try {
+      final ok = await _service.cancelBooking(booking.id);
+
+      if (!ok) return;
+
+      // langsung pindah ke history (tanpa nunggu backend)
+      setState(() {
+        final idx = _bookings.indexWhere((b) => b.id == booking.id);
+        if (idx != -1) {
+          _bookings[idx] =
+              _bookings[idx].copyWith(status: BookingStatus.cancelled);
+        }
+      });
+    } catch (e) {
+      debugPrint("Cancel failed: $e");
+    }
   }
 
   /* ---------------- OPEN RESCHEDULE ---------------- */
@@ -249,7 +260,7 @@ class _BookingListPageState extends State<BookingListPage>
           const Divider(color: Colors.white12),
           const SizedBox(height: 12),
 
-          historyMode ? _historyButtons(b) : _upcomingButtons(b),
+          historyMode ? _historyButtons() : _upcomingButtons(b),
         ],
       ),
     );
@@ -297,25 +308,13 @@ class _BookingListPageState extends State<BookingListPage>
     return Row(
       children: [
         _btn("Cancel", Colors.red, () => _cancelBooking(b)),
-        _btn(
-          "View Details",
-          const Color(0xFFD4BC4E),
-          () async {
-            final updated = await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => BookingDetailPage(booking: b)),
-            );
-
-            if (updated == true) _fetchBookings();
-          },
-        ),
         _btn("Reschedule", Colors.grey, () => _openReschedule(b)),
       ],
     );
   }
 
   /* ---------------- HISTORY BUTTONS ---------------- */
-  Widget _historyButtons(Booking b) {
+  Widget _historyButtons() {
     return Row(
       children: [
         _btn("View Your Review", const Color(0xFFD4BC4E), () {}),

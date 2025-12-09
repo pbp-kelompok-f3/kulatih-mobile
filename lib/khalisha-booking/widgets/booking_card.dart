@@ -9,9 +9,8 @@ class BookingCard extends StatelessWidget {
 
   final VoidCallback onCancel;
   final VoidCallback onReschedule;
-  final VoidCallback onViewDetails;
 
-  // EXTRA CALLBACKS FOR HISTORY MODE
+  // History extras
   final VoidCallback? onBookAgain;
   final VoidCallback? onViewReview;
 
@@ -21,7 +20,6 @@ class BookingCard extends StatelessWidget {
     required this.historyMode,
     required this.onCancel,
     required this.onReschedule,
-    required this.onViewDetails,
     this.onBookAgain,
     this.onViewReview,
   });
@@ -38,13 +36,16 @@ class BookingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // DATE + STATUS
+          /// DATE + STATUS
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 booking.formattedDateTime,
-                style: const TextStyle(color: AppColors.textLight, fontSize: 12),
+                style: const TextStyle(
+                  color: AppColors.textLight,
+                  fontSize: 12,
+                ),
               ),
               BookingStatusBadge(status: booking.status),
             ],
@@ -52,7 +53,7 @@ class BookingCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // COACH ROW
+          /// COACH ROW
           Row(
             children: [
               const CircleAvatar(
@@ -73,7 +74,10 @@ class BookingCard extends StatelessWidget {
                   ),
                   Text(
                     booking.sport,
-                    style: const TextStyle(color: AppColors.textLight, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
@@ -82,10 +86,14 @@ class BookingCard extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          // LOCATION
+          /// LOCATION
           Row(
             children: [
-              const Icon(Icons.location_on, color: AppColors.textLight, size: 16),
+              const Icon(
+                Icons.location_on,
+                color: AppColors.textLight,
+                size: 16,
+              ),
               const SizedBox(width: 6),
               Text(
                 booking.location,
@@ -104,37 +112,27 @@ class BookingCard extends StatelessWidget {
     );
   }
 
-  /* ---------------- UPCOMING BUTTONS ---------------- */
+  /// UPCOMING BUTTONS (NO VIEW DETAILS)
   Widget _upcomingButtons() {
     return Row(
       children: [
         _btn("Cancel", Colors.red, onCancel),
-        _btn("View Details", AppColors.gold, onViewDetails),
         _btn("Reschedule", Colors.grey, onReschedule),
       ],
     );
   }
 
-  /* ---------------- HISTORY BUTTONS ---------------- */
+  /// HISTORY BUTTONS
   Widget _historyButtons() {
     return Row(
       children: [
-        _btn(
-          "View Your Review",
-          AppColors.gold,
-          onViewReview ?? onViewDetails,
-        ),
-        _btn(
-          "Book Again",
-          Colors.grey.shade700,
-          onBookAgain ?? onReschedule,
-        ),
+        _btn("View Review", AppColors.gold, onViewReview ?? () {}),
+        _btn("Book Again", Colors.grey.shade700, onBookAgain ?? () {}),
       ],
     );
   }
 
-  /* ---------------- BUTTON BUILDER ---------------- */
-  Widget _btn(String label, Color bg, VoidCallback? onTap) {
+  Widget _btn(String text, Color bg, VoidCallback onTap) {
     return Expanded(
       child: InkWell(
         onTap: onTap,
@@ -147,7 +145,7 @@ class BookingCard extends StatelessWidget {
           ),
           alignment: Alignment.center,
           child: Text(
-            label,
+            text,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 12,

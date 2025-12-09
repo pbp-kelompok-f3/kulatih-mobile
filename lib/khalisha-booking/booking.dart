@@ -19,6 +19,7 @@ class _BookingPageState extends State<BookingPage> {
 
   int _selectedTab = 0; // 0 = Upcoming, 1 = History
   bool _loading = true;
+
   List<Booking> _bookings = [];
 
   @override
@@ -27,9 +28,9 @@ class _BookingPageState extends State<BookingPage> {
     _fetchBookings();
   }
 
-  /* ================================
-        FETCH BOOKINGS
-  ================================= */
+  // ================================
+  // FETCH BOOKINGS
+  // ================================
   Future<void> _fetchBookings() async {
     setState(() => _loading = true);
 
@@ -45,26 +46,31 @@ class _BookingPageState extends State<BookingPage> {
     setState(() => _loading = false);
   }
 
-  /* ================================
-        FILTER
-  ================================= */
+  // ================================
+  // FILTER
+  // ================================
+  List<Booking> get _upcoming =>
+      _bookings.where((b) => b.isUpcoming).toList();
 
-  List<Booking> get _upcoming => _bookings.where((b) => b.isUpcoming).toList();
-
-  List<Booking> get _history => _bookings.where((b) => b.isHistory).toList();
+  List<Booking> get _history =>
+      _bookings.where((b) => b.isHistory).toList();
 
   List<Booking> get _filtered =>
       _selectedTab == 0 ? _upcoming : _history;
 
-  /* ================================
-        ACTIONS
-  ================================= */
+  // ================================
+  // ACTIONS
+  // ================================
 
   Future<void> _openCreateBooking() async {
+    // sementara pakai coachId dummy "1" biar form-nya jalan
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const BookingFormPage(isReschedule: false),
+        builder: (_) => const BookingFormPage(
+          isReschedule: false,
+          coachId: "1",
+        ),
       ),
     );
 
@@ -90,11 +96,23 @@ class _BookingPageState extends State<BookingPage> {
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: AppColors.card,
-        title: const Text("Cancel Booking", style: TextStyle(color: Colors.white)),
-        content: const Text("Are you sure you want to cancel?", style: TextStyle(color: Colors.white70)),
+        title: const Text(
+          "Cancel Booking",
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          "Are you sure you want to cancel?",
+          style: TextStyle(color: Colors.white70),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("No")),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Yes")),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("No"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Yes"),
+          ),
         ],
       ),
     );
@@ -111,9 +129,9 @@ class _BookingPageState extends State<BookingPage> {
     }
   }
 
-  /* ================================
-        BUILD
-  ================================= */
+  // ================================
+  // BUILD
+  // ================================
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +142,10 @@ class _BookingPageState extends State<BookingPage> {
         elevation: 0,
         title: const Text(
           "MY BOOKINGS",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
 
@@ -134,7 +155,7 @@ class _BookingPageState extends State<BookingPage> {
               children: [
                 const SizedBox(height: 12),
 
-                /// CUSTOM TAB SWITCHER
+                /// TAB SWITCHER sesuai figma
                 TabSwitcher(
                   selectedIndex: _selectedTab,
                   onTabSelected: (index) {
@@ -154,23 +175,46 @@ class _BookingPageState extends State<BookingPage> {
                           ),
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 18),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 18),
                           itemCount: _filtered.length,
                           itemBuilder: (_, i) {
                             final b = _filtered[i];
+
+                            // HISTORY MODE
+                            if (b.isHistory) {
+                              return BookingCard(
+                                booking: b,
+                                historyMode: true,
+                                onCancel: () {},
+                                onReschedule: () {},
+                                onViewReview: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          BookingDetailPage(booking: b),
+                                    ),
+                                  );
+                                },
+                                onBookAgain: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Book Again belum dihubungkan ke flow coach.",
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            }
+
+                            // UPCOMING MODE
                             return BookingCard(
                               booking: b,
-                              historyMode: b.isHistory,
+                              historyMode: false,
                               onCancel: () => _cancelBooking(b),
                               onReschedule: () => _openReschedule(b),
-                              onViewDetails: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => BookingDetailPage(booking: b),
-                                  ),
-                                );
-                              },
                             );
                           },
                         ),
