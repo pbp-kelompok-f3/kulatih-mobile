@@ -29,11 +29,8 @@ class _BookingPageState extends State<BookingPage> {
 
     try {
       final list = await _service.getBookings();
-      setState(() {
-        _allBookings = list;
-      });
+      setState(() => _allBookings = list);
     } catch (e) {
-      print("Fetch error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed loading bookings: $e")),
       );
@@ -42,54 +39,56 @@ class _BookingPageState extends State<BookingPage> {
     setState(() => _loading = false);
   }
 
-  // UPCOMING & HISTORY FILTER
+  // FILTERING LIST
   List<Booking> get _filteredBookings {
     final now = DateTime.now();
 
     if (_selectedTabIndex == 0) {
+      // UPCOMING
       return _allBookings.where((b) {
-        final isFuture = b.endTime.isAfter(now);
-        final isActive = [
+        final future = b.endTime.isAfter(now);
+        final active = [
           BookingStatus.pending,
           BookingStatus.confirmed,
           BookingStatus.rescheduled,
         ].contains(b.status);
-        return isFuture && isActive;
+        return future && active;
       }).toList();
     } else {
+      // HISTORY
       return _allBookings.where((b) {
-        final isPast = b.endTime.isBefore(now);
-        final isHistory = [
+        final past = b.endTime.isBefore(now);
+        final history = [
           BookingStatus.cancelled,
           BookingStatus.completed,
         ].contains(b.status);
-        return isPast || isHistory;
+        return past || history;
       }).toList();
     }
   }
 
-  // OPEN CREATE
+  // OPEN CREATE BOOKING FORM
   Future<void> _openCreateBookingForm() async {
     final result = await Navigator.push<Booking>(
       context,
       MaterialPageRoute(
-        builder: (_) => const BookingFormPage(),
+        builder: (_) => const BookingFormPage(isReschedule: false),
       ),
     );
 
     if (result != null) {
-      await _fetchBookings(); // refresh dari API
+      await _fetchBookings();
     }
   }
 
-  // RESCHEDULE
+  // OPEN RESCHEDULE FORM
   Future<void> _openRescheduleForm(Booking booking) async {
     final result = await Navigator.push<Booking>(
       context,
       MaterialPageRoute(
         builder: (_) => BookingFormPage(
-          initialBooking: booking,
           isReschedule: true,
+          initialBooking: booking,
         ),
       ),
     );
@@ -99,6 +98,7 @@ class _BookingPageState extends State<BookingPage> {
     }
   }
 
+  // CANCEL BOOKING
   Future<void> _cancelBooking(Booking booking) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -110,12 +110,8 @@ class _BookingPageState extends State<BookingPage> {
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text("No")),
-          TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text("Yes")),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("No")),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Yes")),
         ],
       ),
     );
@@ -126,8 +122,9 @@ class _BookingPageState extends State<BookingPage> {
       await _service.cancelBooking(booking.id);
       await _fetchBookings();
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Failed: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed: $e")),
+      );
     }
   }
 
@@ -168,7 +165,8 @@ class _BookingPageState extends State<BookingPage> {
                   child: _filteredBookings.isEmpty
                       ? const Center(
                           child: Text("No bookings yet",
-                              style: TextStyle(color: Colors.white54)))
+                              style: TextStyle(color: Colors.white54)),
+                        )
                       : ListView.builder(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
@@ -189,8 +187,10 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 
+  // TAB BUTTON
   Widget _buildTabButton(String label, int index) {
     final selected = _selectedTabIndex == index;
+
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _selectedTabIndex = index),
@@ -214,11 +214,14 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 
+  // BOOKING CARD
   Widget _buildBookingCard(Booking booking) {
     final d = booking.startTime;
 
-    final dateText =
-        "${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}";
+    final dateText = "${d.day.toString().padLeft(2, '0')}/"
+        "${d.month.toString().padLeft(2, '0')}/"
+        "${d.year}";
+
     final timeText =
         "${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}";
 
@@ -244,7 +247,7 @@ class _BookingPageState extends State<BookingPage> {
 
           const SizedBox(height: 12),
 
-          // coach info
+          // coach + sport
           Row(
             children: [
               const CircleAvatar(radius: 22, child: Icon(Icons.person)),
@@ -281,13 +284,13 @@ class _BookingPageState extends State<BookingPage> {
           Row(
             children: [
               Expanded(
-                child: _btn("Cancel", Colors.red,
-                    () => _cancelBooking(booking)),
+                child:
+                    _btn("Cancel", Colors.red, () => _cancelBooking(booking)),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _btn("Reschedule", Colors.grey,
-                    () => _openRescheduleForm(booking)),
+                child: _btn(
+                    "Reschedule", Colors.grey, () => _openRescheduleForm(booking)),
               ),
             ],
           ),
@@ -315,6 +318,7 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 
+  // STATUS BADGE
   Widget _statusBadge(BookingStatus st) {
     Color c;
     switch (st) {

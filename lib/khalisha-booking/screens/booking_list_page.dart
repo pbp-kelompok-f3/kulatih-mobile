@@ -3,7 +3,6 @@ import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_detail_page.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal.dart';
-import 'package:intl/intl.dart';
 
 class BookingListPage extends StatefulWidget {
   const BookingListPage({super.key});
@@ -14,12 +13,12 @@ class BookingListPage extends StatefulWidget {
 
 class _BookingListPageState extends State<BookingListPage>
     with SingleTickerProviderStateMixin {
+  final BookingService _service = BookingService();
+
   late TabController _tabController;
 
-  List<Booking> _bookings = [];
   bool _loading = true;
-
-  final BookingService _service = BookingService();
+  List<Booking> _bookings = [];
 
   @override
   void initState() {
@@ -28,6 +27,7 @@ class _BookingListPageState extends State<BookingListPage>
     _fetchBookings();
   }
 
+  /* ---------------- FETCH FROM BACKEND ---------------- */
   Future<void> _fetchBookings() async {
     try {
       final data = await _service.getBookings();
@@ -37,28 +37,51 @@ class _BookingListPageState extends State<BookingListPage>
       });
     } catch (e) {
       print("Error fetching bookings: $e");
+      setState(() => _loading = false);
     }
   }
 
-  // ========= HELPERS =========
-
-  bool isUpcoming(Booking b) {
-    return b.status != BookingStatus.cancelled &&
-        b.status != BookingStatus.completed &&
-        b.startTime.isAfter(DateTime.now());
+  /* ---------------- FILTER LOGIC ---------------- */
+  List<Booking> get upcoming {
+    final now = DateTime.now();
+    return _bookings.where((b) {
+      final isFuture = b.startTime.isAfter(now);
+      final isActive = b.status == BookingStatus.pending ||
+          b.status == BookingStatus.confirmed ||
+          b.status == BookingStatus.rescheduled;
+      return isFuture && isActive;
+    }).toList();
   }
 
-  bool isHistory(Booking b) {
-    return !isUpcoming(b);
+  List<Booking> get history {
+    final now = DateTime.now();
+    return _bookings.where((b) {
+      final isPast = b.endTime.isBefore(now);
+      final isHistory = b.status == BookingStatus.completed ||
+          b.status == BookingStatus.cancelled;
+      return isPast || isHistory;
+    }).toList();
   }
 
-  String formatDateTime(Booking b) {
-    final date = DateFormat('EEE, dd MMM yyyy').format(b.startTime);
-    final time =
-        "${DateFormat('HH:mm').format(b.startTime)} - ${DateFormat('HH:mm').format(b.endTime)} WIB";
-    return "$date • $time";
+  /* ---------------- CANCEL ---------------- */
+  Future<void> _cancelBooking(Booking booking) async {
+    await _service.cancelBooking(booking.id);
+    await _fetchBookings();
   }
 
+  /* ---------------- RESCHEDULE ---------------- */
+  Future<void> _openReschedule(Booking booking) async {
+    final result = await showDialog(
+      context: context,
+      builder: (_) => RescheduleModal(booking: booking),
+    );
+
+    if (result == true) {
+      await _fetchBookings();
+    }
+  }
+
+  /* ---------------- UI ---------------- */
   @override
   Widget build(BuildContext context) {
     const indigo = Color(0xFF0F0F38);
@@ -75,28 +98,22 @@ class _BookingListPageState extends State<BookingListPage>
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back_ios,
-                        size: 18, color: Colors.white),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
+                children: const [
+                  Text(
                     "MY BOOKINGS",
                     style: TextStyle(
+                      color: gold,
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: gold,
-                      letterSpacing: 1.2,
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
 
             const SizedBox(height: 20),
 
+            /// TABS
             _buildTabs(),
 
             Expanded(
@@ -105,12 +122,8 @@ class _BookingListPageState extends State<BookingListPage>
                   : TabBarView(
                       controller: _tabController,
                       children: [
-                        _buildList(
-                            _bookings.where((b) => isUpcoming(b)).toList(),
-                            false),
-                        _buildList(
-                            _bookings.where((b) => isHistory(b)).toList(),
-                            true),
+                        _buildList(upcoming, false),
+                        _buildList(history, true),
                       ],
                     ),
             ),
@@ -120,9 +133,7 @@ class _BookingListPageState extends State<BookingListPage>
     );
   }
 
-  /// ------------------------
-  /// TABS (UPCOMING / HISTORY)
-  /// ------------------------
+  /* ---------------- TAB HEADER ---------------- */
   Widget _buildTabs() {
     return Container(
       height: 48,
@@ -147,10 +158,8 @@ class _BookingListPageState extends State<BookingListPage>
     );
   }
 
-  /// ------------------------
-  /// BOOKING LIST
-  /// ------------------------
-  Widget _buildList(List<Booking> items, bool isHistory) {
+  /* ---------------- LIST BUILDER ---------------- */
+  Widget _buildList(List<Booking> items, bool historyMode) {
     if (items.isEmpty) {
       return const Center(
         child: Text(
@@ -159,53 +168,53 @@ class _BookingListPageState extends State<BookingListPage>
         ),
       );
     }
+
     return ListView.builder(
       padding: const EdgeInsets.all(20),
       itemCount: items.length,
-      itemBuilder: (_, i) => _bookingCard(items[i], isHistory),
+      itemBuilder: (_, i) => _bookingCard(items[i], historyMode),
     );
   }
 
-  /// ------------------------
-  /// BOOKING CARD
-  /// ------------------------
-  Widget _bookingCard(Booking b, bool isHistoryMode) {
+  /* ---------------- BOOKING CARD ---------------- */
+  Widget _bookingCard(Booking b, bool historyMode) {
     const cardBg = Color(0xFF1C1C4A);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(18),
+      margin: const EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// DATE & STATUS
+          /// DATE + STATUS
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                formatDateTime(b),
+                b.formattedDateTime,
                 style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w600),
+                  color: Colors.white70,
+                  fontSize: 12,
+                ),
               ),
               _statusBadge(b.status),
             ],
           ),
 
-          const SizedBox(height: 15),
+          const SizedBox(height: 12),
 
-          /// COACH + SPORT
+          /// COACH ROW
           Row(
             children: [
               const CircleAvatar(
                 radius: 26,
-                backgroundImage:
-                    AssetImage("assets/default_user.png"), // sementara avatar default
+                backgroundImage: AssetImage("assets/default_user.png"),
               ),
-              const SizedBox(width: 15),
+              const SizedBox(width: 12),
 
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,43 +222,48 @@ class _BookingListPageState extends State<BookingListPage>
                   Text(
                     b.coachName,
                     style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold),
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     b.sport,
-                    style: const TextStyle(color: Colors.white70),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
             ],
           ),
 
-          const SizedBox(height: 15),
+          const SizedBox(height: 14),
 
           /// LOCATION
           Row(
             children: [
-              const Icon(Icons.location_on, size: 16, color: Colors.white70),
+              const Icon(Icons.location_on, color: Colors.white70, size: 16),
               const SizedBox(width: 6),
-              Text(b.location, style: const TextStyle(color: Colors.white70)),
+              Text(
+                b.location,
+                style: const TextStyle(color: Colors.white70),
+              ),
             ],
           ),
 
-          const SizedBox(height: 15),
+          const SizedBox(height: 16),
           const Divider(color: Colors.white12),
           const SizedBox(height: 12),
 
-          isHistoryMode ? _historyButtons(b) : _upcomingButtons(b),
+          historyMode ? _historyButtons(b) : _upcomingButtons(b),
         ],
       ),
     );
   }
 
-  /// ------------------------
-  /// STATUS BADGE
-  /// ------------------------
+  /* ---------------- STATUS BADGE ---------------- */
   Widget _statusBadge(BookingStatus status) {
     Color c;
     switch (status) {
@@ -266,66 +280,67 @@ class _BookingListPageState extends State<BookingListPage>
         c = Colors.grey;
         break;
       default:
-        c = Colors.amber;
+        c = Colors.orange;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: c,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         bookingStatusToText(status).toUpperCase(),
         style: const TextStyle(
-            color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
-  /// ------------------------
-  /// UPCOMING BUTTONS
-  /// ------------------------
+  /* ---------------- UPCOMING BUTTONS ---------------- */
   Widget _upcomingButtons(Booking b) {
     return Row(
       children: [
-        _btn("Cancel", Colors.red, () async {
-          await _service.cancelBooking(b.id);
-          _fetchBookings();
-        }),
-
-        _btn("View Details", const Color(0xFFD4BC4E), () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => BookingDetailPage(booking: b)),
-          );
-        }),
-
-        _btn("Reschedule", const Color(0xFF0F0F38), () {
-          showDialog(
-            context: context,
-            builder: (_) => RescheduleModal(booking: b),
-          );
-        }),
+        _btn(
+          "Cancel",
+          Colors.red,
+          () => _cancelBooking(b),
+        ),
+        _btn(
+          "View Details",
+          const Color(0xFFD4BC4E),
+          () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BookingDetailPage(booking: b),
+              ),
+            );
+          },
+        ),
+        _btn(
+          "Reschedule",
+          Colors.grey,
+          () => _openReschedule(b),
+        ),
       ],
     );
   }
 
-  /// ------------------------
-  /// HISTORY BUTTONS
-  /// ------------------------
+  /* ---------------- HISTORY BUTTONS ---------------- */
   Widget _historyButtons(Booking b) {
     return Row(
       children: [
         _btn("View Your Review", const Color(0xFFD4BC4E), () {}),
-        _btn("Book Again", const Color(0xFF0F0F38), () {}),
+        _btn("Book Again", Colors.grey.shade700, () {}),
       ],
     );
   }
 
-  /// ------------------------
-  /// REUSABLE BUTTON
-  /// ------------------------
+  /* ---------------- REUSABLE BUTTON ---------------- */
   Widget _btn(String label, Color bg, VoidCallback onTap) {
     return Expanded(
       child: InkWell(
@@ -341,7 +356,10 @@ class _BookingListPageState extends State<BookingListPage>
           child: Text(
             label,
             style: const TextStyle(
-                color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),

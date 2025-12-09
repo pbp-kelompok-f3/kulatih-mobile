@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:kulatih_mobile/albert-user/screens/login.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
+import 'package:kulatih_mobile/navigationbar.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking.dart';
 
 void main() {
@@ -224,6 +225,12 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: 0,
+        onTap: (index){
+          
+        }
       ),
     );
   }

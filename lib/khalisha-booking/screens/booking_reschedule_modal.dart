@@ -15,46 +15,61 @@ class _RescheduleModalState extends State<RescheduleModal> {
   final BookingService _service = BookingService();
 
   DateTime? _newDate;
-  TimeOfDay? _newTime;
+  TimeOfDay? _newStart;
+  TimeOfDay? _newEnd;
 
   bool _loading = false;
 
   Future<void> _pickDate() async {
     final result = await showDatePicker(
       context: context,
+      initialDate: widget.booking.startTime,
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
-      initialDate: widget.booking.startTime,
     );
     if (result != null) {
       setState(() => _newDate = result);
     }
   }
 
-  Future<void> _pickTime() async {
-    final result = await showTimePicker(
+  Future<void> _pickStart() async {
+    final t = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(widget.booking.startTime),
     );
-    if (result != null) {
-      setState(() => _newTime = result);
-    }
+    if (t != null) setState(() => _newStart = t);
+  }
+
+  Future<void> _pickEnd() async {
+    final t = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(widget.booking.endTime),
+    );
+    if (t != null) setState(() => _newEnd = t);
   }
 
   Future<void> _submit() async {
-    if (_newDate == null || _newTime == null) {
+    if (_newDate == null || _newStart == null || _newEnd == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select both date & time")),
+        const SnackBar(content: Text("Please pick date & both times")),
       );
       return;
     }
 
-    final newDateTime = DateTime(
+    final newStartTime = DateTime(
       _newDate!.year,
       _newDate!.month,
       _newDate!.day,
-      _newTime!.hour,
-      _newTime!.minute,
+      _newStart!.hour,
+      _newStart!.minute,
+    );
+
+    final newEndTime = DateTime(
+      _newDate!.year,
+      _newDate!.month,
+      _newDate!.day,
+      _newEnd!.hour,
+      _newEnd!.minute,
     );
 
     setState(() => _loading = true);
@@ -62,7 +77,8 @@ class _RescheduleModalState extends State<RescheduleModal> {
     try {
       await _service.rescheduleBooking(
         bookingId: widget.booking.id,
-        newDate: newDateTime,
+        newStartTime: newStartTime,
+        newEndTime: newEndTime,
       );
 
       if (context.mounted) {
@@ -75,7 +91,7 @@ class _RescheduleModalState extends State<RescheduleModal> {
     }
   }
 
-  Widget _pickerButton(String text, VoidCallback onTap) {
+  Widget _picker(String text, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -91,14 +107,6 @@ class _RescheduleModalState extends State<RescheduleModal> {
 
   @override
   Widget build(BuildContext context) {
-    final dateText = _newDate == null
-        ? "Select New Date"
-        : "${_newDate!.day}/${_newDate!.month}/${_newDate!.year}";
-
-    final timeText = _newTime == null
-        ? "Select New Time"
-        : "${_newTime!.hour.toString().padLeft(2, '0')}:${_newTime!.minute.toString().padLeft(2, '0')}";
-
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -107,17 +115,33 @@ class _RescheduleModalState extends State<RescheduleModal> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Reschedule Booking",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+            const Text("Reschedule Booking",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
 
             const SizedBox(height: 20),
 
-            _pickerButton(dateText, _pickDate),
+            _picker(
+              _newDate == null
+                  ? "Select New Date"
+                  : "${_newDate!.day}/${_newDate!.month}/${_newDate!.year}",
+              _pickDate,
+            ),
             const SizedBox(height: 12),
 
-            _pickerButton(timeText, _pickTime),
+            _picker(
+              _newStart == null
+                  ? "Select Start Time"
+                  : "${_newStart!.hour.toString().padLeft(2, '0')}:${_newStart!.minute.toString().padLeft(2, '0')}",
+              _pickStart,
+            ),
+            const SizedBox(height: 12),
+
+            _picker(
+              _newEnd == null
+                  ? "Select End Time"
+                  : "${_newEnd!.hour.toString().padLeft(2, '0')}:${_newEnd!.minute.toString().padLeft(2, '0')}",
+              _pickEnd,
+            ),
             const SizedBox(height: 20),
 
             _loading
