@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/salman-tournament/widgets/tournament_entry_list.dart';
+import 'package:kulatih_mobile/models/user_provider.dart';
+import 'package:kulatih_mobile/salman-tournament/page/tournament_create.dart';
 
 class TournamentMainPage extends StatefulWidget {
   const TournamentMainPage({super.key});
@@ -24,14 +27,48 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
 
   @override
   Widget build(BuildContext context) {
+    /// 🔥 DAPET ROLE DARI PROVIDER
+    final isCoach = context.watch<UserProvider>().isCoach;
+
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
+
+      // ===================== FLOATING BUTTON COACH ONLY ======================
+      floatingActionButton: AnimatedScale(
+        scale: isCoach ? 1 : 0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutBack,
+        child: AnimatedOpacity(
+          opacity: isCoach ? 1 : 0,
+          duration: const Duration(milliseconds: 250),
+          child: isCoach
+              ? FloatingActionButton(
+                  backgroundColor: const Color(0xFFFBBF24), // kuning gelap
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const TournamentCreatePage(),
+                      ),
+                    );
+                  },
+                  child: const Icon(
+                    Icons.add_rounded,
+                    size: 28,
+                    color: Colors.black,
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ),
 
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-
-            // ================= HERO SECTION =================
+            // ============ HERO SECTION ===============
             SliverToBoxAdapter(
               child: Stack(
                 children: [
@@ -58,10 +95,10 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
                       ),
                     ),
                   ),
-                  Positioned.fill(
+                  const Positioned.fill(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
+                      children: [
                         Text(
                           "FIND YOUR",
                           style: TextStyle(
@@ -101,7 +138,7 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
 
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
-            // ================= SEARCH BAR =================
+            // ============ SEARCH BAR ===============
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -141,7 +178,7 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
 
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
-            // ================= LIST SECTION =================
+            // ============ LIST SECTION ===============
             SliverToBoxAdapter(
               child: TournamentEntryList(query: query),
             ),
