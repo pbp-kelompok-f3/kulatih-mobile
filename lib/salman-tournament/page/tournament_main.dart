@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/salman-tournament/widgets/tournament_entry_list.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/salman-tournament/page/tournament_create.dart';
+import 'package:kulatih_mobile/izzati-forum/styles/colors.dart';
+import 'package:kulatih_mobile/izzati-forum/styles/text.dart';
 
 class TournamentMainPage extends StatefulWidget {
   const TournamentMainPage({super.key});
@@ -27,13 +29,10 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
 
   @override
   Widget build(BuildContext context) {
-    /// 🔥 DAPET ROLE DARI PROVIDER
     final isCoach = context.watch<UserProvider>().isCoach;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
-
-      // ===================== FLOATING BUTTON COACH ONLY ======================
+      backgroundColor: AppColor.indigoDark,
       floatingActionButton: AnimatedScale(
         scale: isCoach ? 1 : 0,
         duration: const Duration(milliseconds: 250),
@@ -43,7 +42,7 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
           duration: const Duration(milliseconds: 250),
           child: isCoach
               ? FloatingActionButton(
-                  backgroundColor: const Color(0xFFFBBF24), // kuning gelap
+                  backgroundColor: AppColor.yellow, // kuning gelap
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -68,7 +67,6 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // ============ HERO SECTION ===============
             SliverToBoxAdapter(
               child: Stack(
                 children: [
@@ -87,35 +85,25 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Colors.black.withOpacity(0.85),
-                          Colors.black.withOpacity(0.4),
+                          AppColor.indigoDark.withOpacity(0.85),
+                          AppColor.indigoDark.withOpacity(0.4),
                         ],
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
                       ),
                     ),
                   ),
-                  const Positioned.fill(
+                  Positioned.fill(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           "FIND YOUR",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1.1,
-                          ),
+                          style: heading(50, color: AppColor.white),
                         ),
                         Text(
                           "PERFECT TOURNAMENT",
-                          style: TextStyle(
-                            color: Color(0xFFFCD34D),
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.1,
-                          ),
+                          style: heading(50, color: AppColor.yellow),
                         ),
                         SizedBox(height: 14),
                         Padding(
@@ -123,65 +111,83 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
                           child: Text(
                             "Discover, join, and compete in tournaments that match your passion and skills.",
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
+                            style: body(16, color: AppColor.white),
                           ),
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
-
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-            // ============ SEARCH BAR ===============
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(32),
+                  padding: const EdgeInsets.symmetric(
+                    
+                    vertical: 4,
                   ),
                   child: Row(
                     children: [
                       Expanded(
                         child: TextField(
                           controller: searchController,
-                          decoration: const InputDecoration(
+                          style: body(14, color: Colors.grey.shade500),
+                          decoration: InputDecoration(
                             hintText: "Search Tournament...",
-                            border: InputBorder.none,
+                            hintStyle: TextStyle(color: Colors.grey.shade500),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 16,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(32),
+                              borderSide: BorderSide(
+                                color: AppColor.yellow.withOpacity(0.7),
+                                width: 1.5,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(32),
+                              borderSide: BorderSide(
+                                color: AppColor.yellow,
+                                width: 2.2,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(32),
+                            ),
                           ),
                           onChanged: _onSearchChanged,
                         ),
                       ),
+                      const SizedBox(width: 10),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFCD34D),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          backgroundColor: AppColor.yellow,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
                         ),
-                        onPressed: () => _onSearchChanged(searchController.text),
-                        child: const Text("Search"),
+                        onPressed: () =>
+                            _onSearchChanged(searchController.text),
+                        child: Icon(Icons.search_rounded,color:Colors.black,
+                        size:28,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
             ),
-
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-            // ============ LIST SECTION ===============
-            SliverToBoxAdapter(
-              child: TournamentEntryList(query: query),
-            ),
+            SliverToBoxAdapter(child: TournamentEntryList(query: query)),
           ],
         ),
       ),
