@@ -7,8 +7,7 @@ class ReviewApi {
   ReviewApi({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
-
-  static const String baseUrl = 'http://10.0.2.2:8000';
+  static const String baseUrl = 'http://localhost:8000';
 
   Uri _uri(String path, [Map<String, dynamic>? query]) {
     final uri = Uri.parse(baseUrl).replace(
@@ -59,8 +58,8 @@ class ReviewApi {
       throw Exception(
           'Failed to load reviews (${res.statusCode}): ${res.body}');
     }
-    final data = jsonDecode(utf8.decode(res.bodyBytes))
-        as Map<String, dynamic>;
+    final data =
+        jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
     return CoachReviewsResponse.fromJson(data);
   }
 
@@ -71,8 +70,8 @@ class ReviewApi {
       throw Exception(
           'Failed to load review detail (${res.statusCode}): ${res.body}');
     }
-    final data = jsonDecode(utf8.decode(res.bodyBytes))
-        as Map<String, dynamic>;
+    final data =
+        jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
     return ReviewDetail.fromJson(data);
   }
 
@@ -100,8 +99,8 @@ class ReviewApi {
           'Failed to create review (${res.statusCode}): ${res.body}');
     }
 
-    final data = jsonDecode(utf8.decode(res.bodyBytes))
-        as Map<String, dynamic>;
+    final data =
+        jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
 
     final newId = int.tryParse(data['id']?.toString() ?? '');
     if (newId == null) {
@@ -132,8 +131,8 @@ class ReviewApi {
           'Failed to update review (${res.statusCode}): ${res.body}');
     }
 
-    final data = jsonDecode(utf8.decode(res.bodyBytes))
-        as Map<String, dynamic>;
+    final data =
+        jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
     return getReviewDetail(reviewId);
   }
 

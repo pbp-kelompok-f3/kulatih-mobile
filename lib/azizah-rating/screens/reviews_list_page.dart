@@ -69,10 +69,10 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
   void _openDetail(ReviewItem item) {
     Navigator.of(context)
         .push(
-      MaterialPageRoute(
-        builder: (_) => ReviewDetailPage(reviewId: int.parse(item.id)),
-      ),
-    )
+          MaterialPageRoute(
+            builder: (_) => ReviewDetailPage(reviewId: int.parse(item.id)),
+          ),
+        )
         .then((changed) {
       if (changed == true) {
         _reload();
@@ -88,81 +88,93 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
         backgroundColor: ReviewColors.indigoDark,
         elevation: 0,
         iconTheme: const IconThemeData(color: ReviewColors.white),
-        title: const Text(
-          'RATING AND FEEDBACK',
-          style: TextStyle(
-            color: ReviewColors.yellow,
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
-        ),
+        // title dikosongin, kita bikin header di body biar sejajar sama Filter
+        title: const SizedBox.shrink(),
       ),
       body: SafeArea(
         child: Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           child: Column(
             children: [
-              // Filter
+              // ===== HEADER + FILTER (SEJAJAR) =====
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Filter',
+                    'RATING AND FEEDBACK',
                     style: TextStyle(
-                      color: ReviewColors.white,
-                      fontSize: 13,
+                      color: ReviewColors.yellow,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 24,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: ReviewColors.indigoDark,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF2E2B55)),
-                    ),
-                    child: DropdownButton<int?>(
-                      value: _ratingFilter,
-                      borderRadius: BorderRadius.circular(12),
-                      dropdownColor: ReviewColors.indigoDark,
-                      underline: const SizedBox.shrink(),
-                      iconEnabledColor: ReviewColors.white,
-                      style: const TextStyle(
-                          color: ReviewColors.white, fontSize: 13),
-                      items: const [
-                        DropdownMenuItem<int?>(
-                          value: null,
-                          child: Text('All'),
+                  Row(
+                    children: [
+                      const Text(
+                        'Filter',
+                        style: TextStyle(
+                          color: ReviewColors.white,
+                          fontSize: 13,
                         ),
-                        DropdownMenuItem<int?>(
-                          value: 5,
-                          child: Text('5★'),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 2,
                         ),
-                        DropdownMenuItem<int?>(
-                          value: 4,
-                          child: Text('4★'),
+                        decoration: BoxDecoration(
+                          color: ReviewColors.indigoDark,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFF2E2B55)),
                         ),
-                        DropdownMenuItem<int?>(
-                          value: 3,
-                          child: Text('3★'),
+                        child: DropdownButton<int?>(
+                          value: _ratingFilter,
+                          borderRadius: BorderRadius.circular(12),
+                          dropdownColor: ReviewColors.indigoDark,
+                          underline: const SizedBox.shrink(),
+                          iconEnabledColor: ReviewColors.white,
+                          style: const TextStyle(
+                            color: ReviewColors.white,
+                            fontSize: 13,
+                          ),
+                          items: const [
+                            DropdownMenuItem<int?>(
+                              value: null,
+                              child: Text('All'),
+                            ),
+                            DropdownMenuItem<int?>(
+                              value: 5,
+                              child: Text('5★'),
+                            ),
+                            DropdownMenuItem<int?>(
+                              value: 4,
+                              child: Text('4★'),
+                            ),
+                            DropdownMenuItem<int?>(
+                              value: 3,
+                              child: Text('3★'),
+                            ),
+                            DropdownMenuItem<int?>(
+                              value: 2,
+                              child: Text('2★'),
+                            ),
+                            DropdownMenuItem<int?>(
+                              value: 1,
+                              child: Text('1★'),
+                            ),
+                          ],
+                          onChanged: _changeRating,
                         ),
-                        DropdownMenuItem<int?>(
-                          value: 2,
-                          child: Text('2★'),
-                        ),
-                        DropdownMenuItem<int?>(
-                          value: 1,
-                          child: Text('1★'),
-                        ),
-                      ],
-                      onChanged: _changeRating,
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+
+              const SizedBox(height: 16),
+
+              // ===== LIST + PAGINATION =====
               Expanded(
                 child: FutureBuilder<CoachReviewsResponse>(
                   future: _future,
@@ -176,10 +188,10 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                     }
 
                     if (snapshot.hasError) {
-                      return Center(
+                      return const Center(
                         child: Text(
                           'Failed to load reviews',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.redAccent,
                           ),
                         ),
@@ -188,35 +200,45 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
 
                     final data = snapshot.data;
                     if (data == null || data.items.isEmpty) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: ReviewColors.indigoLight,
-                          borderRadius: BorderRadius.circular(18),
-                          border:
-                              Border.all(color: const Color(0xFF2E2B55)),
-                        ),
-                        padding: const EdgeInsets.all(20),
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'No reviews',
-                              style: TextStyle(
-                                color: ReviewColors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
+                      // ===== NO REVIEWS STATE (mirip web, gak tinggi menjulang) =====
+                      return Align(
+                        alignment: Alignment.topCenter,
+                        child: Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(top: 8),
+                          decoration: BoxDecoration(
+                            color: ReviewColors.indigoLight,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: const Color(0xFF2E2B55)),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 24,
+                          ),
+                          child: const Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'NO REVIEWS',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: ReviewColors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Be the first to leave a rating & feedback.',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
+                              SizedBox(height: 8),
+                              Text(
+                                'Be the first to leave a rating & feedback.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     }

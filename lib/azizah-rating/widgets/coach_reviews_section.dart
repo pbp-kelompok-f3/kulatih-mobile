@@ -126,37 +126,43 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
             final data = snapshot.data;
             if (data == null || data.items.isEmpty) {
               return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(top: 8),
                 decoration: BoxDecoration(
                   color: ReviewColors.indigoLight,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: const Color(0xFF2E2B55)),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
                 child: const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'No reviews',
+                      'NO REVIEWS',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         color: ReviewColors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 8),
                     Text(
                       'Be the first to leave a rating & feedback.',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: 13,
+                        fontSize: 14,
                       ),
                     ),
                   ],
                 ),
               );
             }
-
             final items = data.items;
 
             return Column(

@@ -95,7 +95,9 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
               onPressed: () => Navigator.of(context).pop(true),
               child: const Text(
                 'Delete',
-                style: TextStyle(color: ReviewColors.yellow),
+                style: TextStyle(
+                  color: ReviewColors.yellow,
+                ),
               ),
             ),
           ],
@@ -132,12 +134,17 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
         backgroundColor: ReviewColors.indigoDark,
         elevation: 0,
         iconTheme: const IconThemeData(color: ReviewColors.white),
-        title: const Text(
-          'RATING AND FEEDBACK',
-          style: TextStyle(
-            color: ReviewColors.yellow,
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
+        titleSpacing: 0,
+        title: const Padding(
+          padding: EdgeInsets.only(left: 16),
+          child: Text(
+            'RATING AND FEEDBACK',
+            style: TextStyle(
+              color: ReviewColors.yellow,
+              fontWeight: FontWeight.w900,
+              fontSize: 24,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
       ),
@@ -153,10 +160,10 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
               );
             }
             if (snapshot.hasError) {
-              return Center(
+              return const Center(
                 child: Text(
                   'Failed to load review detail',
-                  style: const TextStyle(color: Colors.redAccent),
+                  style: TextStyle(color: Colors.redAccent),
                 ),
               );
             }
@@ -172,134 +179,154 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
 
             return Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: ReviewColors.indigoLight,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF2E2B55)),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // avatar
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2F2C56),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        (detail.reviewer.username.isNotEmpty
-                                ? detail.reviewer.username[0]
-                                : '?')
-                            .toUpperCase(),
-                        style: const TextStyle(
-                          color: ReviewColors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: 640, // biar nggak sepanjang layar di web
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: ReviewColors.indigoLight,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFF2E2B55)),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // header row
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '@${detail.reviewer.username}',
-                                      style: const TextStyle(
-                                        color: ReviewColors.white,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          detail.rating.toString(),
-                                          style: const TextStyle(
-                                            color: ReviewColors.white,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        _buildStars(detail.rating),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (detail.isOwner)
-                                Row(
-                                  children: [
-                                    TextButton(
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: ReviewColors.yellow,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 12, vertical: 6),
-                                        minimumSize: Size.zero,
-                                        tapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                      ),
-                                      onPressed: () => _onEdit(detail),
-                                      child: const Text(
-                                        'EDIT',
-                                        style: TextStyle(
-                                          color: Color(0xFF28253E),
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    TextButton(
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: ReviewColors.red,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 12, vertical: 6),
-                                        minimumSize: Size.zero,
-                                        tapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                      ),
-                                      onPressed: () => _onDelete(detail),
-                                      child: const Text(
-                                        'DELETE',
-                                        style: TextStyle(
-                                          color: ReviewColors.white,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                            ],
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // avatar
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF2F2C56),
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(height: 10),
-                          Text(
-                            detail.comment,
+                          alignment: Alignment.center,
+                          child: Text(
+                            (detail.reviewer.username.isNotEmpty
+                                    ? detail.reviewer.username[0]
+                                    : '?')
+                                .toUpperCase(),
                             style: const TextStyle(
                               color: ReviewColors.white,
-                              fontSize: 14,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // header row
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '@${detail.reviewer.username}',
+                                          style: const TextStyle(
+                                            color: ReviewColors.white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              detail.rating.toString(),
+                                              style: const TextStyle(
+                                                color: ReviewColors.white,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            _buildStars(detail.rating),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (detail.isOwner)
+                                    Row(
+                                      children: [
+                                        TextButton(
+                                          style: TextButton.styleFrom(
+                                            backgroundColor:
+                                                ReviewColors.yellow,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            minimumSize: Size.zero,
+                                            tapTargetSize:
+                                                MaterialTapTargetSize
+                                                    .shrinkWrap,
+                                          ),
+                                          onPressed: () => _onEdit(detail),
+                                          child: const Text(
+                                            'EDIT',
+                                            style: TextStyle(
+                                              color: Color(0xFF28253E),
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        TextButton(
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: ReviewColors.red,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            minimumSize: Size.zero,
+                                            tapTargetSize:
+                                                MaterialTapTargetSize
+                                                    .shrinkWrap,
+                                          ),
+                                          onPressed: () =>
+                                              _onDelete(detail),
+                                          child: const Text(
+                                            'DELETE',
+                                            style: TextStyle(
+                                              color: ReviewColors.white,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                detail.comment,
+                                style: const TextStyle(
+                                  color: ReviewColors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             );
