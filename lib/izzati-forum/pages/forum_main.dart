@@ -155,13 +155,21 @@ class ForumMainPageState extends State<ForumMainPage> {
                         );
                       });
                     },
-                    child: const Text("APPLY"),
+                    child: Text(
+                      "APPLY",
+                      style: body(14, color: AppColor.indigoDark).copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
 
                   const SizedBox(width: 10),
 
                   // CLEAR BUTTON
                   TextButton(
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                    ),
                     onPressed: () {
                       _search.clear();
                       _mineOnly = false;
@@ -171,7 +179,19 @@ class ForumMainPageState extends State<ForumMainPage> {
                         _futurePosts = fetchPosts(req);
                       });
                     },
-                    child: Text("Clear", style: body(14, color: Colors.white)),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    child: Text(
+                        "CLEAR",
+                        style: body(14, color: Colors.white).copyWith(
+                          fontWeight: FontWeight.w700,       // bold seperti APPLY
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
                   )
                 ],
               ),

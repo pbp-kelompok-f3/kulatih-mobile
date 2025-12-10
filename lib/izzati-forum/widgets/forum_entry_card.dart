@@ -45,9 +45,14 @@ class _ForumEntryCardState extends State<ForumEntryCard> {
       context: context,
       position: const RelativeRect.fromLTRB(200, 100, 20, 0),
       items: [
-        const PopupMenuItem(value: "edit", child: Text("Edit")),
-        const PopupMenuItem(value: "delete", child: Text("Delete")),
+        if (widget.post.canEdit == true)
+          PopupMenuItem(
+              value: "edit", child: Text("Edit", style: body(14, color: Colors.white))),
+        if (widget.post.canDelete == true)
+          PopupMenuItem(
+              value: "delete", child: Text("Delete", style: body(14, color: Colors.white))),
       ],
+      color: AppColor.indigoDark,
     );
 
     if (selected == "edit") {
@@ -141,18 +146,24 @@ class _ForumEntryCardState extends State<ForumEntryCard> {
                 children: [
                   // ROW: author + timestamp + kebab
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        p.author,
-                        style: heading(18, color: AppColor.yellow),
+                      // AUTHOR di kiri
+                      Expanded(
+                        child: Text(
+                          p.author,
+                          style: heading(18, color: AppColor.yellow),
+                        ),
                       ),
+
+                      // DATE di kanan sebelum kebab
                       Text(
-                        p.created,   // string human readable
+                        p.created,
                         style: body(12, color: Colors.white54),
                       ),
 
-                      // kebab menu kalau owner
+                      const SizedBox(width: 12),
+
+                      // KEBAB MENU di pojok kanan
                       if (p.isOwner == true)
                         GestureDetector(
                           onTap: () => _showKebabMenu(context),
