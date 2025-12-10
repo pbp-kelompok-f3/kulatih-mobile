@@ -18,7 +18,6 @@ class TournamentEntryCard extends StatefulWidget {
 class _TournamentEntryCardState extends State<TournamentEntryCard> {
   @override
   Widget build(BuildContext context) {
-    // Supaya coding di bawahnya lebih rapi dan ga perlu ngetik 'widget.' terus
     final tournament = widget.tournament; 
 
     return GestureDetector(
@@ -46,7 +45,7 @@ class _TournamentEntryCardState extends State<TournamentEntryCard> {
               ),
               child: (tournament.poster.isEmpty)
                   ? Image.asset(
-                      "assets/images/tournament_bg.png", // Pastikan path asset benar
+                      "assets/images/tournament_bg.png",
                       height: 220,
                       width: double.infinity,
                       fit: BoxFit.cover,

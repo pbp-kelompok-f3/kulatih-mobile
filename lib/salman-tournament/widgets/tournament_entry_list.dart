@@ -24,7 +24,6 @@ class _TournamentEntryListState extends State<TournamentEntryList> {
     setState(() => isLoading = true);
 
     final request = context.read<CookieRequest>();
-    // Pastikan URL benar (localhost vs 10.0.2.2)
     final raw = await request.get(
       'http://localhost:8000/tournament/json/tournaments/',
     );
@@ -101,8 +100,7 @@ class _TournamentEntryListState extends State<TournamentEntryList> {
 
           return TournamentEntryCard(
             tournament: tournament,
-            onTap: () async { // <--- UPDATE DI SINI
-              // 1. Tunggu user selesai lihat detail / edit
+            onTap: () async {
               await Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -113,8 +111,6 @@ class _TournamentEntryListState extends State<TournamentEntryList> {
                   ),
                 ),
               );
-
-              // 2. Refresh list setelah user kembali
               _fetchTournaments(); 
             },
           );

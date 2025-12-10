@@ -24,18 +24,14 @@ class TournamentDetailPage extends StatefulWidget {
 }
 
 class _TournamentDetailPageState extends State<TournamentDetailPage> {
-  // 1. Variabel State untuk menyimpan data yang bisa berubah (hasil edit)
   late Tournament _tournamentData;
   bool _isRefreshing = false;
 
   @override
   void initState() {
     super.initState();
-    // Inisialisasi data awal dari halaman sebelumnya
     _tournamentData = widget.tournament;
   }
-
-  // 2. Fungsi Helper Format Tanggal
   String formatTanggal(DateTime t) {
     const bulan = [
       "Januari",
@@ -54,19 +50,14 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
     return "${t.day} ${bulan[t.month - 1]} ${t.year}";
   }
 
-  // 3. Fungsi Refresh Data dari Server
   Future<void> _refreshTournamentData() async {
     setState(() => _isRefreshing = true);
     final request = context.read<CookieRequest>();
 
     try {
-      // NOTE: Ganti localhost dengan 10.0.2.2 jika pakai Emulator Android
-      // Mengambil ulang list turnamen untuk mendapatkan data terbaru
       final response = await request.get(
         'http://localhost:8000/tournament/json/tournaments/',
       );
-
-      // Parsing JSON manual (Sesuai struktur JSON kamu sebelumnya)
       final Map<String, dynamic> normalized = response is Map
           ? Map<String, dynamic>.from(response)
           : {};
@@ -78,9 +69,6 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
       }
 
       final entry = TournamentEntry.fromJson(normalized);
-
-      // Cari turnamen ini berdasarkan ID di dalam list yang baru diambil
-      // Jika tidak ketemu (misal dihapus), tetap pakai data lama
       final updatedData = entry.tournaments.firstWhere(
         (t) => t.id == widget.tournament.id,
         orElse: () => _tournamentData,
@@ -105,8 +93,6 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
   @override
   Widget build(BuildContext context) {
     final isCoach = widget.role == 'coach';
-
-    // PENTING: Gunakan _tournamentData (State) bukan widget.tournament
     final data = _tournamentData;
 
     return Scaffold(
@@ -114,9 +100,8 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text(data.nama), // Pakai data dari state
+        title: Text(data.nama),
         actions: [
-          // Indikator loading kecil kalau lagi refresh
           if (_isRefreshing)
             const Padding(
               padding: EdgeInsets.all(16.0),
@@ -137,7 +122,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // POSTER IMAGE
+
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(30),
@@ -149,7 +134,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                   width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Image.asset(
-                    'images/tournament_bg.png', // Pastikan path asset benar (tanpa slash depan biasanya)
+                    'images/tournament_bg.png',
                     height: 500,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -158,12 +143,9 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
               ),
 
               const SizedBox(height: 16),
-
-              // NAMA TOURNAMENT
               Row(
                 children: [
                   Expanded(
-                    // Pake Expanded biar text panjang ga error overflow
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -176,7 +158,6 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                       ),
                     ),
                   ),
-                  // PESERTA COUNT TITLE
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
@@ -198,8 +179,6 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
               ),
 
               const SizedBox(height: 8),
-
-              // TIPE
               Container(
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(255, 30, 30, 30),
@@ -221,8 +200,6 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
               ),
 
               const SizedBox(height: 6),
-
-              // TANGGAL
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -245,8 +222,6 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
               ),
 
               const SizedBox(height: 6),
-
-              // LOKASI
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -276,8 +251,6 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                 endIndent: 16,
               ),
               const SizedBox(height: 16),
-
-              // PEMBUAT
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -327,8 +300,6 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
               ),
 
               const SizedBox(height: 20),
-
-              // DESKRIPSI
               Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFFF3E5E1),
@@ -351,12 +322,8 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
               ),
 
               const SizedBox(height: 12),
-
-              // --- LOGIC TOMBOL COACH (EDIT / DELETE) ---
               if (isCoach && data.pembuat == widget.currentUsername) ...[
                 const SizedBox(height: 20),
-
-                // TOMBOL EDIT
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Material(
@@ -365,7 +332,6 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(50),
                       onTap: () async {
-                        // 1. Pindah ke halaman Edit dan TUNGGU (await) hasilnya
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -373,8 +339,6 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
                                 TournamentEditPage(tournament: data),
                           ),
                         );
-
-                        // 2. Jika result == true (berhasil simpan), Refresh Data!
                         if (result == true) {
                           _refreshTournamentData();
                         }
