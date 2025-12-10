@@ -3,6 +3,9 @@ import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_detail_page.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal.dart';
+import 'package:kulatih_mobile/azizah-rating/services/review_api.dart';
+import 'package:kulatih_mobile/azizah-rating/screens/review_detail_page.dart';
+import 'package:kulatih_mobile/azizah-rating/widgets/review_form_dialog.dart';
 
 class BookingListPage extends StatefulWidget {
   const BookingListPage({super.key});
@@ -14,6 +17,9 @@ class BookingListPage extends StatefulWidget {
 class _BookingListPageState extends State<BookingListPage>
     with SingleTickerProviderStateMixin {
   final BookingService _service = BookingService();
+
+  // ====== PUNYAMU (REVIEW API) ======
+  final ReviewApi _reviewApi = ReviewApi();
 
   late TabController _tabController;
 
@@ -78,6 +84,95 @@ class _BookingListPageState extends State<BookingListPage>
 
     if (result == true) {
       await _fetchBookings();
+    }
+  }
+
+  /* ---------------- VIEW / CREATE REVIEW ---------------- */
+  Future<void> _handleViewReview(Booking b) async {
+    // kalau mau strict: cuma completed yang bisa direview
+    if (b.status != BookingStatus.completed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You can only review completed bookings.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final coachId = b.coachId.toString();
+
+    try {
+      // 1. cek dulu apakah user SUDAH punya review untuk coach ini
+      final resp = await _reviewApi.getCoachReviews(
+        coachId: coachId,
+        page: 1,
+        pageSize: 20,
+      );
+
+      var myReview = resp.items.cast<dynamic>().firstWhere(
+            (it) => it.isOwner == true,
+            orElse: () => null,
+          );
+
+      if (myReview != null) {
+        // SUDAH PUNYA REVIEW -> langsung buka detail
+        final changed = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ReviewDetailPage(
+              reviewId: int.parse(myReview.id.toString()),
+            ),
+          ),
+        );
+
+        if (changed == true) {
+          await _fetchBookings();
+        }
+        return;
+      }
+
+      // BELUM PUNYA REVIEW -> buka dialog create
+      final created = await ReviewFormDialog.showCreate(
+        context,
+        coachId: coachId,
+        // TODO: inject cookie + csrf kalau nanti auth sudah disambung
+      );
+
+      if (created == true) {
+        // setelah create, ambil lagi review-nya lalu buka detail (kalau mau)
+        final resp2 = await _reviewApi.getCoachReviews(
+          coachId: coachId,
+          page: 1,
+          pageSize: 20,
+        );
+
+        myReview = resp2.items.cast<dynamic>().firstWhere(
+              (it) => it.isOwner == true,
+              orElse: () => null,
+            );
+
+        if (myReview != null) {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ReviewDetailPage(
+                reviewId: int.parse(myReview.id.toString()),
+              ),
+            ),
+          );
+        }
+
+        await _fetchBookings();
+      }
+    } catch (e) {
+      debugPrint("Error handling review: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to open review: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
@@ -318,8 +413,18 @@ class _BookingListPageState extends State<BookingListPage>
   Widget _historyButtons(Booking b) {
     return Row(
       children: [
-        _btn("View Your Review", const Color(0xFFD4BC4E), () {}),
-        _btn("Book Again", Colors.grey.shade700, () {}),
+        _btn(
+          "View Your Review",
+          const Color(0xFFD4BC4E),
+          () => _handleViewReview(b),
+        ),
+        _btn(
+          "Book Again",
+          Colors.grey.shade700,
+          () {
+            // masih kosong, sesuai punya temanmu
+          },
+        ),
       ],
     );
   }

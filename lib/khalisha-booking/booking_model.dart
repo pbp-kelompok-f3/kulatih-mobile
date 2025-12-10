@@ -51,6 +51,10 @@ String bookingStatusToText(BookingStatus status) {
 
 class Booking {
   final int id;
+
+  // buat modul review
+  final String coachId;
+
   final String coachName;
   final String sport;
   final String location;
@@ -63,6 +67,7 @@ class Booking {
 
   Booking({
     required this.id,
+    required this.coachId,
     required this.coachName,
     required this.sport,
     required this.location,
@@ -98,6 +103,7 @@ class Booking {
 
     return Booking(
       id: json['id'],
+      coachId: json['coach_id']?.toString() ?? '',
       coachName: json['coach_name'] ?? '',
       sport: json['sport'] ?? '',
       location: json['location'] ?? '',
@@ -144,6 +150,7 @@ class Booking {
 
   Booking copyWith({
     int? id,
+    String? coachId,
     String? coachName,
     String? sport,
     String? location,
@@ -154,6 +161,7 @@ class Booking {
   }) {
     return Booking(
       id: id ?? this.id,
+      coachId: coachId ?? this.coachId,
       coachName: coachName ?? this.coachName,
       sport: sport ?? this.sport,
       location: location ?? this.location,
