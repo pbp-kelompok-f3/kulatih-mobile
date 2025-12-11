@@ -1,7 +1,8 @@
-// lib/alia-community/pages/community_page.dart
 import 'package:flutter/material.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+
 import 'package:kulatih_mobile/constants/app_colors.dart';
-import 'package:kulatih_mobile/navigationbar.dart';
 import '../models/community.dart';
 import '../services/community_service.dart';
 import '../widgets/community_card.dart';
@@ -27,7 +28,10 @@ class _CommunityPageState extends State<CommunityPage> {
   }
 
   Future<void> fetchCommunities() async {
-    final data = await CommunityService.getAllCommunities();
+    final request = context.read<CookieRequest>();
+
+    final data = await CommunityService.getAllCommunities(request);
+
     setState(() {
       communities = data;
       isLoading = false;
@@ -38,7 +42,6 @@ class _CommunityPageState extends State<CommunityPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.indigoDark,
-      bottomNavigationBar: const NavBar(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -46,6 +49,7 @@ class _CommunityPageState extends State<CommunityPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
+
               Center(
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
@@ -66,7 +70,6 @@ class _CommunityPageState extends State<CommunityPage> {
 
               const SizedBox(height: 20),
 
-              // Searchbar
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
@@ -88,9 +91,7 @@ class _CommunityPageState extends State<CommunityPage> {
 
               const SizedBox(height: 16),
 
-              // Buttons
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: GestureDetector(
@@ -124,7 +125,8 @@ class _CommunityPageState extends State<CommunityPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const CreateCommunityPage()),
+                            builder: (_) => const CreateCommunityPage(),
+                          ),
                         );
                       },
                       child: Container(
@@ -151,7 +153,9 @@ class _CommunityPageState extends State<CommunityPage> {
 
               Expanded(
                 child: isLoading
-                    ? Center(child: CircularProgressIndicator(color: AppColors.gold))
+                    ? Center(
+                        child: CircularProgressIndicator(color: AppColors.gold),
+                      )
                     : ListView.builder(
                         itemCount: communities.length,
                         itemBuilder: (context, index) {

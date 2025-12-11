@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
-import 'package:kulatih_mobile/navigationbar.dart';
 import '../services/community_service.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class CreateCommunityPage extends StatefulWidget {
   const CreateCommunityPage({super.key});
@@ -11,51 +12,64 @@ class CreateCommunityPage extends StatefulWidget {
 }
 
 class _CreateCommunityPageState extends State<CreateCommunityPage> {
-  final nameController = TextEditingController();
-  final shortDescController = TextEditingController();
-  final longDescController = TextEditingController();
+  final _name = TextEditingController();
+  final _short = TextEditingController();
+  final _long = TextEditingController();
+  bool _submitting = false;
 
-  bool isSubmitting = false;
+  Future<void> _submit() async {
+    if (_name.text.trim().isEmpty ||
+        _short.text.trim().isEmpty ||
+        _long.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill in all fields")),
+      );
+      return;
+    }
 
-  void submit() async {
-    setState(() => isSubmitting = true);
+    setState(() => _submitting = true);
 
-    final success = await CommunityService.createCommunity(
-      context,
-      nameController.text,
-      shortDescController.text,
-      longDescController.text,
+    // ⬇️ Ambil CookieRequest dari Provider
+    final request = context.read<CookieRequest>();
+
+    // ⬇️ Kirim request ke service (BUKAN context)
+    final ok = await CommunityService.createCommunity(
+      request,
+      _name.text.trim(),
+      _short.text.trim(),
+      _long.text.trim(),
     );
 
-    setState(() => isSubmitting = false);
+    setState(() => _submitting = false);
+    if (!mounted) return;
 
-    if (success) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Community Created!")));
-
+    if (ok) {
       Navigator.pop(context);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Failed to Create")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to create community")),
+      );
     }
   }
 
-  Widget inputField(String label, TextEditingController controller,
-      {int maxLines = 1}) {
+  Widget _field(String label, TextEditingController c, {int maxLines = 1}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: TextStyle(color: AppColors.textWhite, fontSize: 14)),
+            style: TextStyle(
+              color: AppColors.textWhite,
+              fontWeight: FontWeight.bold,
+            )),
         const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
             color: AppColors.textWhite,
             borderRadius: BorderRadius.circular(20),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
           child: TextField(
-            controller: controller,
+            controller: c,
             maxLines: maxLines,
             decoration: InputDecoration(
               border: InputBorder.none,
@@ -64,7 +78,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -73,44 +87,52 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.indigoDark,
-      bottomNavigationBar: const NavBar(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("MAKE YOUR OWN COMMUNITY",
-                  style: TextStyle(
-                      color: AppColors.textWhite,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20)),
+              Text(
+                "MAKE YOUR OWN COMMUNITY",
+                style: TextStyle(
+                  color: AppColors.textWhite,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
               const SizedBox(height: 30),
 
-              inputField("Community name?", nameController),
-              inputField("Quick description", shortDescController),
-              inputField("Tell us more about your community",
-                  longDescController,
-                  maxLines: 4),
+              _field("Community name?", _name),
+              _field("Quick description", _short),
+              _field("Tell us more about your community", _long, maxLines: 4),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
               GestureDetector(
-                onTap: isSubmitting ? null : submit,
+                onTap: _submitting ? null : _submit,
                 child: Container(
                   alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
                     color: AppColors.gold,
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  child: isSubmitting
-                      ? CircularProgressIndicator(color: AppColors.indigoDark)
+                  child: _submitting
+                      ? SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.indigoDark,
+                          ),
+                        )
                       : Text(
                           "MAKE COMMUNITY",
                           style: TextStyle(
-                              color: AppColors.indigoDark,
-                              fontWeight: FontWeight.bold),
+                            color: AppColors.indigoDark,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                 ),
               ),

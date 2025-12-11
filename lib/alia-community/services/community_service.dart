@@ -1,107 +1,169 @@
 // lib/alia-community/services/community_service.dart
 
 import 'dart:convert';
+
 import 'package:pbp_django_auth/pbp_django_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+
 import '../models/community.dart';
 import '../models/message.dart';
 
 class CommunityService {
-  static const String baseUrl = "http://localhost:8000/community/api";
+  // Ganti baseUrl sesuai environment kamu:
+  // - emulator Android: 10.0.2.2
+  // - browser/web: localhost
+  static const String baseUrl = "http://10.0.2.2:8000";
 
-  // GET all communities
-  static Future<List<Community>> getAllCommunities() async {
+  // =======================
+  //  COMMUNITY BASIC
+  // =======================
+
+  // GET semua community
+  static Future<List<Community>> getAllCommunities(
+      CookieRequest request) async {
     try {
-      final response = await CookieRequest().get("$baseUrl/list/");
+      final response =
+          await request.get("$baseUrl/community/api/communities/");
 
-      return (response as List)
-          .map((json) => Community.fromJson(json))
-          .toList();
+      if (response is List) {
+        return response
+            .map<Community>((json) => Community.fromJson(json))
+            .toList();
+      } else if (response is Map && response["communities"] is List) {
+        return (response["communities"] as List)
+            .map<Community>((json) => Community.fromJson(json))
+            .toList();
+      }
+      return [];
     } catch (e) {
+      print("ERROR getAllCommunities: $e");
       return [];
     }
   }
 
-  // GET communities user has joined
-  static Future<List<Community>> getJoinedCommunities() async {
+  // GET community yang sudah di-join user
+  static Future<List<Community>> getJoinedCommunities(
+      CookieRequest request) async {
     try {
       final response =
-          await CookieRequest().get("$baseUrl/my-communities/");
+          await request.get("$baseUrl/community/api/my-communities/");
 
-      return (response as List)
-          .map((json) => Community.fromJson(json))
-          .toList();
+      if (response is List) {
+        return response
+            .map<Community>((json) => Community.fromJson(json))
+            .toList();
+      } else if (response is Map && response["communities"] is List) {
+        return (response["communities"] as List)
+            .map<Community>((json) => Community.fromJson(json))
+            .toList();
+      }
+      return [];
     } catch (e) {
+      print("ERROR getJoinedCommunities: $e");
       return [];
     }
   }
 
   // POST create community
   static Future<bool> createCommunity(
-      BuildContext context,
-      String name,
-      String shortDesc,
-      String longDesc,
-      ) async {
-    final request = context.read<CookieRequest>();
-
-    final response = await request.post(
-      "$baseUrl/create/",
-      {
-        "name": name,
-        "short_description": shortDesc,
-        "long_description": longDesc,
-      },
-    );
-
-    return response["status"] == "success";
-  }
-
-  // POST join
-  static Future<bool> joinCommunity(BuildContext context, int id) async {
-    final request = context.read<CookieRequest>();
-
-    final response = await request.post(
-      "$baseUrl/join/$id/",
-      {},
-    );
-
-    return response["status"] == "success";
-  }
-
-  // POST leave
-  static Future<void> leaveCommunity(int id) async {
-    await CookieRequest().post("$baseUrl/leave/$id/", {});
-  }
-
-  // GET messages for community
-  static Future<List<Message>> getMessages(int communityId) async {
+    CookieRequest request,
+    String name,
+    String shortDescription,
+    String fullDescription,
+  ) async {
     try {
-      final response =
-          await CookieRequest().get("$baseUrl/messages/$communityId/");
+      final response = await request.postJson(
+        "$baseUrl/community/api/create/",
+        jsonEncode({
+          "name": name,
+          "short_description": shortDescription,
+          "full_description": fullDescription,
+        }),
+      );
 
-      return (response as List)
-          .map((json) => Message.fromJson(json))
-          .toList();
+      return response["success"] == true || response["status"] == "success";
     } catch (e) {
+      print("ERROR createCommunity: $e");
+      return false;
+    }
+  }
+
+  // POST join community
+  static Future<bool> joinCommunity(
+      CookieRequest request, int communityId) async {
+    try {
+      final response = await request.postJson(
+        "$baseUrl/community/api/$communityId/join/",
+        jsonEncode({}),
+      );
+      return response["success"] == true || response["status"] == "success";
+    } catch (e) {
+      print("ERROR joinCommunity: $e");
+      return false;
+    }
+  }
+
+  // POST leave community
+  static Future<bool> leaveCommunity(
+      CookieRequest request, int communityId) async {
+    try {
+      final response = await request.postJson(
+        "$baseUrl/community/api/$communityId/leave/",
+        jsonEncode({}),
+      );
+      return response["success"] == true || response["status"] == "success";
+    } catch (e) {
+      print("ERROR leaveCommunity: $e");
+      return false;
+    }
+  }
+
+  // =======================
+  //  GROUP CHAT
+  // =======================
+
+  // GET semua message untuk suatu community
+  static Future<List<Message>> getMessages(
+      CookieRequest request, int communityId) async {
+    try {
+      final response = await request
+          .get("$baseUrl/community/api/$communityId/messages/");
+
+      // Bisa berupa List langsung atau dibungkus {"messages": [...]}
+      if (response is List) {
+        return response
+            .map<Message>((json) => Message.fromJson(json))
+            .toList();
+      } else if (response is Map && response["messages"] is List) {
+        return (response["messages"] as List)
+            .map<Message>((json) => Message.fromJson(json))
+            .toList();
+      }
+
+      return [];
+    } catch (e) {
+      print("ERROR getMessages: $e");
       return [];
     }
   }
 
-  // POST send message
+  // POST kirim message ke community
   static Future<bool> sendMessage(
-      BuildContext context,
-      int communityId,
-      String message,
-      ) async {
-    final request = context.read<CookieRequest>();
+    CookieRequest request,
+    int communityId,
+    String text,
+  ) async {
+    try {
+      final response = await request.postJson(
+        "$baseUrl/community/api/$communityId/messages/send/",
+        jsonEncode({
+          "text": text,
+        }),
+      );
 
-    final response = await request.post(
-      "$baseUrl/send/$communityId/",
-      {"content": message},
-    );
-
-    return response["status"] == "success";
+      return response["success"] == true || response["status"] == "success";
+    } catch (e) {
+      print("ERROR sendMessage: $e");
+      return false;
+    }
   }
 }

@@ -1,29 +1,30 @@
+// lib/alia-community/models/message.dart
+
 class Message {
   final int id;
-  final String user;
-  final String content;
-  final String timestamp;
-  final bool isSelf;
+  final int communityId;
+  final int senderId;
+  final String senderName;
+  final String text;
+  final String createdAt;
 
   Message({
     required this.id,
-    required this.user,
-    required this.content,
-    required this.timestamp,
-    required this.isSelf,
+    required this.communityId,
+    required this.senderId,
+    required this.senderName,
+    required this.text,
+    required this.createdAt,
   });
 
-  factory Message.fromJson(
-    Map<String, dynamic> json, {
-    required String currentUsername,
-  }) {
-    final user = json['user'] as String? ?? '';
+  factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      id: json['id'] as int,
-      user: user,
-      content: json['content'] as String? ?? '',
-      timestamp: json['timestamp'] as String? ?? '',
-      isSelf: user == currentUsername,
+      id: json['id'] ?? 0,
+      communityId: json['community_id'] ?? 0,
+      senderId: json['sender_id'] ?? 0,
+      senderName: json['sender_name'] ?? "",
+      text: json['text'] ?? "",
+      createdAt: json['created_at'] ?? "",
     );
   }
 }

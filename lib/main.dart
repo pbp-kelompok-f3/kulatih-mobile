@@ -8,6 +8,8 @@ import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/navigationbar.dart';
 import 'package:kulatih_mobile/salman-tournament/page/tournament_main.dart';
 import 'package:kulatih_mobile/azizah-rating/screens/reviews_list_page.dart';
+import 'package:kulatih_mobile/alia-community/pages/community_page.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -239,12 +241,7 @@ class _MyHomePageState extends State<MyHomePage> {
       TournamentMainPage(),
       const BookingListPage(),
       ForumMainPage(),
-      const Center(
-        child: Text(
-          "Community Page",
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
+      const CommunityPage(),
     ];
 
     return Scaffold(

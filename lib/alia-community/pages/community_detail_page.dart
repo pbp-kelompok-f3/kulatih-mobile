@@ -2,61 +2,67 @@ import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import '../models/community.dart';
 import 'community_chat_page.dart';
-import '../services/community_service.dart';
 
 class CommunityDetailPage extends StatelessWidget {
   final Community community;
+
   const CommunityDetailPage({super.key, required this.community});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.indigoDark,
+      appBar: AppBar(
+        backgroundColor: AppColors.indigoDark,
+        elevation: 0,
+        iconTheme: IconThemeData(color: AppColors.textWhite),
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
-
-              CircleAvatar(
-                radius: 45,
-                backgroundColor: AppColors.textWhite,
-              ),
-
-              const SizedBox(height: 20),
-
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 6, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.indigo,
-                  borderRadius: BorderRadius.circular(20),
-                ),
+              // NAMA COMMUNITY
+              Center(
                 child: Text(
-                  "JUMLAH ANGGOTA COMMUNITY",
-                  style:
-                      TextStyle(color: AppColors.gold, fontSize: 12),
+                  community.name,
+                  style: TextStyle(
+                    color: AppColors.gold,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              Text(
-                community.name,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: AppColors.textWhite,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18),
+              // JUMLAH ANGGOTA
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 6, horizontal: 18),
+                  decoration: BoxDecoration(
+                    color: AppColors.indigo,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    "ANGGOTA: ${community.membersCount}",
+                    style: TextStyle(
+                      color: AppColors.textWhite,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
 
               const SizedBox(height: 20),
 
+              // FULL DESCRIPTION
               Expanded(
                 child: SingleChildScrollView(
                   child: Text(
-                    community.longDescription,
+                    community.fullDescription,
                     style: TextStyle(
                       color: AppColors.textWhite,
                       fontSize: 14,
@@ -67,35 +73,37 @@ class CommunityDetailPage extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              GestureDetector(
-                onTap: () async {
-                  final ok = await CommunityService.joinCommunity(
-                      context, community.id);
-
-                  if (ok) {
+              // BUTTON TO CHAT
+              Center(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.gold,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (_) =>
-                              CommunityChatPage(community: community)),
+                        builder: (_) => CommunityChatPage(community: community),
+                      ),
                     );
-                  }
-                },
-                child: Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: AppColors.gold,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  },
+
                   child: Text(
                     "JOIN US NOW",
                     style: TextStyle(
-                        color: AppColors.indigoDark,
-                        fontWeight: FontWeight.bold),
+                      color: AppColors.indigoDark,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
+
+              const SizedBox(height: 20),
             ],
           ),
         ),

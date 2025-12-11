@@ -1,10 +1,10 @@
-// lib/alia-community/pages/my_community_page.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
-import 'package:kulatih_mobile/navigationbar.dart';
 import '../models/community.dart';
 import '../services/community_service.dart';
 import '../widgets/my_community_card.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class MyCommunityPage extends StatefulWidget {
   const MyCommunityPage({super.key});
@@ -14,33 +14,38 @@ class MyCommunityPage extends StatefulWidget {
 }
 
 class _MyCommunityPageState extends State<MyCommunityPage> {
-  List<Community> myCommunities = [];
-  bool isLoading = true;
+  List<Community> _myCommunities = [];
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    loadMyCommunities();
+    _load();
   }
 
-  Future<void> loadMyCommunities() async {
-    final data = await CommunityService.getJoinedCommunities();
+  Future<void> _load() async {
+    final request = context.read<CookieRequest>();
+
+    final data = await CommunityService.getJoinedCommunities(request);
+
     setState(() {
-      myCommunities = data;
-      isLoading = false;
+      _myCommunities = data;
+      _loading = false;
     });
   }
 
-  Future<void> leaveCommunity(int id) async {
-    await CommunityService.leaveCommunity(id);
-    loadMyCommunities();
+  Future<void> _leave(int id) async {
+    final request = context.read<CookieRequest>();
+
+    await CommunityService.leaveCommunity(request, id);
+
+    _load();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.indigoDark,
-      bottomNavigationBar: const NavBar(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -54,18 +59,19 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
                   color: AppColors.gold,
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: Text(
-                  "MY COMMUNITY",
-                  style: TextStyle(
-                    color: AppColors.indigoDark,
-                    fontWeight: FontWeight.bold,
+                child: Center(
+                  child: Text(
+                    "MY COMMUNITY",
+                    style: TextStyle(
+                      color: AppColors.indigoDark,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              // Search bar
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
@@ -85,22 +91,23 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
               const SizedBox(height: 20),
 
               Expanded(
-                child: isLoading
+                child: _loading
                     ? Center(
-                        child: CircularProgressIndicator(color: AppColors.gold))
+                        child: CircularProgressIndicator(
+                          color: AppColors.gold,
+                        ),
+                      )
                     : ListView.builder(
-                        itemCount: myCommunities.length,
-                        itemBuilder: (_, index) {
-                          final c = myCommunities[index];
+                        itemCount: _myCommunities.length,
+                        itemBuilder: (context, index) {
+                          final c = _myCommunities[index];
                           return MyCommunityCard(
                             community: c,
-                            onLeave: () => leaveCommunity(c.id),
+                            onLeave: () => _leave(c.id),
                           );
                         },
                       ),
               ),
-
-              const SizedBox(height: 20),
             ],
           ),
         ),

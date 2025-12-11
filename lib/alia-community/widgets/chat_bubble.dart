@@ -1,40 +1,63 @@
 // lib/alia-community/widgets/chat_bubble.dart
+
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
+
 import '../models/message.dart';
 
 class ChatBubble extends StatelessWidget {
   final Message message;
+  final bool isMe;
 
   const ChatBubble({
     super.key,
     required this.message,
+    required this.isMe,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isSelf = message.isSelf;
+    final bgColor = isMe ? AppColors.gold : AppColors.textWhite;
+    final textColor = isMe ? AppColors.indigoDark : AppColors.indigoDark;
+    final align =
+        isMe ? Alignment.centerRight : Alignment.centerLeft;
+    final borderRadius = BorderRadius.only(
+      topLeft: const Radius.circular(20),
+      topRight: const Radius.circular(20),
+      bottomLeft:
+          isMe ? const Radius.circular(20) : const Radius.circular(4),
+      bottomRight:
+          isMe ? const Radius.circular(4) : const Radius.circular(20),
+    );
 
     return Align(
-      alignment: isSelf ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: align,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelf ? AppColors.gold : AppColors.indigo,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isSelf ? 16 : 4),
-            bottomRight: Radius.circular(isSelf ? 4 : 16),
-          ),
+          color: bgColor,
+          borderRadius: borderRadius,
         ),
-        child: Text(
-          message.content,
-          style: TextStyle(
-            color: isSelf ? AppColors.indigoDark : AppColors.textWhite,
-            fontSize: 13,
-          ),
+        child: Column(
+          crossAxisAlignment:
+              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            if (!isMe)
+              Text(
+                message.senderName,
+                style: TextStyle(
+                  color: AppColors.textLight,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            if (!isMe) const SizedBox(height: 4),
+            Text(
+              message.text,
+              style: TextStyle(color: textColor, fontSize: 14),
+            ),
+          ],
         ),
       ),
     );
