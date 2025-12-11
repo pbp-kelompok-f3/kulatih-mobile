@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
+
 import '../models/community.dart';
+import '../services/community_service.dart';
 import 'community_chat_page.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class CommunityDetailPage extends StatelessWidget {
-  final Community community;
+  final CommunityEntry community;
 
   const CommunityDetailPage({super.key, required this.community});
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+
     return Scaffold(
       backgroundColor: AppColors.indigoDark,
       appBar: AppBar(
@@ -21,9 +27,7 @@ class CommunityDetailPage extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // NAMA COMMUNITY
               Center(
                 child: Text(
                   community.name,
@@ -35,19 +39,18 @@ class CommunityDetailPage extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
-              // JUMLAH ANGGOTA
               Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 6, horizontal: 18),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 6, horizontal: 18),
                   decoration: BoxDecoration(
                     color: AppColors.indigo,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    "ANGGOTA: ${community.membersCount}",
+                    "Members: ${community.membersCount}",
                     style: TextStyle(
                       color: AppColors.textWhite,
                       fontWeight: FontWeight.bold,
@@ -56,9 +59,8 @@ class CommunityDetailPage extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
-              // FULL DESCRIPTION
               Expanded(
                 child: SingleChildScrollView(
                   child: Text(
@@ -73,32 +75,37 @@ class CommunityDetailPage extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // BUTTON TO CHAT
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.gold,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  onPressed: () {
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.gold,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
+                ),
+                onPressed: () async {
+                  final joined =
+                      await CommunityService.joinCommunity(request, community.id);
+
+                  if (joined) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CommunityChatPage(community: community),
+                        builder: (_) =>
+                            CommunityChatPage(community: community),
                       ),
                     );
-                  },
-
-                  child: Text(
-                    "JOIN US NOW",
-                    style: TextStyle(
-                      color: AppColors.indigoDark,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Already joined or failed")),
+                    );
+                  }
+                },
+                child: Text(
+                  "JOIN US NOW",
+                  style: TextStyle(
+                    color: AppColors.indigoDark,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),

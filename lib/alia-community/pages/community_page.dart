@@ -3,9 +3,11 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
 import 'package:kulatih_mobile/constants/app_colors.dart';
+
 import '../models/community.dart';
 import '../services/community_service.dart';
 import '../widgets/community_card.dart';
+
 import 'my_community_page.dart';
 import 'create_community_page.dart';
 import 'community_detail_page.dart';
@@ -18,7 +20,7 @@ class CommunityPage extends StatefulWidget {
 }
 
 class _CommunityPageState extends State<CommunityPage> {
-  List<Community> communities = [];
+  List<CommunityEntry> communities = [];
   bool isLoading = true;
 
   @override
@@ -29,7 +31,6 @@ class _CommunityPageState extends State<CommunityPage> {
 
   Future<void> fetchCommunities() async {
     final request = context.read<CookieRequest>();
-
     final data = await CommunityService.getAllCommunities(request);
 
     setState(() {
@@ -153,9 +154,7 @@ class _CommunityPageState extends State<CommunityPage> {
 
               Expanded(
                 child: isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(color: AppColors.gold),
-                      )
+                    ? Center(child: CircularProgressIndicator(color: AppColors.gold))
                     : ListView.builder(
                         itemCount: communities.length,
                         itemBuilder: (context, index) {

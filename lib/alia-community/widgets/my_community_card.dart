@@ -1,10 +1,11 @@
 // lib/alia-community/widgets/my_community_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
-import '../models/community.dart';
+import '../models/community.dart';   // <-- CommunityEntry
 
 class MyCommunityCard extends StatelessWidget {
-  final Community community;
+  final CommunityEntry community;
   final VoidCallback onLeave;
 
   const MyCommunityCard({
@@ -16,10 +17,10 @@ class MyCommunityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.indigo, // sama seperti card utama
+        color: AppColors.indigo,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -34,7 +35,9 @@ class MyCommunityCard extends StatelessWidget {
               color: Colors.white,
             ),
           ),
+
           const SizedBox(width: 16),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +50,9 @@ class MyCommunityCard extends StatelessWidget {
                     fontSize: 14,
                   ),
                 ),
+
                 const SizedBox(height: 6),
+
                 Text(
                   community.shortDescription,
                   maxLines: 3,
@@ -58,7 +63,9 @@ class MyCommunityCard extends StatelessWidget {
                     height: 1.4,
                   ),
                 ),
+
                 const SizedBox(height: 10),
+
                 GestureDetector(
                   onTap: onLeave,
                   child: Text(

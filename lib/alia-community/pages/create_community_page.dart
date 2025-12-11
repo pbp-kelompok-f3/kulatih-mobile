@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import '../services/community_service.dart';
-import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class CreateCommunityPage extends StatefulWidget {
   const CreateCommunityPage({super.key});
@@ -15,6 +16,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   final _name = TextEditingController();
   final _short = TextEditingController();
   final _long = TextEditingController();
+
   bool _submitting = false;
 
   Future<void> _submit() async {
@@ -29,18 +31,18 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
 
     setState(() => _submitting = true);
 
-    // ⬇️ Ambil CookieRequest dari Provider
     final request = context.read<CookieRequest>();
 
-    // ⬇️ Kirim request ke service (BUKAN context)
     final ok = await CommunityService.createCommunity(
       request,
       _name.text.trim(),
       _short.text.trim(),
       _long.text.trim(),
+      null,        // profileImageUrl (opsional, null dulu)
     );
 
     setState(() => _submitting = false);
+
     if (!mounted) return;
 
     if (ok) {

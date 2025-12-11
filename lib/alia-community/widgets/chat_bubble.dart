@@ -18,16 +18,15 @@ class ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bgColor = isMe ? AppColors.gold : AppColors.textWhite;
-    final textColor = isMe ? AppColors.indigoDark : AppColors.indigoDark;
-    final align =
-        isMe ? Alignment.centerRight : Alignment.centerLeft;
+    final textColor = AppColors.indigoDark;
+
+    final align = isMe ? Alignment.centerRight : Alignment.centerLeft;
+
     final borderRadius = BorderRadius.only(
       topLeft: const Radius.circular(20),
       topRight: const Radius.circular(20),
-      bottomLeft:
-          isMe ? const Radius.circular(20) : const Radius.circular(4),
-      bottomRight:
-          isMe ? const Radius.circular(4) : const Radius.circular(20),
+      bottomLeft: isMe ? const Radius.circular(20) : const Radius.circular(4),
+      bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(20),
     );
 
     return Align(
@@ -45,7 +44,7 @@ class ChatBubble extends StatelessWidget {
           children: [
             if (!isMe)
               Text(
-                message.senderName,
+                message.sender, // FIXED
                 style: TextStyle(
                   color: AppColors.textLight,
                   fontSize: 11,
@@ -53,6 +52,8 @@ class ChatBubble extends StatelessWidget {
                 ),
               ),
             if (!isMe) const SizedBox(height: 4),
+
+            // message text
             Text(
               message.text,
               style: TextStyle(color: textColor, fontSize: 14),

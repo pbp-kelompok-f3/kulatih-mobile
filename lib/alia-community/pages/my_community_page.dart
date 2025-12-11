@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import '../models/community.dart';
 import '../services/community_service.dart';
 import '../widgets/my_community_card.dart';
-import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class MyCommunityPage extends StatefulWidget {
   const MyCommunityPage({super.key});
@@ -14,7 +15,7 @@ class MyCommunityPage extends StatefulWidget {
 }
 
 class _MyCommunityPageState extends State<MyCommunityPage> {
-  List<Community> _myCommunities = [];
+  List<CommunityEntry> _myCommunities = [];
   bool _loading = true;
 
   @override
@@ -26,7 +27,7 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
   Future<void> _load() async {
     final request = context.read<CookieRequest>();
 
-    final data = await CommunityService.getJoinedCommunities(request);
+    final data = await CommunityService.getMyCommunities(request);
 
     setState(() {
       _myCommunities = data;

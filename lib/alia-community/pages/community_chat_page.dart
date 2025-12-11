@@ -7,13 +7,13 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 
-import '../models/community.dart';
-import '../models/message.dart';
+import '../models/community.dart';        // <-- CommunityEntry
+import '../models/message.dart';          // <-- Message
 import '../services/community_service.dart';
 import '../widgets/chat_bubble.dart';
 
 class CommunityChatPage extends StatefulWidget {
-  final Community community;
+  final CommunityEntry community;
 
   const CommunityChatPage({
     super.key,
@@ -42,8 +42,10 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
     final request = context.read<CookieRequest>();
 
     setState(() => _loading = true);
+
     final msgs =
         await CommunityService.getMessages(request, widget.community.id);
+
     setState(() {
       _messages = msgs;
       _loading = false;
@@ -88,13 +90,6 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
   }
 
   @override
-  void dispose() {
-    _messageController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final user = context.watch<UserProvider>();
 
@@ -103,21 +98,16 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
+            // HEADER
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Tombol back sederhana
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                    child: const Icon(Icons.arrow_back_ios,
+                        color: Colors.white, size: 20),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -128,9 +118,8 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                       fontSize: 20,
                     ),
                   ),
-                  const SizedBox(height: 4),
                   Text(
-                    "Start chatting with others to get more information about this community",
+                    "Start chatting with others to get more information",
                     style: TextStyle(
                       color: AppColors.textLight,
                       fontSize: 12,
@@ -140,29 +129,21 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
               ),
             ),
 
-            const SizedBox(height: 8),
-
-            // LIST CHAT
             Expanded(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: AppColors.indigo,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: _loading
                     ? Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.gold,
-                        ),
-                      )
+                        child: CircularProgressIndicator(color: AppColors.gold))
                     : _messages.isEmpty
                         ? Center(
                             child: Text(
-                              "No messages yet.\nBe the first to say hi!",
-                              textAlign: TextAlign.center,
+                              "No messages yet.",
                               style: TextStyle(
                                 color: AppColors.textLight,
                                 fontSize: 13,
@@ -174,8 +155,8 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                             itemCount: _messages.length,
                             itemBuilder: (context, index) {
                               final msg = _messages[index];
-                              final isMe =
-                                  msg.senderName == user.username;
+                              final isMe = msg.sender ==
+                                  user.username; // FIXED
                               return ChatBubble(
                                 message: msg,
                                 isMe: isMe,
@@ -185,19 +166,15 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
               ),
             ),
 
-            const SizedBox(height: 12),
-
-            // INPUT BAR
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.all(20),
               child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 decoration: BoxDecoration(
                   color: AppColors.indigo,
                   borderRadius: BorderRadius.circular(24),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 child: Row(
                   children: [
                     Expanded(
@@ -212,15 +189,12 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                         onSubmitted: (_) => _sendMessage(),
                       ),
                     ),
-                    const SizedBox(width: 8),
                     _sending
                         ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.gold,
-                            ),
+                                strokeWidth: 2, color: AppColors.gold),
                           )
                         : GestureDetector(
                             onTap: _sendMessage,
@@ -235,7 +209,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                   ],
                 ),
               ),
-            ),
+            )
           ],
         ),
       ),

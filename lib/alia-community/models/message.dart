@@ -1,30 +1,61 @@
-// lib/alia-community/models/message.dart
+// To parse this JSON data, do
+//
+//     final communityMessage = communityMessageFromJson(jsonString);
+
+import 'dart:convert';
+
+CommunityMessage communityMessageFromJson(String str) => CommunityMessage.fromJson(json.decode(str));
+
+String communityMessageToJson(CommunityMessage data) => json.encode(data.toJson());
+
+class CommunityMessage {
+    int count;
+    List<Message> messages;
+
+    CommunityMessage({
+        required this.count,
+        required this.messages,
+    });
+
+    factory CommunityMessage.fromJson(Map<String, dynamic> json) => CommunityMessage(
+        count: json["count"],
+        messages: List<Message>.from(json["messages"].map((x) => Message.fromJson(x))),
+    );
+
+    Map<String, dynamic> toJson() => {
+        "count": count,
+        "messages": List<dynamic>.from(messages.map((x) => x.toJson())),
+    };
+}
 
 class Message {
-  final int id;
-  final int communityId;
-  final int senderId;
-  final String senderName;
-  final String text;
-  final String createdAt;
+    int id;
+    String text;
+    String sender;
+    int senderId;
+    DateTime createdAt;
 
-  Message({
-    required this.id,
-    required this.communityId,
-    required this.senderId,
-    required this.senderName,
-    required this.text,
-    required this.createdAt,
-  });
+    Message({
+        required this.id,
+        required this.text,
+        required this.sender,
+        required this.senderId,
+        required this.createdAt,
+    });
 
-  factory Message.fromJson(Map<String, dynamic> json) {
-    return Message(
-      id: json['id'] ?? 0,
-      communityId: json['community_id'] ?? 0,
-      senderId: json['sender_id'] ?? 0,
-      senderName: json['sender_name'] ?? "",
-      text: json['text'] ?? "",
-      createdAt: json['created_at'] ?? "",
+    factory Message.fromJson(Map<String, dynamic> json) => Message(
+        id: json["id"],
+        text: json["text"],
+        sender: json["sender"],
+        senderId: json["sender_id"],
+        createdAt: DateTime.parse(json["created_at"]),
     );
-  }
+
+    Map<String, dynamic> toJson() => {
+        "id": id,
+        "text": text,
+        "sender": sender,
+        "sender_id": senderId,
+        "created_at": createdAt.toIso8601String(),
+    };
 }
