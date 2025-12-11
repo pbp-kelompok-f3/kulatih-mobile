@@ -33,20 +33,21 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
 
     final request = context.read<CookieRequest>();
 
-    final ok = await CommunityService.createCommunity(
+    final newCommunity = await CommunityService.createCommunity(
       request,
       _name.text.trim(),
       _short.text.trim(),
       _long.text.trim(),
-      null,        // profileImageUrl (opsional, null dulu)
+      null, // profile image url optional
     );
 
     setState(() => _submitting = false);
 
     if (!mounted) return;
 
-    if (ok) {
-      Navigator.pop(context);
+    if (newCommunity != null) {
+      // OPTIONAL: langsung redirect agar user bisa lihat community baru di My Community
+      Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to create community")),

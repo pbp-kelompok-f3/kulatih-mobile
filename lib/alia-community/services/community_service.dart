@@ -7,15 +7,16 @@ import '../models/message.dart';
 class CommunityService {
   static const String baseUrl = "http://localhost:8000/community";
 
-  // Helper untuk force created_by ke enum valid
+  /// Safely handle unknown creator usernames
   static Map<String, dynamic> normalizeCreator(Map<String, dynamic> json) {
-    final allowed = ["admin", "pew"];
+    final newJson = Map<String, dynamic>.from(json);
 
-    if (!allowed.contains(json["created_by"])) {
-      // fallback default -> "admin"
-      json["created_by"] = "admin";
+    final allowed = ["admin", "pew"];
+    if (!allowed.contains(newJson["created_by"])) {
+      newJson["created_by"] = "admin";
     }
-    return json;
+
+    return newJson;
   }
 
   // ============================================================
@@ -36,16 +37,20 @@ class CommunityService {
   // ============================================================
   // GET COMMUNITY DETAIL
   // ============================================================
-  static Future<CommunityEntry?> getCommunityDetail(
+  static Future<Map<String, dynamic>?> getCommunityDetail(
       CookieRequest request, int id) async {
     final response = await request.get("$baseUrl/$id/json/");
-    return CommunityEntry.fromJson(normalizeCreator(response));
+
+    if (response is Map<String, dynamic>) {
+      return normalizeCreator(response);
+    }
+    return null;
   }
 
   // ============================================================
   // CREATE COMMUNITY
   // ============================================================
-  static Future<bool> createCommunity(
+  static Future<CommunityEntry?> createCommunity(
     CookieRequest request,
     String name,
     String shortDescription,
@@ -62,7 +67,10 @@ class CommunityService {
       }),
     );
 
-    return response["success"] == true;
+    if (response["id"] != null) {
+      return CommunityEntry.fromJson(normalizeCreator(response));
+    }
+    return null;
   }
 
   // ============================================================
@@ -72,72 +80,84 @@ class CommunityService {
       CookieRequest request) async {
     final response = await request.get("$baseUrl/my/json/");
 
-    // Django return LIST, bukan { communities: [...] }
     if (response is List) {
       return response
           .map((json) => CommunityEntry.fromJson(normalizeCreator(json)))
           .toList();
     }
-
     return [];
   }
 
   // ============================================================
   // JOIN COMMUNITY
   // ============================================================
-  static Future<bool> joinCommunity(
+  static Future<CommunityEntry?> joinCommunity(
       CookieRequest request, int id) async {
     final response =
         await request.postJson("$baseUrl/join/$id/json/", jsonEncode({}));
 
-    return response["success"] == true;
+    if (response["community"] != null) {
+      return CommunityEntry.fromJson(
+        normalizeCreator(response["community"]),
+      );
+    }
+    return null;
   }
 
   // ============================================================
   // LEAVE COMMUNITY
   // ============================================================
-  static Future<bool> leaveCommunity(
+  static Future<CommunityEntry?> leaveCommunity(
       CookieRequest request, int id) async {
     final response =
         await request.postJson("$baseUrl/leave/$id/json/", jsonEncode({}));
 
-    return response["success"] == true;
+    if (response["community"] != null) {
+      return CommunityEntry.fromJson(
+        normalizeCreator(response["community"]),
+      );
+    }
+    return null;
   }
 
   // ============================================================
-  // GET GROUP CHAT MESSAGES
+  // GET MESSAGES
   // ============================================================
   static Future<List<Message>> getMessages(
       CookieRequest request, int communityId) async {
     final response =
         await request.get("$baseUrl/my/$communityId/messages/json/");
 
-    if (response["messages"] is List) {
+    if (response is Map && response["messages"] is List) {
       return (response["messages"] as List)
           .map((json) => Message.fromJson(json))
           .toList();
     }
+
     return [];
   }
 
   // ============================================================
-  // SEND MESSAGE
+  // SEND MESSAGE (FIXED)
   // ============================================================
-  static Future<bool> sendMessage(
+  static Future<Message?> sendMessage(
       CookieRequest request, int communityId, String text) async {
     final response = await request.postJson(
       "$baseUrl/my/$communityId/json/send_message/",
       jsonEncode({"text": text}),
     );
 
-    return response["id"] != null;
+    if (response["data"] != null) {
+      return Message.fromJson(response["data"]);
+    }
+    return null;
   }
 
   // ============================================================
   // EDIT MESSAGE
   // ============================================================
-  static Future<bool> editMessage(CookieRequest request, int communityId,
-      int msgId, String newText) async {
+  static Future<bool> editMessage(
+      CookieRequest request, int communityId, int msgId, String newText) async {
     final response = await request.postJson(
       "$baseUrl/my/$communityId/json/edit_message/$msgId/",
       jsonEncode({"text": newText}),
@@ -151,7 +171,6 @@ class CommunityService {
   // ============================================================
   static Future<bool> deleteMessage(
       CookieRequest request, int communityId, int msgId) async {
-
     final response = await request.postJson(
       "$baseUrl/my/$communityId/json/delete_message/$msgId/",
       jsonEncode({}),

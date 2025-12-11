@@ -72,7 +72,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
 
     setState(() => _sending = true);
 
-    final success = await CommunityService.sendMessage(
+    final newMsg = await CommunityService.sendMessage(
       request,
       widget.community.id,
       text,
@@ -80,16 +80,21 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
 
     setState(() => _sending = false);
 
-    if (success) {
+    if (newMsg != null) {
       _messageController.clear();
 
-      // add new message instantly
-      await _loadMessages();
+      // langsung tambahkan tanpa reload
+      setState(() {
+        _messages.add(newMsg);
+      });
+
+      _scrollToBottom();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to send message")),
       );
     }
+
   }
 
   Future<void> _deleteMessage(Message msg) async {

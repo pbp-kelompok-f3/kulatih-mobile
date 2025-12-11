@@ -40,7 +40,11 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
 
     await CommunityService.leaveCommunity(request, id);
 
-    _load();
+    // Reload internal list
+    await _load();
+
+    // Return true so CommunityPage auto-refreshes
+    Navigator.pop(context, true);
   }
 
   @override
@@ -84,7 +88,8 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
                     border: InputBorder.none,
                     hintText: "Search communities you have joined",
                     hintStyle: TextStyle(color: AppColors.textLight),
-                    suffixIcon: Icon(Icons.search, color: AppColors.indigoDark),
+                    suffixIcon:
+                        Icon(Icons.search, color: AppColors.indigoDark),
                   ),
                 ),
               ),
@@ -94,9 +99,8 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
               Expanded(
                 child: _loading
                     ? Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.gold,
-                        ),
+                        child:
+                            CircularProgressIndicator(color: AppColors.gold),
                       )
                     : ListView.builder(
                         itemCount: _myCommunities.length,

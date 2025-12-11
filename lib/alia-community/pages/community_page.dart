@@ -51,9 +51,11 @@ class _CommunityPageState extends State<CommunityPage> {
             children: [
               const SizedBox(height: 20),
 
+              // Header
               Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                   decoration: BoxDecoration(
                     color: AppColors.gold,
                     borderRadius: BorderRadius.circular(30),
@@ -71,6 +73,7 @@ class _CommunityPageState extends State<CommunityPage> {
 
               const SizedBox(height: 20),
 
+              // Search Bar (non-functional but UI preserved)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
@@ -85,13 +88,15 @@ class _CommunityPageState extends State<CommunityPage> {
                       color: AppColors.textLight,
                       fontSize: 14,
                     ),
-                    suffixIcon: Icon(Icons.search, color: AppColors.indigoDark),
+                    suffixIcon:
+                        Icon(Icons.search, color: AppColors.indigoDark),
                   ),
                 ),
               ),
 
               const SizedBox(height: 16),
 
+              // Buttons: My Community & Create
               Row(
                 children: [
                   Expanded(
@@ -99,8 +104,9 @@ class _CommunityPageState extends State<CommunityPage> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const MyCommunityPage()),
-                        );
+                          MaterialPageRoute(
+                              builder: (_) => const MyCommunityPage()),
+                        ).then((_) => fetchCommunities()); // 🔥 AUTO REFRESH
                       },
                       child: Container(
                         alignment: Alignment.center,
@@ -119,16 +125,17 @@ class _CommunityPageState extends State<CommunityPage> {
                       ),
                     ),
                   ),
+
                   const SizedBox(width: 12),
+
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const CreateCommunityPage(),
-                          ),
-                        );
+                              builder: (_) => const CreateCommunityPage()),
+                        ).then((_) => fetchCommunities()); // 🔥 AUTO REFRESH
                       },
                       child: Container(
                         alignment: Alignment.center,
@@ -152,22 +159,30 @@ class _CommunityPageState extends State<CommunityPage> {
 
               const SizedBox(height: 20),
 
+              // COMMUNITY LIST
               Expanded(
                 child: isLoading
-                    ? Center(child: CircularProgressIndicator(color: AppColors.gold))
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.gold,
+                        ),
+                      )
                     : ListView.builder(
                         itemCount: communities.length,
                         itemBuilder: (context, index) {
                           final c = communities[index];
                           return CommunityCard(
                             community: c,
-                            onTap: () {
-                              Navigator.push(
+                            onTap: () async {
+                              // Go to detail page, then refresh automatically on return
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => CommunityDetailPage(community: c),
+                                  builder: (_) =>
+                                      CommunityDetailPage(community: c),
                                 ),
                               );
+                              fetchCommunities(); // 🔥 AUTO REFRESH
                             },
                           );
                         },

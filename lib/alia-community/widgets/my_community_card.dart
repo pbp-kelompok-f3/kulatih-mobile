@@ -27,6 +27,7 @@ class MyCommunityCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // COMMUNITY NAME
           Text(
             community.name.toUpperCase(),
             style: TextStyle(
@@ -38,6 +39,7 @@ class MyCommunityCard extends StatelessWidget {
 
           const SizedBox(height: 6),
 
+          // SHORT DESCRIPTION
           Text(
             community.shortDescription,
             maxLines: 3,
@@ -51,10 +53,11 @@ class MyCommunityCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
+          // ======= ACTION BUTTONS =======
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // VIEW DETAIL (member = true)
+              // VIEW DETAIL — tidak perlu isMember lagi
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -62,7 +65,6 @@ class MyCommunityCard extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (_) => CommunityDetailPage(
                         community: community,
-                        isMember: true,   // <-- FIXED
                       ),
                     ),
                   );
@@ -77,13 +79,15 @@ class MyCommunityCard extends StatelessWidget {
                 ),
               ),
 
-              // GROUP CHAT
+              // OPEN GROUP CHAT
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CommunityChatPage(community: community),
+                      builder: (_) => CommunityChatPage(
+                        community: community,
+                      ),
                     ),
                   );
                 },
@@ -97,7 +101,7 @@ class MyCommunityCard extends StatelessWidget {
                 ),
               ),
 
-              // LEAVE
+              // LEAVE COMMUNITY
               GestureDetector(
                 onTap: onLeave,
                 child: Text(
