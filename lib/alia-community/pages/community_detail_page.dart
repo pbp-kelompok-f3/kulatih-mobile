@@ -9,8 +9,13 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class CommunityDetailPage extends StatelessWidget {
   final CommunityEntry community;
+  final bool isMember;  // <-- ADD THIS
 
-  const CommunityDetailPage({super.key, required this.community});
+  const CommunityDetailPage({
+    super.key,
+    required this.community,
+    this.isMember = false,   // default: not member
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +48,7 @@ class CommunityDetailPage extends StatelessWidget {
 
               Center(
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 6, horizontal: 18),
+                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 18),
                   decoration: BoxDecoration(
                     color: AppColors.indigo,
                     borderRadius: BorderRadius.circular(20),
@@ -75,40 +79,69 @@ class CommunityDetailPage extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.gold,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)),
-                ),
-                onPressed: () async {
-                  final joined =
-                      await CommunityService.joinCommunity(request, community.id);
-
-                  if (joined) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            CommunityChatPage(community: community),
+              // =============================
+              //     BUTTON SECTION
+              // =============================
+              isMember
+                  ? ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.gold,
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                       ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Already joined or failed")),
-                    );
-                  }
-                },
-                child: Text(
-                  "JOIN US NOW",
-                  style: TextStyle(
-                    color: AppColors.indigoDark,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CommunityChatPage(community: community),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "GO TO GROUP CHAT",
+                        style: TextStyle(
+                          color: AppColors.indigoDark,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.gold,
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      onPressed: () async {
+                        final joined = await CommunityService.joinCommunity(
+                          request,
+                          community.id,
+                        );
+
+                        if (joined) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CommunityChatPage(community: community),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Already joined or failed")),
+                          );
+                        }
+                      },
+                      child: Text(
+                        "JOIN US NOW",
+                        style: TextStyle(
+                          color: AppColors.indigoDark,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
 
               const SizedBox(height: 20),
             ],

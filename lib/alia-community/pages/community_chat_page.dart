@@ -7,8 +7,8 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 
-import '../models/community.dart';        // <-- CommunityEntry
-import '../models/message.dart';          // <-- Message
+import '../models/community.dart';
+import '../models/message.dart';
 import '../services/community_service.dart';
 import '../widgets/chat_bubble.dart';
 
@@ -41,10 +41,10 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
   Future<void> _loadMessages() async {
     final request = context.read<CookieRequest>();
 
-    setState(() => _loading = true);
-
-    final msgs =
-        await CommunityService.getMessages(request, widget.community.id);
+    final msgs = await CommunityService.getMessages(
+      request,
+      widget.community.id,
+    );
 
     setState(() {
       _messages = msgs;
@@ -55,15 +55,13 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
   }
 
   void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollController.animateTo(
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
         );
-      });
-    }
+      }
+    });
   }
 
   Future<void> _sendMessage() async {
@@ -74,18 +72,79 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
 
     setState(() => _sending = true);
 
-    final success =
-        await CommunityService.sendMessage(request, widget.community.id, text);
+    final success = await CommunityService.sendMessage(
+      request,
+      widget.community.id,
+      text,
+    );
 
     setState(() => _sending = false);
 
     if (success) {
       _messageController.clear();
+
+      // add new message instantly
       await _loadMessages();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to send message")),
       );
+    }
+  }
+
+  Future<void> _deleteMessage(Message msg) async {
+    final request = context.read<CookieRequest>();
+
+    final ok = await CommunityService.deleteMessage(
+      request,
+      widget.community.id,
+      msg.id,
+    );
+
+    if (ok) {
+      setState(() => _messages.removeWhere((m) => m.id == msg.id));
+    }
+  }
+
+  Future<void> _editMessage(Message msg) async {
+    final controller = TextEditingController(text: msg.text);
+
+    final updated = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Edit message"),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: "New text"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
+
+    if (updated == null || updated.isEmpty) return;
+
+    final request = context.read<CookieRequest>();
+
+    final ok = await CommunityService.editMessage(
+      request,
+      widget.community.id,
+      msg.id,
+      updated,
+    );
+
+    if (ok) {
+      setState(() {
+        msg.text = updated;
+      });
     }
   }
 
@@ -129,6 +188,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
               ),
             ),
 
+            // MESSAGES
             Expanded(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -139,33 +199,28 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                 ),
                 child: _loading
                     ? Center(
-                        child: CircularProgressIndicator(color: AppColors.gold))
-                    : _messages.isEmpty
-                        ? Center(
-                            child: Text(
-                              "No messages yet.",
-                              style: TextStyle(
-                                color: AppColors.textLight,
-                                fontSize: 13,
-                              ),
-                            ),
-                          )
-                        : ListView.builder(
-                            controller: _scrollController,
-                            itemCount: _messages.length,
-                            itemBuilder: (context, index) {
-                              final msg = _messages[index];
-                              final isMe = msg.sender ==
-                                  user.username; // FIXED
-                              return ChatBubble(
-                                message: msg,
-                                isMe: isMe,
-                              );
-                            },
-                          ),
+                        child:
+                            CircularProgressIndicator(color: AppColors.gold),
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        itemCount: _messages.length,
+                        itemBuilder: (context, index) {
+                          final msg = _messages[index];
+                          final isMe = msg.sender == user.username;
+
+                          return ChatBubble(
+                            message: msg,
+                            isMe: isMe,
+                            onDelete: isMe ? () => _deleteMessage(msg) : null,
+                            onEdit: isMe ? () => _editMessage(msg) : null,
+                          );
+                        },
+                      ),
               ),
             ),
 
+            // SEND MESSAGE
             Padding(
               padding: const EdgeInsets.all(20),
               child: Container(
@@ -194,7 +249,9 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: AppColors.gold),
+                              strokeWidth: 2,
+                              color: AppColors.gold,
+                            ),
                           )
                         : GestureDetector(
                             onTap: _sendMessage,
@@ -209,7 +266,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

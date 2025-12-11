@@ -1,8 +1,9 @@
-// lib/alia-community/widgets/my_community_card.dart
-
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
-import '../models/community.dart';   // <-- CommunityEntry
+
+import '../models/community.dart';
+import '../pages/community_detail_page.dart';
+import '../pages/community_chat_page.dart';
 
 class MyCommunityCard extends StatelessWidget {
   final CommunityEntry community;
@@ -23,62 +24,92 @@ class MyCommunityCard extends StatelessWidget {
         color: AppColors.indigo,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // avatar dummy
-          Container(
-            width: 56,
-            height: 56,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
+          Text(
+            community.name.toUpperCase(),
+            style: TextStyle(
+              color: AppColors.textWhite,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
             ),
           ),
 
-          const SizedBox(width: 16),
+          const SizedBox(height: 6),
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  community.name.toUpperCase(),
-                  style: TextStyle(
-                    color: AppColors.textWhite,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-
-                const SizedBox(height: 6),
-
-                Text(
-                  community.shortDescription,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: AppColors.textLight,
-                    fontSize: 12,
-                    height: 1.4,
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                GestureDetector(
-                  onTap: onLeave,
-                  child: Text(
-                    "LEAVE",
-                    style: TextStyle(
-                      color: AppColors.gold,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
+          Text(
+            community.shortDescription,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: AppColors.textLight,
+              fontSize: 12,
+              height: 1.4,
             ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // VIEW DETAIL (member = true)
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CommunityDetailPage(
+                        community: community,
+                        isMember: true,   // <-- FIXED
+                      ),
+                    ),
+                  );
+                },
+                child: Text(
+                  "VIEW DETAIL",
+                  style: TextStyle(
+                    color: AppColors.gold,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+
+              // GROUP CHAT
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CommunityChatPage(community: community),
+                    ),
+                  );
+                },
+                child: Text(
+                  "GROUP CHAT",
+                  style: TextStyle(
+                    color: AppColors.gold,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+
+              // LEAVE
+              GestureDetector(
+                onTap: onLeave,
+                child: Text(
+                  "LEAVE",
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
