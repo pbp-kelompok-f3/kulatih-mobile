@@ -7,8 +7,13 @@ import 'package:provider/provider.dart';
 
 class TournamentEntryList extends StatefulWidget {
   final String query;
+  final String filter;
 
-  const TournamentEntryList({super.key, required this.query});
+  const TournamentEntryList({
+    super.key,
+    required this.query,
+    required this.filter,
+  });
 
   @override
   State<TournamentEntryList> createState() => _TournamentEntryListState();
@@ -40,12 +45,12 @@ class _TournamentEntryListState extends State<TournamentEntryList> {
 
     final entry = TournamentEntry.fromJson(normalized);
 
-    // Cek mounted agar aman saat setState
     if (mounted) {
       setState(() {
         allTournaments = entry.tournaments;
         userRole = entry.role;
-        currentUsername = entry.namaUser; // Pastikan key di model sesuai (namaUser/username)
+        currentUsername =
+            entry.namaUser;
         isLoading = false;
       });
     }
@@ -59,13 +64,34 @@ class _TournamentEntryListState extends State<TournamentEntryList> {
 
   @override
   Widget build(BuildContext context) {
-    final q = widget.query.trim().toLowerCase();
+  final q = widget.query.trim().toLowerCase();
 
-    final filtered = q.isEmpty
-        ? allTournaments
-        : allTournaments
-            .where((t) => t.nama.toLowerCase().contains(q))
-            .toList();
+  List<Tournament> filtered = allTournaments;
+
+  if (q.isNotEmpty) {
+    filtered = filtered.where((t) {
+      final nama = t.nama.toLowerCase();
+      final lokasi = t.lokasi.toLowerCase();
+      final pembuat = t.pembuat.toLowerCase();
+      final tipe = t.tipe.toLowerCase();
+
+      return nama.contains(q) ||
+             lokasi.contains(q) ||
+             pembuat.contains(q) ||
+             tipe.contains(q);
+    }).toList();
+  }
+
+    if (widget.filter == "My Tournaments") {
+      filtered = filtered.where((t) {
+        final isCreator = t.pembuat == currentUsername;
+        final isParticipant = t.participants.any(
+          (p) => p.member.username == currentUsername,
+        );
+
+        return isCreator || isParticipant;
+      }).toList();
+    }
 
     if (isLoading) {
       return const Center(
@@ -111,7 +137,7 @@ class _TournamentEntryListState extends State<TournamentEntryList> {
                   ),
                 ),
               );
-              _fetchTournaments(); 
+              _fetchTournaments();
             },
           );
         },

@@ -16,6 +16,7 @@ class TournamentMainPage extends StatefulWidget {
 class _TournamentMainPageState extends State<TournamentMainPage> {
   final TextEditingController searchController = TextEditingController();
   String query = '';
+  String currentFilter = 'All Tournaments';
 
   void _onSearchChanged(String value) {
     setState(() => query = value);
@@ -42,18 +43,23 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
           duration: const Duration(milliseconds: 250),
           child: isCoach
               ? FloatingActionButton(
-                  backgroundColor: AppColor.yellow, // kuning gelap
+                  backgroundColor: AppColor.yellow,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => const TournamentCreatePage(),
                       ),
                     );
+
+                    if (result == true) {
+                      setState(() {}); // REFRESH UI
+                    }
                   },
+
                   child: const Icon(
                     Icons.add_rounded,
                     size: 28,
@@ -124,71 +130,107 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    
-                    vertical: 4,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: searchController,
-                          style: body(14, color: Colors.grey.shade500),
-                          decoration: InputDecoration(
-                            hintText: "Search Tournament...",
-                            hintStyle: TextStyle(color: Colors.grey.shade500),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 16,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(32),
-                              borderSide: BorderSide(
-                                color: AppColor.yellow.withOpacity(0.7),
-                                width: 1.5,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(32),
-                              borderSide: BorderSide(
-                                color: AppColor.yellow,
-                                width: 2.2,
-                              ),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(32),
-                            ),
-                          ),
-                          onChanged: _onSearchChanged,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: searchController,
+                        style: body(14, color: Colors.grey.shade500),
+                        decoration: InputDecoration(
+                          hintText: "Search Tournament...",
+                          hintStyle: TextStyle(color: Colors.grey.shade500),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
                             vertical: 16,
                           ),
-                          backgroundColor: AppColor.yellow,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: AppColor.yellow.withOpacity(0.7),
+                              width: 1.5,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(32),
+                            borderSide: BorderSide(
+                              color: AppColor.yellow,
+                              width: 2.2,
+                            ),
                           ),
                         ),
-                        onPressed: () =>
-                            _onSearchChanged(searchController.text),
-                        child: Icon(Icons.search_rounded,color:Colors.black,
-                        size:28,
+                        onChanged: _onSearchChanged,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        backgroundColor: AppColor.yellow,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                    ],
-                  ),
+                      onPressed: () => _onSearchChanged(searchController.text),
+                      child: const Icon(
+                        Icons.search_rounded,
+                        color: Colors.black,
+                        size: 28,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    _buildFilterButton("All Tournaments"),
+                    const SizedBox(width: 10),
+                    _buildFilterButton("My Tournaments"),
+                  ],
+                ),
+              ),
+            ),
+
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
-            SliverToBoxAdapter(child: TournamentEntryList(query: query)),
+            SliverToBoxAdapter(
+              child: TournamentEntryList(key: ValueKey(DateTime.now().toIso8601String()), query: query, filter: currentFilter),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterButton(String label) {
+    final isActive = currentFilter == label;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            currentFilter = label;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isActive ? AppColor.yellow : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColor.yellow, width: 1.5),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: body(14, color: isActive ? Colors.black : AppColor.yellow),
+          ),
         ),
       ),
     );
