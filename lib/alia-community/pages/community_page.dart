@@ -21,12 +21,22 @@ class CommunityPage extends StatefulWidget {
 
 class _CommunityPageState extends State<CommunityPage> {
   List<CommunityEntry> communities = [];
+  List<CommunityEntry> filteredCommunities = [];
   bool isLoading = true;
+
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     fetchCommunities();
+    _searchController.addListener(_filterCommunities);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> fetchCommunities() async {
@@ -35,27 +45,43 @@ class _CommunityPageState extends State<CommunityPage> {
 
     setState(() {
       communities = data;
+      filteredCommunities = data;
       isLoading = false;
+    });
+  }
+
+  void _filterCommunities() {
+    final query = _searchController.text.toLowerCase().trim();
+
+    setState(() {
+      if (query.isEmpty) {
+        filteredCommunities = communities;
+      } else {
+        filteredCommunities = communities.where((c) {
+          return c.name.toLowerCase().contains(query) ||
+              c.shortDescription.toLowerCase().contains(query) ||
+              c.fullDescription.toLowerCase().contains(query);
+        }).toList();
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.indigoDark,
+      backgroundColor: AppColors.indigo,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
 
-              // Header
+              // ===== HEADER =====
               Center(
                 child: Container(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                      const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
                   decoration: BoxDecoration(
                     color: AppColors.gold,
                     borderRadius: BorderRadius.circular(30),
@@ -65,38 +91,45 @@ class _CommunityPageState extends State<CommunityPage> {
                     style: TextStyle(
                       color: AppColors.indigoDark,
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: 24,
                     ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // ===== SEARCH BAR (Vertical padding 7) =====
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+                decoration: BoxDecoration(
+                  color: AppColors.card,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  style: TextStyle(color: AppColors.textWhite, fontSize: 14),
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                    isCollapsed: true, // 🔥 Centers text perfectly
+                    border: InputBorder.none,
+                    hintText: "Search community to join",
+                    hintStyle:
+                        TextStyle(color: AppColors.textLight, fontSize: 14),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.clear, color: AppColors.textLight),
+                            onPressed: () => _searchController.clear(),
+                          )
+                        : Icon(Icons.search, color: AppColors.textLight),
                   ),
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              // Search Bar (non-functional but UI preserved)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.textWhite,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: TextField(
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: "Search community",
-                    hintStyle: TextStyle(
-                      color: AppColors.textLight,
-                      fontSize: 14,
-                    ),
-                    suffixIcon:
-                        Icon(Icons.search, color: AppColors.indigoDark),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Buttons: My Community & Create
+              // ===== BUTTONS =====
               Row(
                 children: [
                   Expanded(
@@ -106,13 +139,13 @@ class _CommunityPageState extends State<CommunityPage> {
                           context,
                           MaterialPageRoute(
                               builder: (_) => const MyCommunityPage()),
-                        ).then((_) => fetchCommunities()); // 🔥 AUTO REFRESH
+                        ).then((_) => fetchCommunities());
                       },
                       child: Container(
                         alignment: Alignment.center,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: AppColors.indigo,
+                          color: AppColors.card,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -135,13 +168,13 @@ class _CommunityPageState extends State<CommunityPage> {
                           context,
                           MaterialPageRoute(
                               builder: (_) => const CreateCommunityPage()),
-                        ).then((_) => fetchCommunities()); // 🔥 AUTO REFRESH
+                        ).then((_) => fetchCommunities());
                       },
                       child: Container(
                         alignment: Alignment.center,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: AppColors.indigo,
+                          color: AppColors.card,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -159,34 +192,44 @@ class _CommunityPageState extends State<CommunityPage> {
 
               const SizedBox(height: 20),
 
-              // COMMUNITY LIST
+              // ===== LIST =====
               Expanded(
                 child: isLoading
                     ? Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.gold,
-                        ),
+                        child:
+                            CircularProgressIndicator(color: AppColors.gold),
                       )
-                    : ListView.builder(
-                        itemCount: communities.length,
-                        itemBuilder: (context, index) {
-                          final c = communities[index];
-                          return CommunityCard(
-                            community: c,
-                            onTap: () async {
-                              // Go to detail page, then refresh automatically on return
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      CommunityDetailPage(community: c),
-                                ),
+                    : filteredCommunities.isEmpty
+                        ? Center(
+                            child: Text(
+                              _searchController.text.isEmpty
+                                  ? "No communities available."
+                                  : "No communities found.",
+                              style: TextStyle(
+                                color: AppColors.textLight,
+                                fontSize: 14,
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: filteredCommunities.length,
+                            itemBuilder: (context, index) {
+                              final c = filteredCommunities[index];
+                              return CommunityCard(
+                                community: c,
+                                onTap: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          CommunityDetailPage(community: c),
+                                    ),
+                                  );
+                                  fetchCommunities();
+                                },
                               );
-                              fetchCommunities(); // 🔥 AUTO REFRESH
                             },
-                          );
-                        },
-                      ),
+                          ),
               ),
             ],
           ),

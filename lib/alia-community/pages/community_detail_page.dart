@@ -30,9 +30,6 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     _loadDetail();
   }
 
-  /// ===========================
-  /// LOAD DETAIL + STATUS MEMBER
-  /// ===========================
   Future<void> _loadDetail() async {
     final request = context.read<CookieRequest>();
 
@@ -42,7 +39,6 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     setState(() {
       isMember = detail?["is_member"] == true;
 
-      // update jumlah member
       if (detail?["members_count"] != null) {
         widget.community.membersCount = detail!["members_count"];
       }
@@ -51,58 +47,36 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     });
   }
 
-  /// ===========================
-  /// HANDLE JOIN → redirect + notif
-  /// ===========================
   Future<void> _joinCommunity() async {
-    print('🔵 Starting join...'); // DEBUG
-    
     final request = context.read<CookieRequest>();
 
     try {
-      // Langsung call API tanpa parsing ke CommunityEntry dulu
       final response = await request.postJson(
         "${CommunityService.baseUrl}/join/${widget.community.id}/json/",
         jsonEncode({}),
       );
 
-      print('🔵 Response: $response'); // DEBUG
-
       if (!mounted) return;
 
-      // Cek apakah ada response dan success == true
-      if (response != null && 
+      if (response != null &&
           (response["success"] == true || response["community"] != null)) {
-        
-        print('✅ Join successful!'); // DEBUG
-        
-        // 🔥 Notif sukses
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('You\'ve joined "${widget.community.name}" community.'),
+            content:
+                Text('You\'ve joined "${widget.community.name}" community.'),
             backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
           ),
         );
 
-        // Kasih sedikit delay biar snackbar keliatan
-        await Future.delayed(const Duration(milliseconds: 300));
+        await Future.delayed(const Duration(milliseconds: 250));
 
         if (!mounted) return;
 
-        print('✅ Redirecting...'); // DEBUG
-
-        // 🔥 Redirect langsung ke My Community Page
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const MyCommunityPage()),
         );
-        
-        print('✅ Redirect complete!'); // DEBUG
-        
       } else {
-        print('🔴 Join failed: $response'); // DEBUG
-        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Failed to join community."),
@@ -111,10 +85,8 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
         );
       }
     } catch (e) {
-      print('🔴 Error: $e'); // DEBUG
-      
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error: $e"),
@@ -128,7 +100,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
   Widget build(BuildContext context) {
     if (loading) {
       return Scaffold(
-        backgroundColor: AppColors.indigoDark,
+        backgroundColor: AppColors.indigo,
         body: Center(
           child: CircularProgressIndicator(color: AppColors.gold),
         ),
@@ -136,9 +108,9 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.indigoDark,
+      backgroundColor: AppColors.indigo,
       appBar: AppBar(
-        backgroundColor: AppColors.indigoDark,
+        backgroundColor: AppColors.indigo,
         elevation: 0,
         iconTheme: IconThemeData(color: AppColors.textWhite),
       ),
@@ -147,13 +119,13 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
-              // COMMUNITY NAME
+              // TITLE
               Center(
                 child: Text(
-                  widget.community.name,
+                  widget.community.name.toUpperCase(),
                   style: TextStyle(
                     color: AppColors.gold,
-                    fontSize: 20,
+                    fontSize: 26,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -165,31 +137,48 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
               Center(
                 child: Container(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 6, horizontal: 18),
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
                   decoration: BoxDecoration(
-                    color: AppColors.indigo,
-                    borderRadius: BorderRadius.circular(20),
+                    color: AppColors.card,
+                    borderRadius: BorderRadius.circular(30),
                   ),
                   child: Text(
                     "Members: ${widget.community.membersCount}",
                     style: TextStyle(
                       color: AppColors.textWhite,
                       fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-              // FULL DESCRIPTION
+              // ==============================================================
+              // FULL DESCRIPTION → FIXED WIDTH, FIXED HEIGHT, TEXT CENTERED
+              // ==============================================================
               Expanded(
-                child: SingleChildScrollView(
-                  child: Text(
-                    widget.community.fullDescription,
-                    style: TextStyle(
-                      color: AppColors.textWhite,
-                      fontSize: 14,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.card,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Center(
+                        child: Text(
+                          widget.community.fullDescription,
+                          textAlign: TextAlign.center, // 🔥 Center text
+                          style: TextStyle(
+                            color: AppColors.textWhite,
+                            fontSize: 15,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -197,9 +186,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
 
               const SizedBox(height: 20),
 
-              // ===============================
-              // BUTTON JOIN / GO TO CHAT
-              // ===============================
+              // BUTTON
               isMember == true
                   ? ElevatedButton(
                       style: ElevatedButton.styleFrom(

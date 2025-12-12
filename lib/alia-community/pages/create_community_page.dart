@@ -4,7 +4,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import '../services/community_service.dart';
-import '../pages/my_community_page.dart';   // <-- tambahkan import ini
+import '../pages/my_community_page.dart';
 
 class CreateCommunityPage extends StatefulWidget {
   const CreateCommunityPage({super.key});
@@ -47,7 +47,6 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     if (!mounted) return;
 
     if (newCommunity != null) {
-      // 🔥 Notif sukses
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Community successfully created!"),
@@ -55,7 +54,6 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
         ),
       );
 
-      // 🔥 Redirect langsung ke My Community Page
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const MyCommunityPage()),
@@ -67,33 +65,42 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     }
   }
 
-  Widget _field(String label, TextEditingController c, {int maxLines = 1}) {
+  Widget _field(String label, TextEditingController controller,
+      {int maxLines = 1}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: TextStyle(
-              color: AppColors.textWhite,
-              fontWeight: FontWeight.bold,
-            )),
-        const SizedBox(height: 6),
+        Text(
+          label,
+          style: TextStyle(
+            color: AppColors.textWhite,
+            fontWeight: FontWeight.w700,
+            fontSize: 15,
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        // INPUT BOX
         Container(
           decoration: BoxDecoration(
-            color: AppColors.textWhite,
-            borderRadius: BorderRadius.circular(20),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: TextField(
-            controller: c,
+            controller: controller,
             maxLines: maxLines,
+            style: TextStyle(
+              color: AppColors.indigoDark,
+              fontSize: 14,
+            ),
             decoration: InputDecoration(
               border: InputBorder.none,
-              hintText: label,
-              hintStyle: TextStyle(color: AppColors.textLight),
             ),
           ),
         ),
-        const SizedBox(height: 16),
+
+        const SizedBox(height: 20),
       ],
     );
   }
@@ -101,54 +108,76 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.indigoDark,
+      backgroundColor: AppColors.indigo,   // ✔ background sesuai screenshot
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                "MAKE YOUR OWN COMMUNITY",
-                style: TextStyle(
-                  color: AppColors.textWhite,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              _field("Community name?", _name),
-              _field("Quick description", _short),
-              _field("Tell us more about your community", _long, maxLines: 4),
-
               const SizedBox(height: 10),
 
-              GestureDetector(
-                onTap: _submitting ? null : _submit,
-                child: Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: AppColors.gold,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: _submitting
-                      ? SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.indigoDark,
-                          ),
-                        )
-                      : Text(
-                          "MAKE COMMUNITY",
-                          style: TextStyle(
-                            color: AppColors.indigoDark,
-                            fontWeight: FontWeight.bold,
-                          ),
+              // TITLE
+              Text(
+                "MAKE YOUR OWN\nCOMMUNITY",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.textWhite,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 28,
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              // BOX FORM (warna diperbaiki)
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                decoration: BoxDecoration(
+                  color: AppColors.indigoDark,  // ✔ box form lebih gelap (benar)
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _field("Community name", _name),
+                    _field("Quick description", _short),
+                    _field("Tell us more about your community", _long,
+                        maxLines: 6),
+
+                    const SizedBox(height: 10),
+
+                    // SUBMIT BUTTON
+                    GestureDetector(
+                      onTap: _submitting ? null : _submit,
+                      child: Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        decoration: BoxDecoration(
+                          color: AppColors.gold,
+                          borderRadius: BorderRadius.circular(30),
                         ),
+                        child: _submitting
+                            ? SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.indigoDark,
+                                ),
+                              )
+                            : Text(
+                                "MAKE COMMUNITY",
+                                style: TextStyle(
+                                  color: AppColors.indigoDark,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

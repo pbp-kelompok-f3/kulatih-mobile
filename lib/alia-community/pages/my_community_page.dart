@@ -16,38 +16,58 @@ class MyCommunityPage extends StatefulWidget {
 
 class _MyCommunityPageState extends State<MyCommunityPage> {
   List<CommunityEntry> _myCommunities = [];
+  List<CommunityEntry> _filteredCommunities = [];
   bool _loading = true;
+
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _load();
+    _searchController.addListener(_filterCommunities);
   }
 
-  /// ================================
-  /// LOAD DATA COMMUNITIES
-  /// ================================
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _load() async {
     final request = context.read<CookieRequest>();
     final data = await CommunityService.getMyCommunities(request);
 
     setState(() {
       _myCommunities = data;
+      _filteredCommunities = data;
       _loading = false;
     });
   }
 
-  /// ================================
-  /// SHOW LEAVE CONFIRMATION POP-UP
-  /// ================================
+  void _filterCommunities() {
+    final q = _searchController.text.toLowerCase().trim();
+
+    setState(() {
+      if (q.isEmpty) {
+        _filteredCommunities = _myCommunities;
+      } else {
+        _filteredCommunities = _myCommunities.where((c) {
+          return c.name.toLowerCase().contains(q) ||
+              c.shortDescription.toLowerCase().contains(q) ||
+              c.fullDescription.toLowerCase().contains(q);
+        }).toList();
+      }
+    });
+  }
+
   Future<void> _confirmLeave(CommunityEntry community) async {
-    final shouldLeave = await showDialog<bool>(
+    final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text("Leave community?"),
         content: Text(
-          'Are you sure you want to leave "${community.name}" community?\nYou can rejoin later.',
-        ),
+            'Are you sure you want to leave "${community.name}" community?\nYou can rejoin later.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -55,53 +75,36 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(
-              "Leave",
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text("Leave", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
 
-    if (shouldLeave == true) {
-      await _leave(community);
+    if (ok == true) {
+      _leave(community);
     }
   }
 
-  /// ================================
-  /// API LEAVE + INSTANT REMOVE + SNACKBAR
-  /// ================================
   Future<void> _leave(CommunityEntry community) async {
-    print('🔵 Leaving community: ${community.name}'); // DEBUG
-    
     final request = context.read<CookieRequest>();
-    final result = await CommunityService.leaveCommunity(request, community.id);
-
-    print('🔵 Leave result: $result'); // DEBUG
+    final ok = await CommunityService.leaveCommunity(request, community.id);
 
     if (!mounted) return;
 
-    if (result) {
-      // ✅ Berhasil leave - hapus dari list
+    if (ok) {
       setState(() {
         _myCommunities.removeWhere((c) => c.id == community.id);
+        _filteredCommunities.removeWhere((c) => c.id == community.id);
       });
 
-      print('✅ Successfully left community'); // DEBUG
-
-      // ✅ Show success snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('You have left "${community.name}" community.'),
           backgroundColor: Colors.green,
-          duration: const Duration(seconds: 2),
         ),
       );
     } else {
-      print('🔴 Failed to leave community'); // DEBUG
-      
-      // ❌ Gagal leave
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Failed to leave community."),
@@ -111,13 +114,10 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
     }
   }
 
-  /// ================================
-  /// BUILD UI
-  /// ================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.indigoDark,
+      backgroundColor: AppColors.indigo,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -125,9 +125,9 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
             children: [
               const SizedBox(height: 20),
 
-              // TITLE
+              // ===== TITLE =====
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
                   color: AppColors.gold,
                   borderRadius: BorderRadius.circular(30),
@@ -138,6 +138,7 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
                     style: TextStyle(
                       color: AppColors.indigoDark,
                       fontWeight: FontWeight.bold,
+                      fontSize: 20,
                     ),
                   ),
                 ),
@@ -145,50 +146,56 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
 
               const SizedBox(height: 20),
 
-              // SEARCH BAR (belum aktif, dekorasi saja)
+              // ===== SEARCH BAR (same 7 padding) =====
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
                 decoration: BoxDecoration(
-                  color: AppColors.textWhite,
-                  borderRadius: BorderRadius.circular(20),
+                  color: AppColors.card,
+                  borderRadius: BorderRadius.circular(25),
                 ),
                 child: TextField(
+                  controller: _searchController,
+                  style: TextStyle(color: AppColors.textWhite, fontSize: 14),
+                  textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
+                    isCollapsed: true,
                     border: InputBorder.none,
                     hintText: "Search communities you have joined",
-                    hintStyle: TextStyle(color: AppColors.textLight),
-                    suffixIcon:
-                        Icon(Icons.search, color: AppColors.indigoDark),
+                    hintStyle:
+                        TextStyle(color: AppColors.textLight, fontSize: 14),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.clear, color: AppColors.textLight),
+                            onPressed: () => _searchController.clear(),
+                          )
+                        : Icon(Icons.search, color: AppColors.textLight),
                   ),
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              // LIST OF COMMUNITIES
+              // ===== LIST =====
               Expanded(
                 child: _loading
                     ? Center(
-                        child:
-                            CircularProgressIndicator(color: AppColors.gold),
+                        child: CircularProgressIndicator(color: AppColors.gold),
                       )
-                    : _myCommunities.isEmpty
+                    : _filteredCommunities.isEmpty
                         ? Center(
                             child: Text(
-                              "You haven't joined any community yet.",
-                              style: TextStyle(
-                                color: AppColors.textLight,
-                                fontSize: 14,
-                              ),
+                              "No communities found.",
+                              style: TextStyle(color: AppColors.textLight),
                             ),
                           )
                         : ListView.builder(
-                            itemCount: _myCommunities.length,
-                            itemBuilder: (context, index) {
-                              final c = _myCommunities[index];
+                            itemCount: _filteredCommunities.length,
+                            itemBuilder: (_, i) {
                               return MyCommunityCard(
-                                community: c,
-                                onLeave: () => _confirmLeave(c),
+                                community: _filteredCommunities[i],
+                                onLeave: () =>
+                                    _confirmLeave(_filteredCommunities[i]),
                               );
                             },
                           ),

@@ -21,13 +21,12 @@ class MyCommunityCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.indigo,
+        color: AppColors.card, // 🔥 SAME as search bar
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // COMMUNITY NAME
           Text(
             community.name.toUpperCase(),
             style: TextStyle(
@@ -39,7 +38,6 @@ class MyCommunityCard extends StatelessWidget {
 
           const SizedBox(height: 6),
 
-          // SHORT DESCRIPTION
           Text(
             community.shortDescription,
             maxLines: 3,
@@ -53,19 +51,15 @@ class MyCommunityCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // ACTION BUTTONS
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // VIEW DETAIL
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CommunityDetailPage(
-                        community: community,
-                      ),
+                      builder: (_) => CommunityDetailPage(community: community),
                     ),
                   );
                 },
@@ -79,15 +73,12 @@ class MyCommunityCard extends StatelessWidget {
                 ),
               ),
 
-              // GROUP CHAT
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CommunityChatPage(
-                        community: community,
-                      ),
+                      builder: (_) => CommunityChatPage(community: community),
                     ),
                   );
                 },
@@ -101,7 +92,6 @@ class MyCommunityCard extends StatelessWidget {
                 ),
               ),
 
-              // LEAVE
               GestureDetector(
                 onTap: onLeave,
                 child: const Text(
