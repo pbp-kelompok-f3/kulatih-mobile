@@ -18,7 +18,7 @@ class CommunityPage extends StatefulWidget {
   State<CommunityPage> createState() => _CommunityPageState();
 }
 
-class _CommunityPageState extends State<CommunityPage> {
+class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveClientMixin {
   List<CommunityEntry> all = [];
   List<CommunityEntry> filtered = [];
   bool loading = true;
@@ -28,6 +28,9 @@ class _CommunityPageState extends State<CommunityPage> {
   // Pagination
   int currentPage = 1;
   final int itemsPerPage = 6;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -46,19 +49,28 @@ class _CommunityPageState extends State<CommunityPage> {
   /// LOAD COMMUNITIES
   /// ================================
   Future<void> fetchCommunities() async {
-    setState(() => loading = true); // 🔥 SET LOADING
+    if (mounted) {
+      setState(() => loading = true);
+    }
     
-    final request = context.read<CookieRequest>();
-    final data = await CommunityService.getAllCommunities(request);
+    try {
+      final request = context.read<CookieRequest>();
+      final data = await CommunityService.getAllCommunities(request);
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    setState(() {
-      all = data;
-      filtered = data;
-      loading = false;
-      currentPage = 1;
-    });
+      setState(() {
+        all = data;
+        // Reapply filter setelah refresh
+        _filter();
+        loading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => loading = false);
+      }
+      print('Error fetching communities: $e');
+    }
   }
 
   /// ================================
@@ -74,7 +86,11 @@ class _CommunityPageState extends State<CommunityPage> {
                   c.shortDescription.toLowerCase().contains(q) ||
                   c.fullDescription.toLowerCase().contains(q);
             }).toList();
-      currentPage = 1;
+      
+      // Reset ke page 1 jika filter berubah
+      if (currentPage > totalPages && totalPages > 0) {
+        currentPage = 1;
+      }
     });
   }
 
@@ -82,9 +98,10 @@ class _CommunityPageState extends State<CommunityPage> {
   /// PAGINATION HELPERS
   /// ================================
   int get totalPages =>
-      (filtered.length / itemsPerPage).ceil().clamp(1, 999);
+      filtered.isEmpty ? 1 : (filtered.length / itemsPerPage).ceil();
 
   List<CommunityEntry> get paginated {
+    if (filtered.isEmpty) return [];
     final start = (currentPage - 1) * itemsPerPage;
     final end = (start + itemsPerPage).clamp(0, filtered.length);
     if (start >= filtered.length) return [];
@@ -101,6 +118,8 @@ class _CommunityPageState extends State<CommunityPage> {
   /// PAGINATION UI (BOTTOM ONLY)
   /// ================================
   Widget _buildPagination() {
+    if (filtered.isEmpty) return const SizedBox.shrink();
+    
     return Wrap(
       spacing: 10,
       alignment: WrapAlignment.center,
@@ -144,6 +163,8 @@ class _CommunityPageState extends State<CommunityPage> {
   /// ================================
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
     return Scaffold(
       backgroundColor: AppColors.indigo,
       body: SafeArea(
@@ -202,16 +223,17 @@ class _CommunityPageState extends State<CommunityPage> {
                     child: _navBtn(
                       "MY COMMUNITY",
                       () async {
-                        // 🔥 AWAIT RESULT
-                        final hasChanges = await Navigator.push<bool>(
+                        // 🔥 SELALU REFRESH SETELAH KEMBALI
+                        final result = await Navigator.push<bool>(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const MyCommunityPage()),
+                            builder: (_) => const MyCommunityPage(),
+                          ),
                         );
 
-                        // 🔥 REFRESH IF CHANGES DETECTED
-                        if (hasChanges == true && mounted) {
-                          fetchCommunities();
+                        // Refresh regardless of result untuk ensure data terbaru
+                        if (mounted) {
+                          await fetchCommunities();
                         }
                       },
                     ),
@@ -224,10 +246,11 @@ class _CommunityPageState extends State<CommunityPage> {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const CreateCommunityPage()),
+                            builder: (_) => const CreateCommunityPage(),
+                          ),
                         );
                         if (mounted) {
-                          fetchCommunities();
+                          await fetchCommunities();
                         }
                       },
                     ),
@@ -239,42 +262,74 @@ class _CommunityPageState extends State<CommunityPage> {
 
               // LIST + PAGINATION AT BOTTOM
               Expanded(
-                child: loading
-                    ? Center(
-                        child:
-                            CircularProgressIndicator(color: AppColors.gold),
-                      )
-                    : ListView.builder(
-                        itemCount: paginated.length + 1,
-                        itemBuilder: (_, i) {
-                          if (i < paginated.length) {
-                            final c = paginated[i];
-                            return CommunityCard(
-                              community: c,
-                              onTap: () async {
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        CommunityDetailPage(community: c),
+                child: RefreshIndicator(
+                  onRefresh: fetchCommunities,
+                  color: AppColors.gold,
+                  child: loading
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.gold,
+                          ),
+                        )
+                      : filtered.isEmpty
+                          ? ListView(
+                              children: [
+                                SizedBox(
+                                  height: MediaQuery.of(context).size.height * 0.4,
+                                ),
+                                Center(
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.search_off,
+                                        size: 64,
+                                        color: AppColors.textLight,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'No communities found',
+                                        style: TextStyle(
+                                          color: AppColors.textLight,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                );
-                                if (mounted) {
-                                  fetchCommunities();
+                                ),
+                              ],
+                            )
+                          : ListView.builder(
+                              key: ValueKey('community_list_${all.length}'),
+                              itemCount: paginated.length + 1,
+                              itemBuilder: (_, i) {
+                                if (i < paginated.length) {
+                                  final c = paginated[i];
+                                  return CommunityCard(
+                                    key: ValueKey('community_${c.id}'),
+                                    community: c,
+                                    onTap: () async {
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              CommunityDetailPage(community: c),
+                                        ),
+                                      );
+                                      if (mounted) {
+                                        await fetchCommunities();
+                                      }
+                                    },
+                                  );
                                 }
-                              },
-                            );
-                          }
 
-                          // BOTTOM PAGINATION (scroll dulu baru keliatan)
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 30),
-                            child: filtered.isNotEmpty
-                                ? _buildPagination()
-                                : const SizedBox.shrink(),
-                          );
-                        },
-                      ),
+                                // BOTTOM PAGINATION
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 30),
+                                  child: _buildPagination(),
+                                );
+                              },
+                            ),
+                ),
               ),
             ],
           ),
