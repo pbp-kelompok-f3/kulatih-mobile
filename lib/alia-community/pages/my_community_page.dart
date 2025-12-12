@@ -17,6 +17,7 @@ class MyCommunityPage extends StatefulWidget {
 class _MyCommunityPageState extends State<MyCommunityPage> {
   List<CommunityEntry> _myCommunities = [];
   bool _loading = true;
+  bool _snackbarHandled = false; // agar snackbar join tidak muncul dua kali
 
   @override
   void initState() {
@@ -24,9 +25,11 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
     _load();
   }
 
+  /// ================================
+  /// LOAD DATA COMMUNITIES
+  /// ================================
   Future<void> _load() async {
     final request = context.read<CookieRequest>();
-
     final data = await CommunityService.getMyCommunities(request);
 
     setState(() {
@@ -35,18 +38,99 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
     });
   }
 
-  Future<void> _leave(int id) async {
-    final request = context.read<CookieRequest>();
+  /// ======================================================
+  /// DIA PANGGIL OTOMATIS SETIAP ROUTE MASUK KE PAGE INI
+  /// DIGUNAKAN UNTUK MENAMPILKAN SNACKBAR JOIN COMMUNITY
+  /// ======================================================
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    await CommunityService.leaveCommunity(request, id);
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
-    // Reload internal list
-    await _load();
+    if (!_snackbarHandled &&
+        args != null &&
+        args["joinedCommunityName"] != null) {
+      _snackbarHandled = true;
 
-    // Return true so CommunityPage auto-refreshes
-    Navigator.pop(context, true);
+      final name = args["joinedCommunityName"];
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('You’ve joined "$name" community.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      });
+    }
   }
 
+  /// ================================
+  /// SHOW LEAVE CONFIRMATION POP-UP
+  /// ================================
+  Future<void> _confirmLeave(CommunityEntry community) async {
+    final shouldLeave = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Leave community?"),
+        content: Text(
+          'Are you sure you want to leave "${community.name}" community?\nYou can rejoin later.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              "Leave",
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLeave == true) {
+      await _leave(community);
+    }
+  }
+
+  /// ================================
+  /// API LEAVE + INSTANT REMOVE + SNACKBAR
+  /// ================================
+  Future<void> _leave(CommunityEntry community) async {
+    final request = context.read<CookieRequest>();
+    final result = await CommunityService.leaveCommunity(request, community.id);
+
+    if (!mounted) return;
+
+    if (result != null) {
+      setState(() {
+        _myCommunities.removeWhere((c) => c.id == community.id);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('You have left "${community.name}" community.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Failed to leave community."),
+        ),
+      );
+    }
+  }
+
+  /// ================================
+  /// BUILD UI
+  /// ================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +142,7 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
             children: [
               const SizedBox(height: 20),
 
+              // TITLE
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
@@ -77,6 +162,7 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
 
               const SizedBox(height: 20),
 
+              // SEARCH BAR (belum aktif, dekorasi saja)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
@@ -96,6 +182,7 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
 
               const SizedBox(height: 20),
 
+              // LIST OF COMMUNITIES
               Expanded(
                 child: _loading
                     ? Center(
@@ -108,7 +195,7 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
                           final c = _myCommunities[index];
                           return MyCommunityCard(
                             community: c,
-                            onLeave: () => _leave(c.id),
+                            onLeave: () => _confirmLeave(c),
                           );
                         },
                       ),

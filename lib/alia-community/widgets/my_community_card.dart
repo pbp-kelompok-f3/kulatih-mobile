@@ -53,11 +53,11 @@ class MyCommunityCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // ======= ACTION BUTTONS =======
+          // ACTION BUTTONS
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // VIEW DETAIL — tidak perlu isMember lagi
+              // VIEW DETAIL
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -79,7 +79,7 @@ class MyCommunityCard extends StatelessWidget {
                 ),
               ),
 
-              // OPEN GROUP CHAT
+              // GROUP CHAT
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -101,10 +101,10 @@ class MyCommunityCard extends StatelessWidget {
                 ),
               ),
 
-              // LEAVE COMMUNITY
+              // LEAVE
               GestureDetector(
                 onTap: onLeave,
-                child: Text(
+                child: const Text(
                   "LEAVE",
                   style: TextStyle(
                     color: Colors.redAccent,

@@ -4,6 +4,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import '../services/community_service.dart';
+import '../pages/my_community_page.dart';   // <-- tambahkan import ini
 
 class CreateCommunityPage extends StatefulWidget {
   const CreateCommunityPage({super.key});
@@ -38,7 +39,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       _name.text.trim(),
       _short.text.trim(),
       _long.text.trim(),
-      null, // profile image url optional
+      null,
     );
 
     setState(() => _submitting = false);
@@ -46,8 +47,19 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     if (!mounted) return;
 
     if (newCommunity != null) {
-      // OPTIONAL: langsung redirect agar user bisa lihat community baru di My Community
-      Navigator.pop(context, true);
+      // 🔥 Notif sukses
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Community successfully created!"),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // 🔥 Redirect langsung ke My Community Page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MyCommunityPage()),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to create community")),

@@ -40,7 +40,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     setState(() {
       isMember = detail?["is_member"] == true;
 
-      // update jumlah member di model
+      // update jumlah member
       if (detail?["members_count"] != null) {
         widget.community.membersCount = detail!["members_count"];
       }
@@ -49,10 +49,35 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
     });
   }
 
+  /// ===========================
+  /// HANDLE JOIN
+  /// ===========================
+  Future<void> _joinCommunity() async {
+    final request = context.read<CookieRequest>();
+
+    final updated =
+        await CommunityService.joinCommunity(request, widget.community.id);
+
+    if (updated != null) {
+      // After join → redirect ke MyCommunityPage + kirim notif
+      Navigator.pushReplacementNamed(
+        context,
+        "/my-community",
+        arguments: {
+          "joinedCommunityName": widget.community.name,
+        },
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Failed to join community."),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final request = context.watch<CookieRequest>();
-
     if (loading) {
       return Scaffold(
         backgroundColor: AppColors.indigoDark,
@@ -169,40 +194,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                      onPressed: () async {
-                        final updated = await CommunityService.joinCommunity(
-                          request,
-                          widget.community.id,
-                        );
-
-                        if (updated != null) {
-                          setState(() {
-                            isMember = true;
-
-                            // Update seluruh model community ini
-                            widget.community.membersCount =
-                                updated.membersCount;
-                            widget.community.shortDescription =
-                                updated.shortDescription;
-                            widget.community.fullDescription =
-                                updated.fullDescription;
-                            widget.community.createdBy = updated.createdBy;
-                          });
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("Success! You joined this community."),
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content:
-                                  Text("Already joined or failed to join."),
-                            ),
-                          );
-                        }
-                      },
+                      onPressed: _joinCommunity,
                       child: Text(
                         "JOIN US NOW",
                         style: TextStyle(
