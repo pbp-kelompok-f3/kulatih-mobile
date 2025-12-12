@@ -26,6 +26,10 @@ class _CommunityPageState extends State<CommunityPage> {
 
   final TextEditingController _searchController = TextEditingController();
 
+  // Pagination
+  int currentPage = 1;
+  int itemsPerPage = 6;
+
   @override
   void initState() {
     super.initState();
@@ -63,7 +67,119 @@ class _CommunityPageState extends State<CommunityPage> {
               c.fullDescription.toLowerCase().contains(query);
         }).toList();
       }
+      currentPage = 1;
     });
+  }
+
+  int get totalPages {
+    if (filteredCommunities.isEmpty) return 1;
+    return (filteredCommunities.length / itemsPerPage).ceil();
+  }
+
+  List<CommunityEntry> get paginatedCommunities {
+    int startIndex = (currentPage - 1) * itemsPerPage;
+    int endIndex = startIndex + itemsPerPage;
+    if (endIndex > filteredCommunities.length) {
+      endIndex = filteredCommunities.length;
+    }
+    if (startIndex >= filteredCommunities.length) return [];
+    return filteredCommunities.sublist(startIndex, endIndex);
+  }
+
+  void _goToPage(int page) {
+    if (page >= 1 && page <= totalPages) {
+      setState(() {
+        currentPage = page;
+      });
+    }
+  }
+
+  Widget _buildPagination() {
+    List<Widget> pageButtons = [];
+
+    // Previous button
+    pageButtons.add(
+      GestureDetector(
+        onTap: currentPage > 1 ? () => _goToPage(currentPage - 1) : null,
+        child: Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: currentPage > 1 ? AppColors.card : AppColors.card.withOpacity(0.5),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              '<',
+              style: TextStyle(
+                color: currentPage > 1 ? AppColors.textWhite : AppColors.textLight,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Page numbers
+    for (int i = 1; i <= totalPages; i++) {
+      pageButtons.add(
+        GestureDetector(
+          onTap: () => _goToPage(i),
+          child: Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: i == currentPage ? AppColors.gold : AppColors.card,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                '$i',
+                style: TextStyle(
+                  color: i == currentPage ? AppColors.indigoDark : AppColors.textWhite,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Next button
+    pageButtons.add(
+      GestureDetector(
+        onTap: currentPage < totalPages ? () => _goToPage(currentPage + 1) : null,
+        child: Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: currentPage < totalPages ? AppColors.card : AppColors.card.withOpacity(0.5),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              '>',
+              style: TextStyle(
+                color: currentPage < totalPages ? AppColors.textWhite : AppColors.textLight,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      alignment: WrapAlignment.center,
+      children: pageButtons,
+    );
   }
 
   @override
@@ -80,8 +196,7 @@ class _CommunityPageState extends State<CommunityPage> {
               // ===== HEADER =====
               Center(
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
                   decoration: BoxDecoration(
                     color: AppColors.gold,
                     borderRadius: BorderRadius.circular(30),
@@ -99,10 +214,9 @@ class _CommunityPageState extends State<CommunityPage> {
 
               const SizedBox(height: 24),
 
-              // ===== SEARCH BAR (Vertical padding 7) =====
+              // ===== SEARCH BAR =====
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
                 decoration: BoxDecoration(
                   color: AppColors.card,
                   borderRadius: BorderRadius.circular(25),
@@ -112,11 +226,10 @@ class _CommunityPageState extends State<CommunityPage> {
                   style: TextStyle(color: AppColors.textWhite, fontSize: 14),
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
-                    isCollapsed: true, // 🔥 Centers text perfectly
+                    isCollapsed: true,
                     border: InputBorder.none,
                     hintText: "Search community to join",
-                    hintStyle:
-                        TextStyle(color: AppColors.textLight, fontSize: 14),
+                    hintStyle: TextStyle(color: AppColors.textLight, fontSize: 14),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
                             icon: Icon(Icons.clear, color: AppColors.textLight),
@@ -137,8 +250,7 @@ class _CommunityPageState extends State<CommunityPage> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (_) => const MyCommunityPage()),
+                          MaterialPageRoute(builder: (_) => const MyCommunityPage()),
                         ).then((_) => fetchCommunities());
                       },
                       child: Container(
@@ -158,16 +270,13 @@ class _CommunityPageState extends State<CommunityPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(width: 12),
-
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (_) => const CreateCommunityPage()),
+                          MaterialPageRoute(builder: (_) => const CreateCommunityPage()),
                         ).then((_) => fetchCommunities());
                       },
                       child: Container(
@@ -196,8 +305,7 @@ class _CommunityPageState extends State<CommunityPage> {
               Expanded(
                 child: isLoading
                     ? Center(
-                        child:
-                            CircularProgressIndicator(color: AppColors.gold),
+                        child: CircularProgressIndicator(color: AppColors.gold),
                       )
                     : filteredCommunities.isEmpty
                         ? Center(
@@ -212,17 +320,16 @@ class _CommunityPageState extends State<CommunityPage> {
                             ),
                           )
                         : ListView.builder(
-                            itemCount: filteredCommunities.length,
+                            itemCount: paginatedCommunities.length,
                             itemBuilder: (context, index) {
-                              final c = filteredCommunities[index];
+                              final c = paginatedCommunities[index];
                               return CommunityCard(
                                 community: c,
                                 onTap: () async {
                                   await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          CommunityDetailPage(community: c),
+                                      builder: (_) => CommunityDetailPage(community: c),
                                     ),
                                   );
                                   fetchCommunities();
@@ -231,6 +338,13 @@ class _CommunityPageState extends State<CommunityPage> {
                             },
                           ),
               ),
+
+              // ===== PAGINATION =====
+              if (!isLoading && filteredCommunities.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                _buildPagination(),
+                const SizedBox(height: 20),
+              ],
             ],
           ),
         ),
