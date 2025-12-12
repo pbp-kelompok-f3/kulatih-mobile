@@ -15,21 +15,21 @@ class MyCommunityPage extends StatefulWidget {
 }
 
 class _MyCommunityPageState extends State<MyCommunityPage> {
-  List<CommunityEntry> _myCommunities = [];
-  List<CommunityEntry> _filteredCommunities = [];
-  bool _loading = true;
+  List<CommunityEntry> all = [];
+  List<CommunityEntry> filtered = [];
+  bool loading = true;
+  bool hasChanges = false; // 🔥 TRACK CHANGES
 
   final TextEditingController _searchController = TextEditingController();
 
-  // Pagination
   int currentPage = 1;
-  int itemsPerPage = 6;
+  final int itemsPerPage = 6;
 
   @override
   void initState() {
     super.initState();
     _load();
-    _searchController.addListener(_filterCommunities);
+    _searchController.addListener(_filter);
   }
 
   @override
@@ -38,64 +38,69 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
     super.dispose();
   }
 
+  /// ================================
+  /// LOAD DATA
+  /// ================================
   Future<void> _load() async {
     final request = context.read<CookieRequest>();
     final data = await CommunityService.getMyCommunities(request);
 
+    if (!mounted) return;
+
     setState(() {
-      _myCommunities = data;
-      _filteredCommunities = data;
-      _loading = false;
+      all = data;
+      filtered = data;
+      loading = false;
     });
   }
 
-  void _filterCommunities() {
+  /// ================================
+  /// SEARCH
+  /// ================================
+  void _filter() {
     final q = _searchController.text.toLowerCase().trim();
-
     setState(() {
-      if (q.isEmpty) {
-        _filteredCommunities = _myCommunities;
-      } else {
-        _filteredCommunities = _myCommunities.where((c) {
-          return c.name.toLowerCase().contains(q) ||
-              c.shortDescription.toLowerCase().contains(q) ||
-              c.fullDescription.toLowerCase().contains(q);
-        }).toList();
-      }
+      filtered = q.isEmpty
+          ? all
+          : all.where((c) {
+              return c.name.toLowerCase().contains(q) ||
+                  c.shortDescription.toLowerCase().contains(q) ||
+                  c.fullDescription.toLowerCase().contains(q);
+            }).toList();
       currentPage = 1;
     });
   }
 
-  int get totalPages {
-    if (_filteredCommunities.isEmpty) return 1;
-    return (_filteredCommunities.length / itemsPerPage).ceil();
-  }
+  /// ================================
+  /// PAGINATION
+  /// ================================
+  int get totalPages =>
+      (filtered.length / itemsPerPage).ceil().clamp(1, 999);
 
-  List<CommunityEntry> get paginatedCommunities {
-    int startIndex = (currentPage - 1) * itemsPerPage;
-    int endIndex = startIndex + itemsPerPage;
-    if (endIndex > _filteredCommunities.length) {
-      endIndex = _filteredCommunities.length;
-    }
-    if (startIndex >= _filteredCommunities.length) return [];
-    return _filteredCommunities.sublist(startIndex, endIndex);
+  List<CommunityEntry> get paginated {
+    final start = (currentPage - 1) * itemsPerPage;
+    final end = (start + itemsPerPage).clamp(0, filtered.length);
+    if (start >= filtered.length) return [];
+    return filtered.sublist(start, end);
   }
 
   void _goToPage(int page) {
     if (page >= 1 && page <= totalPages) {
-      setState(() {
-        currentPage = page;
-      });
+      setState(() => currentPage = page);
     }
   }
 
+  /// ================================
+  /// LEAVE
+  /// ================================
   Future<void> _confirmLeave(CommunityEntry community) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text("Leave community?"),
         content: Text(
-            'Are you sure you want to leave "${community.name}" community?\nYou can rejoin later.'),
+          'Are you sure you want to leave "${community.name}" community?\nYou can rejoin later.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -122,234 +127,189 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
 
     if (ok) {
       setState(() {
-        _myCommunities.removeWhere((c) => c.id == community.id);
-        _filteredCommunities.removeWhere((c) => c.id == community.id);
-        
-        // Adjust page if needed
-        if (currentPage > totalPages && totalPages > 0) {
-          currentPage = totalPages;
-        }
+        all.removeWhere((c) => c.id == community.id);
+        filtered.removeWhere((c) => c.id == community.id);
+        if (currentPage > totalPages) currentPage = totalPages;
+        hasChanges = true; // 🔥 MARK AS CHANGED
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('You have left "${community.name}" community.'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('You have left "${community.name}" community.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Failed to leave community."),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Failed to leave community."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
+  /// ================================
+  /// PAGINATION UI (BOTTOM ONLY)
+  /// ================================
   Widget _buildPagination() {
-    List<Widget> pageButtons = [];
-
-    // Previous button
-    pageButtons.add(
-      GestureDetector(
-        onTap: currentPage > 1 ? () => _goToPage(currentPage - 1) : null,
-        child: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: currentPage > 1 ? AppColors.card : AppColors.card.withOpacity(0.5),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              '<',
-              style: TextStyle(
-                color: currentPage > 1 ? AppColors.textWhite : AppColors.textLight,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Page numbers
-    for (int i = 1; i <= totalPages; i++) {
-      pageButtons.add(
-        GestureDetector(
-          onTap: () => _goToPage(i),
-          child: Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: i == currentPage ? AppColors.gold : AppColors.card,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                '$i',
-                style: TextStyle(
-                  color: i == currentPage ? AppColors.indigoDark : AppColors.textWhite,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    // Next button
-    pageButtons.add(
-      GestureDetector(
-        onTap: currentPage < totalPages ? () => _goToPage(currentPage + 1) : null,
-        child: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: currentPage < totalPages ? AppColors.card : AppColors.card.withOpacity(0.5),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              '>',
-              style: TextStyle(
-                color: currentPage < totalPages ? AppColors.textWhite : AppColors.textLight,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
     return Wrap(
       spacing: 10,
-      runSpacing: 10,
       alignment: WrapAlignment.center,
-      children: pageButtons,
+      children: [
+        _page('<', currentPage > 1 ? currentPage - 1 : null),
+        for (int i = 1; i <= totalPages; i++)
+          _page('$i', i, active: i == currentPage),
+        _page('>', currentPage < totalPages ? currentPage + 1 : null),
+      ],
     );
   }
 
+  Widget _page(String t, int? p, {bool active = false}) {
+    return GestureDetector(
+      onTap: p == null ? null : () => _goToPage(p),
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: active ? AppColors.gold : AppColors.card,
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          t,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: active
+                ? AppColors.indigoDark
+                : p == null
+                    ? AppColors.textLight
+                    : AppColors.textWhite,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// ================================
+  /// UI
+  /// ================================
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.indigo,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-
-              // ===== TITLE =====
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  color: AppColors.gold,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Center(
-                  child: Text(
-                    "MY COMMUNITY",
-                    style: TextStyle(
-                      color: AppColors.indigoDark,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // ===== SEARCH BAR =====
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  style: TextStyle(color: AppColors.textWhite, fontSize: 14),
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: InputDecoration(
-                    isCollapsed: true,
-                    border: InputBorder.none,
-                    hintText: "Search communities you have joined",
-                    hintStyle: TextStyle(color: AppColors.textLight, fontSize: 14),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: Icon(Icons.clear, color: AppColors.textLight),
-                            onPressed: () => _searchController.clear(),
-                          )
-                        : Icon(Icons.search, color: AppColors.textLight),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // ===== LIST =====
-              Expanded(
-                child: _loading
-                    ? Center(
-                        child: CircularProgressIndicator(color: AppColors.gold),
-                      )
-                    : _filteredCommunities.isEmpty
-                        ? Center(
-                            child: Text(
-                              "No communities found.",
-                              style: TextStyle(color: AppColors.textLight),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: paginatedCommunities.length,
-                            itemBuilder: (_, i) {
-                              return MyCommunityCard(
-                                community: paginatedCommunities[i],
-                                onLeave: () => _confirmLeave(paginatedCommunities[i]),
-                              );
-                            },
-                          ),
-              ),
-
-              // ===== PAGINATION =====
-              if (!_loading && _filteredCommunities.isNotEmpty) ...[
+    return WillPopScope(
+      // 🔥 INTERCEPT BACK BUTTON
+      onWillPop: () async {
+        Navigator.pop(context, hasChanges);
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.indigo,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
                 const SizedBox(height: 20),
-                _buildPagination(),
-                const SizedBox(height: 16),
-              ],
 
-              // ===== BACK TO COMMUNITY BUTTON (Small centered) =====
-              Center(
-                child: GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
-                    decoration: BoxDecoration(
-                      color: AppColors.gold,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                // TITLE
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: AppColors.gold,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Center(
                     child: Text(
-                      "BACK TO COMMUNITY",
+                      "MY COMMUNITY",
                       style: TextStyle(
                         color: AppColors.indigoDark,
                         fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                        fontSize: 20,
                       ),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 20),
-            ],
+                const SizedBox(height: 20),
+
+                // SEARCH
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: AppColors.card,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    style: TextStyle(color: AppColors.textWhite),
+                    decoration: InputDecoration(
+                      isCollapsed: true,
+                      border: InputBorder.none,
+                      hintText: "Search communities you joined",
+                      hintStyle: TextStyle(color: AppColors.textLight),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // LIST + FOOTER
+                Expanded(
+                  child: loading
+                      ? Center(
+                          child:
+                              CircularProgressIndicator(color: AppColors.gold),
+                        )
+                      : ListView.builder(
+                          itemCount: paginated.length + 1,
+                          itemBuilder: (_, i) {
+                            if (i < paginated.length) {
+                              return MyCommunityCard(
+                                community: paginated[i],
+                                onLeave: () => _confirmLeave(paginated[i]),
+                              );
+                            }
+
+                            return Column(
+                              children: [
+                                const SizedBox(height: 30),
+                                if (filtered.isNotEmpty) _buildPagination(),
+                                const SizedBox(height: 20),
+                                GestureDetector(
+                                  onTap: () {
+                                    // 🔥 RETURN hasChanges SIGNAL
+                                    Navigator.pop(context, hasChanges);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 24),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.gold,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Text(
+                                      "BACK TO COMMUNITY",
+                                      style: TextStyle(
+                                        color: AppColors.indigoDark,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 30),
+                              ],
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
