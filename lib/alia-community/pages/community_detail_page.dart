@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import '../models/community.dart';
 import '../services/community_service.dart';
 import 'community_chat_page.dart';
+import 'my_community_page.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 
@@ -50,27 +52,73 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
   }
 
   /// ===========================
-  /// HANDLE JOIN
+  /// HANDLE JOIN → redirect + notif
   /// ===========================
   Future<void> _joinCommunity() async {
+    print('🔵 Starting join...'); // DEBUG
+    
     final request = context.read<CookieRequest>();
 
-    final updated =
-        await CommunityService.joinCommunity(request, widget.community.id);
-
-    if (updated != null) {
-      // After join → redirect ke MyCommunityPage + kirim notif
-      Navigator.pushReplacementNamed(
-        context,
-        "/my-community",
-        arguments: {
-          "joinedCommunityName": widget.community.name,
-        },
+    try {
+      // Langsung call API tanpa parsing ke CommunityEntry dulu
+      final response = await request.postJson(
+        "${CommunityService.baseUrl}/join/${widget.community.id}/json/",
+        jsonEncode({}),
       );
-    } else {
+
+      print('🔵 Response: $response'); // DEBUG
+
+      if (!mounted) return;
+
+      // Cek apakah ada response dan success == true
+      if (response != null && 
+          (response["success"] == true || response["community"] != null)) {
+        
+        print('✅ Join successful!'); // DEBUG
+        
+        // 🔥 Notif sukses
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('You\'ve joined "${widget.community.name}" community.'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
+        // Kasih sedikit delay biar snackbar keliatan
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        if (!mounted) return;
+
+        print('✅ Redirecting...'); // DEBUG
+
+        // 🔥 Redirect langsung ke My Community Page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MyCommunityPage()),
+        );
+        
+        print('✅ Redirect complete!'); // DEBUG
+        
+      } else {
+        print('🔴 Join failed: $response'); // DEBUG
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Failed to join community."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('🔴 Error: $e'); // DEBUG
+      
+      if (!mounted) return;
+      
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Failed to join community."),
+        SnackBar(
+          content: Text("Error: $e"),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -99,9 +147,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
-              // =====================
               // COMMUNITY NAME
-              // =====================
               Center(
                 child: Text(
                   widget.community.name,
@@ -115,9 +161,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
 
               const SizedBox(height: 16),
 
-              // =====================
               // MEMBERS COUNT
-              // =====================
               Center(
                 child: Container(
                   padding:
@@ -138,9 +182,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
 
               const SizedBox(height: 16),
 
-              // =====================
               // FULL DESCRIPTION
-              // =====================
               Expanded(
                 child: SingleChildScrollView(
                   child: Text(
@@ -156,7 +198,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
               const SizedBox(height: 20),
 
               // ===============================
-              //    BUTTON JOIN / CHAT
+              // BUTTON JOIN / GO TO CHAT
               // ===============================
               isMember == true
                   ? ElevatedButton(

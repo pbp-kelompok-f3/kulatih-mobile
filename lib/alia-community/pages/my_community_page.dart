@@ -17,7 +17,6 @@ class MyCommunityPage extends StatefulWidget {
 class _MyCommunityPageState extends State<MyCommunityPage> {
   List<CommunityEntry> _myCommunities = [];
   bool _loading = true;
-  bool _snackbarHandled = false; // agar snackbar join tidak muncul dua kali
 
   @override
   void initState() {
@@ -36,35 +35,6 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
       _myCommunities = data;
       _loading = false;
     });
-  }
-
-  /// ======================================================
-  /// DIA PANGGIL OTOMATIS SETIAP ROUTE MASUK KE PAGE INI
-  /// DIGUNAKAN UNTUK MENAMPILKAN SNACKBAR JOIN COMMUNITY
-  /// ======================================================
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    final args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-
-    if (!_snackbarHandled &&
-        args != null &&
-        args["joinedCommunityName"] != null) {
-      _snackbarHandled = true;
-
-      final name = args["joinedCommunityName"];
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('You’ve joined "$name" community.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      });
-    }
   }
 
   /// ================================

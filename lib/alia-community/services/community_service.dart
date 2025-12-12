@@ -89,21 +89,45 @@ class CommunityService {
   }
 
   // ============================================================
-  // JOIN COMMUNITY
-  // ============================================================
-  static Future<CommunityEntry?> joinCommunity(
-      CookieRequest request, int id) async {
+// JOIN COMMUNITY
+// ============================================================
+static Future<CommunityEntry?> joinCommunity(
+    CookieRequest request, int id) async {
+  try {
     final response =
         await request.postJson("$baseUrl/join/$id/json/", jsonEncode({}));
 
-    if (response["community"] != null) {
-      return CommunityEntry.fromJson(
-        normalizeCreator(response["community"]),
+    print('🔵 Join response: $response'); // DEBUG
+
+    // Cek apakah berhasil (baik joined baru atau already member)
+    if (response["success"] == true || response["community"] != null) {
+      // Return community data
+      if (response["community"] != null) {
+        return CommunityEntry.fromJson(
+          normalizeCreator(response["community"]),
+        );
+      }
+      
+      // Kalau already member tapi tetap success, return dummy object
+      // Supaya UI tahu join "berhasil" (walaupun udah member)
+      return CommunityEntry(
+        id: id,
+        name: '',
+        shortDescription: '',
+        fullDescription: '',
+        profileImageUrl: null,
+        membersCount: 0,
+        createdAt: DateTime.now(),
+        createdBy: CreatedBy.ADMIN,
       );
     }
+    
+    return null;
+  } catch (e) {
+    print('🔴 Error joining community: $e');
     return null;
   }
-
+}
   // ============================================================
   // LEAVE COMMUNITY
   // ============================================================
