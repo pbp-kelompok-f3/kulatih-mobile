@@ -73,26 +73,39 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
   /// API LEAVE + INSTANT REMOVE + SNACKBAR
   /// ================================
   Future<void> _leave(CommunityEntry community) async {
+    print('🔵 Leaving community: ${community.name}'); // DEBUG
+    
     final request = context.read<CookieRequest>();
     final result = await CommunityService.leaveCommunity(request, community.id);
 
+    print('🔵 Leave result: $result'); // DEBUG
+
     if (!mounted) return;
 
-    if (result != null) {
+    if (result) {
+      // ✅ Berhasil leave - hapus dari list
       setState(() {
         _myCommunities.removeWhere((c) => c.id == community.id);
       });
 
+      print('✅ Successfully left community'); // DEBUG
+
+      // ✅ Show success snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('You have left "${community.name}" community.'),
           backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
         ),
       );
     } else {
+      print('🔴 Failed to leave community'); // DEBUG
+      
+      // ❌ Gagal leave
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Failed to leave community."),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -159,16 +172,26 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
                         child:
                             CircularProgressIndicator(color: AppColors.gold),
                       )
-                    : ListView.builder(
-                        itemCount: _myCommunities.length,
-                        itemBuilder: (context, index) {
-                          final c = _myCommunities[index];
-                          return MyCommunityCard(
-                            community: c,
-                            onLeave: () => _confirmLeave(c),
-                          );
-                        },
-                      ),
+                    : _myCommunities.isEmpty
+                        ? Center(
+                            child: Text(
+                              "You haven't joined any community yet.",
+                              style: TextStyle(
+                                color: AppColors.textLight,
+                                fontSize: 14,
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: _myCommunities.length,
+                            itemBuilder: (context, index) {
+                              final c = _myCommunities[index];
+                              return MyCommunityCard(
+                                community: c,
+                                onLeave: () => _confirmLeave(c),
+                              );
+                            },
+                          ),
               ),
             ],
           ),

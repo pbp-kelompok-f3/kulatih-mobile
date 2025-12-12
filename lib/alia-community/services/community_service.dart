@@ -128,21 +128,29 @@ static Future<CommunityEntry?> joinCommunity(
     return null;
   }
 }
+
   // ============================================================
-  // LEAVE COMMUNITY
-  // ============================================================
-  static Future<CommunityEntry?> leaveCommunity(
-      CookieRequest request, int id) async {
+// LEAVE COMMUNITY
+// ============================================================
+static Future<bool> leaveCommunity(
+    CookieRequest request, int id) async {
+  try {
     final response =
         await request.postJson("$baseUrl/leave/$id/json/", jsonEncode({}));
 
-    if (response["community"] != null) {
-      return CommunityEntry.fromJson(
-        normalizeCreator(response["community"]),
-      );
+    print('🔵 Leave response: $response'); // DEBUG
+
+    // Cek apakah berhasil
+    if (response["success"] == true) {
+      return true;
     }
-    return null;
+    
+    return false;
+  } catch (e) {
+    print('🔴 Error leaving community: $e');
+    return false;
   }
+}
 
   // ============================================================
   // GET MESSAGES
