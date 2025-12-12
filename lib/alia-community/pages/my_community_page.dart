@@ -310,44 +310,59 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
                             ),
                           )
                         : ListView.builder(
-                            itemCount: _getPaginatedCommunities().length,
+                            itemCount: _getPaginatedCommunities().length + 1,
                             itemBuilder: (_, i) {
-                              return MyCommunityCard(
-                                community: _getPaginatedCommunities()[i],
-                                onLeave: () => _confirmLeave(_getPaginatedCommunities()[i]),
+                              // ===== COMMUNITY CARD =====
+                              if (i < _getPaginatedCommunities().length) {
+                                final community = _getPaginatedCommunities()[i];
+                                return MyCommunityCard(
+                                  community: community,
+                                  onLeave: () => _confirmLeave(community),
+                                );
+                              }
+
+                              // ===== FOOTER (SCROLL KE BAWAH BARU KELIHATAN) =====
+                              return Column(
+                                children: [
+                                  const SizedBox(height: 30),
+
+                                  // PAGINATION
+                                  if (_filteredCommunities.isNotEmpty)
+                                    _buildPagination(),
+
+                                  const SizedBox(height: 20),
+
+                                  // BACK BUTTON (KECIL, TENGAH)
+                                  Center(
+                                    child: GestureDetector(
+                                      onTap: () => Navigator.pop(context),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 10,
+                                          horizontal: 28,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.gold,
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Text(
+                                          "BACK TO COMMUNITY",
+                                          style: TextStyle(
+                                            color: AppColors.indigoDark,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12, // 🔥 kecil seperti gambar
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 30),
+                                ],
                               );
                             },
-                          ),
-              ),
+                          )
 
-              // ===== PAGINATION =====
-              if (!_loading && _filteredCommunities.isNotEmpty) ...[
-                const SizedBox(height: 20),
-                _buildPagination(),
-                const SizedBox(height: 20),
-              ],
-
-              // ===== BACK TO COMMUNITY BUTTON =====
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: AppColors.gold,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "BACK TO COMMUNITY",
-                      style: TextStyle(
-                        color: AppColors.indigoDark,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
               ),
 
               const SizedBox(height: 20),
