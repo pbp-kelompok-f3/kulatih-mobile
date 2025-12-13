@@ -17,6 +17,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   final _name = TextEditingController();
   final _short = TextEditingController();
   final _long = TextEditingController();
+  final _profilePicture = TextEditingController();
 
   bool _submitting = false;
 
@@ -25,7 +26,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
         _short.text.trim().isEmpty ||
         _long.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill in all fields")),
+        const SnackBar(content: Text("Please fill in all required fields")),
       );
       return;
     }
@@ -39,7 +40,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       _name.text.trim(),
       _short.text.trim(),
       _long.text.trim(),
-      null,
+      _profilePicture.text.trim().isEmpty ? null : _profilePicture.text.trim(),
     );
 
     setState(() => _submitting = false);
@@ -66,17 +67,30 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   }
 
   Widget _field(String label, TextEditingController controller,
-      {int maxLines = 1}) {
+      {int maxLines = 1, bool optional = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: AppColors.textWhite,
-            fontWeight: FontWeight.w700,
-            fontSize: 15,
-          ),
+        Row(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: AppColors.textWhite,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+            ),
+            if (optional)
+              Text(
+                " (optional)",
+                style: TextStyle(
+                  color: AppColors.textLight,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12,
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 8),
 
@@ -108,7 +122,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.indigo,   
+      backgroundColor: AppColors.indigo,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 20),
@@ -136,7 +150,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
                 decoration: BoxDecoration(
-                  color: AppColors.indigoDark,  
+                  color: AppColors.indigoDark,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Column(
@@ -146,6 +160,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                     _field("Quick description", _short),
                     _field("Tell us more about your community", _long,
                         maxLines: 6),
+                    _field("Profile Picture", _profilePicture, optional: true),
 
                     const SizedBox(height: 10),
 

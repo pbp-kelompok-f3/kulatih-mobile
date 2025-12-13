@@ -20,13 +20,13 @@ class CommunityCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.card, 
+          color: AppColors.card,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // dummy avatar
+            // Profile Picture
             Container(
               width: 56,
               height: 56,
@@ -34,6 +34,39 @@ class CommunityCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Colors.white,
               ),
+              child: community.profileImageUrl != null &&
+                      community.profileImageUrl!.isNotEmpty
+                  ? ClipOval(
+                      child: Image.network(
+                        community.profileImageUrl!,
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.indigo,
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.white,
+                          );
+                        },
+                      ),
+                    )
+                  : Container(), // Empty white circle if no image
             ),
 
             const SizedBox(width: 16),
@@ -61,11 +94,11 @@ class CommunityCard extends StatelessWidget {
                       fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 8), 
+                  const SizedBox(height: 8),
                   Text(
                     "Click to view detail",
                     style: TextStyle(
-                      color: AppColors.gold, 
+                      color: AppColors.gold,
                       fontSize: 11,
                       fontStyle: FontStyle.italic,
                     ),

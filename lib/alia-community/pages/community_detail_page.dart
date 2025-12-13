@@ -119,36 +119,61 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
+              // Profile Picture
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: widget.community.profileImageUrl != null &&
+                        widget.community.profileImageUrl!.isNotEmpty
+                    ? ClipOval(
+                        child: Image.network(
+                          widget.community.profileImageUrl!,
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.white,
+                            );
+                          },
+                        ),
+                      )
+                    : Container(), // Empty white circle if no image
+              ),
+
+              const SizedBox(height: 16),
+
               // Judul
-              Center(
-                child: Text(
-                  widget.community.name.toUpperCase(),
-                  style: TextStyle(
-                    color: AppColors.gold,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
+              Text(
+                widget.community.name.toUpperCase(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.gold,
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
 
               const SizedBox(height: 16),
 
               // Members count
-              Center(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
-                  decoration: BoxDecoration(
-                    color: AppColors.card,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Text(
-                    "Members: ${widget.community.membersCount}",
-                    style: TextStyle(
-                      color: AppColors.textWhite,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                decoration: BoxDecoration(
+                  color: AppColors.card,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  "Members: ${widget.community.membersCount}",
+                  style: TextStyle(
+                    color: AppColors.textWhite,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
                 ),
               ),
