@@ -1,5 +1,3 @@
-// lib/alia-community/widgets/chat_bubble.dart
-
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import '../models/message.dart';
@@ -44,7 +42,7 @@ class ChatBubble extends StatelessWidget {
               ),
             ),
 
-          // CHAT BUBBLE
+          // Chat bubble
           Container(
             margin: const EdgeInsets.symmetric(vertical: 6),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -67,7 +65,7 @@ class ChatBubble extends StatelessWidget {
             ),
           ),
 
-          // EDIT & DELETE (hanya untuk pesan sendiri)
+          // Edit & Delete untuk pesan sendiri
           if (isMe)
             Padding(
               padding: const EdgeInsets.only(top: 4, right: 4),
@@ -99,7 +97,7 @@ class ChatBubble extends StatelessWidget {
               ),
             ),
 
-          // Untuk pesan orang lain → tampilkan tombol di bawah bubble
+          // Edit & Delete untuk message orang lain)
           if (!isMe)
             Padding(
               padding: const EdgeInsets.only(left: 6, top: 2),

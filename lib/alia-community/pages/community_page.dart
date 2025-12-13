@@ -45,9 +45,7 @@ class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveCl
     super.dispose();
   }
 
-  /// ================================
-  /// LOAD COMMUNITIES
-  /// ================================
+  // Load communities
   Future<void> fetchCommunities() async {
     if (mounted) {
       setState(() => loading = true);
@@ -73,9 +71,7 @@ class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveCl
     }
   }
 
-  /// ================================
-  /// SEARCH FILTER
-  /// ================================
+  /// Filter untuk search bar
   void _filter() {
     final q = _searchController.text.toLowerCase().trim();
     setState(() {
@@ -94,9 +90,7 @@ class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveCl
     });
   }
 
-  /// ================================
-  /// PAGINATION HELPERS
-  /// ================================
+  /// Pagination helper
   int get totalPages =>
       filtered.isEmpty ? 1 : (filtered.length / itemsPerPage).ceil();
 
@@ -114,9 +108,7 @@ class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveCl
     }
   }
 
-  /// ================================
   /// PAGINATION UI (BOTTOM ONLY)
-  /// ================================
   Widget _buildPagination() {
     if (filtered.isEmpty) return const SizedBox.shrink();
     
@@ -158,12 +150,10 @@ class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveCl
     );
   }
 
-  /// ================================
   /// UI
-  /// ================================
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    super.build(context);
     
     return Scaffold(
       backgroundColor: AppColors.indigo,
@@ -174,7 +164,7 @@ class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveCl
             children: [
               const SizedBox(height: 20),
 
-              // HEADER
+              // Header
               Container(
                 padding:
                     const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
@@ -194,7 +184,7 @@ class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveCl
 
               const SizedBox(height: 24),
 
-              // SEARCH
+              // Search bar
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
@@ -216,14 +206,13 @@ class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveCl
 
               const SizedBox(height: 20),
 
-              // NAV BUTTONS
+              // Navigation Buttons
               Row(
                 children: [
                   Expanded(
                     child: _navBtn(
                       "MY COMMUNITY",
                       () async {
-                        // 🔥 SELALU REFRESH SETELAH KEMBALI
                         final result = await Navigator.push<bool>(
                           context,
                           MaterialPageRoute(
@@ -231,7 +220,7 @@ class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveCl
                           ),
                         );
 
-                        // Refresh regardless of result untuk ensure data terbaru
+                        // Refresh buat fetch ulang kalau ada perubahan
                         if (mounted) {
                           await fetchCommunities();
                         }
@@ -260,7 +249,7 @@ class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveCl
 
               const SizedBox(height: 20),
 
-              // LIST + PAGINATION AT BOTTOM
+              //List of communities
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: fetchCommunities,
@@ -322,7 +311,7 @@ class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveCl
                                   );
                                 }
 
-                                // BOTTOM PAGINATION
+                                // Pagination
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 30),
                                   child: _buildPagination(),

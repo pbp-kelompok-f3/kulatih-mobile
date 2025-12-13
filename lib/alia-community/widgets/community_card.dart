@@ -20,7 +20,7 @@ class CommunityCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.card, // 🔥 Ganti dari indigo ke card (lebih terang)
+          color: AppColors.card, 
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -61,11 +61,11 @@ class CommunityCard extends StatelessWidget {
                       fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 8), // 🔥 Spacing
+                  const SizedBox(height: 8), 
                   Text(
                     "Click to view detail",
                     style: TextStyle(
-                      color: AppColors.gold, // 🔥 Gold color untuk highlight
+                      color: AppColors.gold, 
                       fontSize: 11,
                       fontStyle: FontStyle.italic,
                     ),

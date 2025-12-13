@@ -1,5 +1,3 @@
-// lib/alia-community/pages/community_chat_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
@@ -83,7 +81,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
     if (newMsg != null) {
       _messageController.clear();
 
-      // langsung tambahkan tanpa reload
+      // langsung add tanpa reload
       setState(() {
         _messages.add(newMsg);
       });
@@ -162,7 +160,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // HEADER
+            // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Row(
@@ -204,7 +202,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
               ),
             ),
 
-            // MESSAGES
+            // Messages 
             Expanded(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -236,7 +234,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
               ),
             ),
 
-            // SEND MESSAGE
+            // Send message box
             Padding(
               padding: const EdgeInsets.all(20),
               child: Container(

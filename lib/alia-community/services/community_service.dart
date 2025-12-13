@@ -19,9 +19,7 @@ class CommunityService {
     return newJson;
   }
 
-  // ============================================================
-  // GET ALL COMMUNITIES
-  // ============================================================
+  // Get All Communities
   static Future<List<CommunityEntry>> getAllCommunities(
       CookieRequest request) async {
     final response = await request.get("$baseUrl/json/");
@@ -34,9 +32,7 @@ class CommunityService {
     return [];
   }
 
-  // ============================================================
-  // GET COMMUNITY DETAIL
-  // ============================================================
+  // Get Community Detail
   static Future<Map<String, dynamic>?> getCommunityDetail(
       CookieRequest request, int id) async {
     final response = await request.get("$baseUrl/$id/json/");
@@ -47,9 +43,7 @@ class CommunityService {
     return null;
   }
 
-  // ============================================================
-  // CREATE COMMUNITY
-  // ============================================================
+  // Create Community
   static Future<CommunityEntry?> createCommunity(
     CookieRequest request,
     String name,
@@ -73,9 +67,7 @@ class CommunityService {
     return null;
   }
 
-  // ============================================================
-  // GET MY COMMUNITIES
-  // ============================================================
+  //Get My Communities
   static Future<List<CommunityEntry>> getMyCommunities(
       CookieRequest request) async {
     final response = await request.get("$baseUrl/my/json/");
@@ -88,9 +80,7 @@ class CommunityService {
     return [];
   }
 
-  // ============================================================
-// JOIN COMMUNITY
-// ============================================================
+ // Join Community
 static Future<CommunityEntry?> joinCommunity(
     CookieRequest request, int id) async {
   try {
@@ -99,7 +89,7 @@ static Future<CommunityEntry?> joinCommunity(
 
     print('🔵 Join response: $response'); // DEBUG
 
-    // Cek apakah berhasil (baik joined baru atau already member)
+    // Cek apakah berhasil (joined baru atau already member)
     if (response["success"] == true || response["community"] != null) {
       // Return community data
       if (response["community"] != null) {
@@ -129,16 +119,14 @@ static Future<CommunityEntry?> joinCommunity(
   }
 }
 
-  // ============================================================
-// LEAVE COMMUNITY
-// ============================================================
+// Leave Community
 static Future<bool> leaveCommunity(
     CookieRequest request, int id) async {
   try {
     final response =
         await request.postJson("$baseUrl/leave/$id/json/", jsonEncode({}));
 
-    print('🔵 Leave response: $response'); // DEBUG
+    print('🔵 Leave response: $response'); 
 
     // Cek apakah berhasil
     if (response["success"] == true) {
@@ -152,9 +140,7 @@ static Future<bool> leaveCommunity(
   }
 }
 
-  // ============================================================
-  // GET MESSAGES
-  // ============================================================
+  // Get Messages
   static Future<List<Message>> getMessages(
       CookieRequest request, int communityId) async {
     final response =
@@ -169,9 +155,7 @@ static Future<bool> leaveCommunity(
     return [];
   }
 
-  // ============================================================
-  // SEND MESSAGE (FIXED)
-  // ============================================================
+  // Send Message
   static Future<Message?> sendMessage(
       CookieRequest request, int communityId, String text) async {
     final response = await request.postJson(
@@ -185,9 +169,7 @@ static Future<bool> leaveCommunity(
     return null;
   }
 
-  // ============================================================
-  // EDIT MESSAGE
-  // ============================================================
+  // Edit Message
   static Future<bool> editMessage(
       CookieRequest request, int communityId, int msgId, String newText) async {
     final response = await request.postJson(
@@ -198,9 +180,7 @@ static Future<bool> leaveCommunity(
     return response["success"] == true;
   }
 
-  // ============================================================
-  // DELETE MESSAGE
-  // ============================================================
+  // Delete Message
   static Future<bool> deleteMessage(
       CookieRequest request, int communityId, int msgId) async {
     final response = await request.postJson(

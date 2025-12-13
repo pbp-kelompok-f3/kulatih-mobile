@@ -119,7 +119,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
-              // TITLE
+              // Judul
               Center(
                 child: Text(
                   widget.community.name.toUpperCase(),
@@ -133,7 +133,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
 
               const SizedBox(height: 16),
 
-              // MEMBERS COUNT
+              // Members count
               Center(
                 child: Container(
                   padding:
@@ -155,9 +155,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
 
               const SizedBox(height: 24),
 
-              // ==============================================================
-              // FULL DESCRIPTION → FIXED WIDTH, FIXED HEIGHT, TEXT CENTERED
-              // ==============================================================
+              // Full Description
               Expanded(
                 child: Container(
                   width: double.infinity,
@@ -171,7 +169,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                       child: Center(
                         child: Text(
                           widget.community.fullDescription,
-                          textAlign: TextAlign.center, // 🔥 Center text
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             color: AppColors.textWhite,
                             fontSize: 15,
@@ -186,7 +184,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
 
               const SizedBox(height: 20),
 
-              // BUTTON
+              // Join / Go to group chat button
               isMember == true
                   ? ElevatedButton(
                       style: ElevatedButton.styleFrom(

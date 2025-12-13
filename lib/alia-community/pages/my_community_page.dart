@@ -247,7 +247,7 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
             children: [
               const SizedBox(height: 20),
 
-              // ===== TITLE =====
+              // Judul
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
@@ -268,7 +268,7 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
 
               const SizedBox(height: 20),
 
-              // ===== SEARCH BAR =====
+              // Search bar
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
                 decoration: BoxDecoration(
@@ -296,7 +296,7 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
 
               const SizedBox(height: 20),
 
-              // ===== LIST =====
+              // List of my communities
               Expanded(
                 child: _loading
                     ? Center(
@@ -312,7 +312,7 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
                         : ListView.builder(
                             itemCount: _getPaginatedCommunities().length + 1,
                             itemBuilder: (_, i) {
-                              // ===== COMMUNITY CARD =====
+                              // Community cards
                               if (i < _getPaginatedCommunities().length) {
                                 final community = _getPaginatedCommunities()[i];
                                 return MyCommunityCard(
@@ -321,18 +321,18 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
                                 );
                               }
 
-                              // ===== FOOTER (SCROLL KE BAWAH BARU KELIHATAN) =====
+                              // Pagination & Back Button (scroll view)
                               return Column(
                                 children: [
                                   const SizedBox(height: 30),
 
-                                  // PAGINATION
+                                  // Pagination
                                   if (_filteredCommunities.isNotEmpty)
                                     _buildPagination(),
 
                                   const SizedBox(height: 20),
 
-                                  // BACK BUTTON (KECIL, TENGAH)
+                                  // Back to community page button
                                   Center(
                                     child: GestureDetector(
                                       onTap: () => Navigator.pop(context),
@@ -350,7 +350,7 @@ class _MyCommunityPageState extends State<MyCommunityPage> {
                                           style: TextStyle(
                                             color: AppColors.indigoDark,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 12, // 🔥 kecil seperti gambar
+                                            fontSize: 12, 
                                           ),
                                         ),
                                       ),

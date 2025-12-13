@@ -80,7 +80,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
         ),
         const SizedBox(height: 8),
 
-        // INPUT BOX
+        // Input box
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -108,7 +108,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.indigo,   // ✔ background sesuai screenshot
+      backgroundColor: AppColors.indigo,   
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 20),
@@ -117,7 +117,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
             children: [
               const SizedBox(height: 10),
 
-              // TITLE
+              // Judul
               Text(
                 "MAKE YOUR OWN\nCOMMUNITY",
                 textAlign: TextAlign.center,
@@ -130,13 +130,13 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
 
               const SizedBox(height: 40),
 
-              // BOX FORM (warna diperbaiki)
+              // Form box
               Container(
                 width: double.infinity,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
                 decoration: BoxDecoration(
-                  color: AppColors.indigoDark,  // ✔ box form lebih gelap (benar)
+                  color: AppColors.indigoDark,  
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Column(
@@ -149,7 +149,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
 
                     const SizedBox(height: 10),
 
-                    // SUBMIT BUTTON
+                    // Submit button
                     GestureDetector(
                       onTap: _submitting ? null : _submit,
                       child: Container(
