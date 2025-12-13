@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:kulatih_mobile/salman-tournament/page/tournament_main.dart';
+import 'package:kulatih_mobile/izzati-forum/styles/text.dart';
+import 'package:kulatih_mobile/izzati-forum/styles/colors.dart';
 
 class TournamentCreatePage extends StatefulWidget {
   const TournamentCreatePage({super.key});
@@ -44,12 +46,9 @@ class _TournamentCreatePageUIState extends State<TournamentCreatePage> {
     return Scaffold(
       backgroundColor: const Color(0xFF0E0D25), // DARK NAVY BG
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "CREATE TOURNAMENT",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
+          style: heading( 45, color: Colors.white )
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFF0E0D25),

@@ -6,6 +6,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/salman-tournament/page/tournament_delete.dart';
 import 'package:kulatih_mobile/salman-tournament/page/tournament_main.dart';
+import 'package:kulatih_mobile/izzati-forum/styles/colors.dart';
 
 class TournamentDetailPage extends StatefulWidget {
   final Tournament tournament;
@@ -82,9 +83,23 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
           _isRefreshing = false;
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Data turnamen diperbarui!")),
-        );
+ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(
+    content: const Text(
+      "Data turnamen diperbarui!",
+      style: TextStyle(
+        color: Colors.black,     // biar kontras sama kuning
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    backgroundColor: AppColor.yellow,
+    behavior: SnackBarBehavior.floating,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+  ),
+);
+
       }
     } catch (e) {
       if (mounted) setState(() => _isRefreshing = false);

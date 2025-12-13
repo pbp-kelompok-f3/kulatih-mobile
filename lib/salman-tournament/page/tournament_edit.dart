@@ -1,8 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:pbp_django_auth/pbp_django_auth.dart';
-import 'package:provider/provider.dart';
+import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:kulatih_mobile/izzati-forum/styles/text.dart';
+import 'package:kulatih_mobile/izzati-forum/styles/colors.dart';
 import 'package:kulatih_mobile/salman-tournament/models/tournament_model.dart';
 
 class TournamentEditPage extends StatefulWidget {
@@ -17,20 +19,19 @@ class TournamentEditPage extends StatefulWidget {
 class _TournamentEditPageState extends State<TournamentEditPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers untuk input
   late TextEditingController _namaController;
   late TextEditingController _lokasiController;
   late TextEditingController _deskripsiController;
   late TextEditingController _dateController;
   late TextEditingController _posterController;
-  
+
   DateTime? _selectedDate;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Isi form dengan data yang sudah ada (Pre-fill)
+
     _namaController = TextEditingController(text: widget.tournament.nama);
     _lokasiController = TextEditingController(text: widget.tournament.lokasi);
     _deskripsiController = TextEditingController(
@@ -39,7 +40,6 @@ class _TournamentEditPageState extends State<TournamentEditPage> {
     _posterController = TextEditingController(text: widget.tournament.poster);
 
     _selectedDate = widget.tournament.tanggal;
-    // Format tanggal untuk tampilan (ex: 2023-12-01)
     _dateController = TextEditingController(
       text: DateFormat('yyyy-MM-dd').format(widget.tournament.tanggal),
     );
@@ -55,34 +55,55 @@ class _TournamentEditPageState extends State<TournamentEditPage> {
     super.dispose();
   }
 
-  // Fungsi Helper untuk memilih tanggal
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+  InputDecoration _inputDecoration() {
+    return InputDecoration(
+      filled: true,
+      fillColor: AppColor.indigoLight,
+      hintStyle: const TextStyle(color: Colors.white38),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.white10),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppColor.yellow, width: 2),
+      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(text, style: body(14, color: Colors.white70)),
+    );
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
       builder: (context, child) {
-        // Custom theme date picker biar gelap (sesuai tema app)
         return Theme(
           data: Theme.of(context).copyWith(
+            dialogBackgroundColor: AppColor.indigoLight,
             colorScheme: const ColorScheme.dark(
-              primary: Colors.orangeAccent,
-              onPrimary: Colors.black,
-              surface: Color(0xFF1E1E1E),
-              onSurface: Colors.white,
+              primary: AppColor.yellow,
+              surface: AppColor.indigoLight,
             ),
-            dialogBackgroundColor: const Color(0xFF121212),
           ),
           child: child!,
         );
       },
     );
 
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null) {
       setState(() {
         _selectedDate = picked;
-        _dateController.text = DateFormat('yyyy-MM-dd').format(picked);
+        _dateController.text = DateFormat("yyyy-MM-dd").format(picked);
       });
     }
   }
@@ -92,230 +113,188 @@ class _TournamentEditPageState extends State<TournamentEditPage> {
     final request = context.watch<CookieRequest>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212), // Background gelap
+      backgroundColor: AppColor.indigoDark,
       appBar: AppBar(
-        title: const Text("Edit Turnamen"),
-        backgroundColor: Colors.black,
+        title: Text("EDIT TOURNAMENT", style: heading(45, color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: AppColor.indigoDark,
+        elevation: 0,
         foregroundColor: Colors.white,
       ),
+
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- NAMA TURNAMEN ---
-              _buildLabel("Nama Turnamen"),
+              _buildLabel("Nama Tournament"),
               TextFormField(
                 controller: _namaController,
                 style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration("Contoh: Armaso 2026"),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nama tidak boleh kosong';
-                  }
-                  return null;
-                },
+                decoration: _inputDecoration().copyWith(
+                  hintText: "Enter tournament name",
+                ),
+                validator: (v) => v!.isEmpty ? "Nama wajib diisi" : null,
               ),
-              const SizedBox(height: 20),
 
-              // --- LOKASI ---
-              _buildLabel("Lokasi"),
+              const SizedBox(height: 15),
+
+              _buildLabel("Tanggal Tournament"),
+              GestureDetector(
+                onTap: _pickDate,
+                child: AbsorbPointer(
+                  child: TextFormField(
+                    controller: _dateController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: _inputDecoration().copyWith(
+                      hintText: "mm/dd/yyyy",
+                      suffixIcon: const Icon(
+                        Icons.calendar_today,
+                        color: AppColor.yellow,
+                      ),
+                    ),
+                    validator: (v) => v!.isEmpty ? "Tanggal wajib diisi" : null,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              _buildLabel("Lokasi Tournament"),
               TextFormField(
                 controller: _lokasiController,
                 style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration("Contoh: GOR Pertamina"),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Lokasi tidak boleh kosong';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // --- TANGGAL ---
-              _buildLabel("Tanggal Pelaksanaan"),
-              TextFormField(
-                controller: _dateController,
-                readOnly: true, // Tidak bisa diketik manual, harus dipencet
-                style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration("YYYY-MM-DD").copyWith(
-                  suffixIcon: const Icon(
-                    Icons.calendar_today,
-                    color: Colors.orangeAccent,
-                  ),
+                decoration: _inputDecoration().copyWith(
+                  hintText: "Enter location",
                 ),
-                onTap: () => _selectDate(context),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Tanggal wajib diisi';
-                  }
-                  return null;
-                },
+                validator: (v) => v!.isEmpty ? "Lokasi wajib diisi" : null,
               ),
-              const SizedBox(height: 20),
-              _buildLabel("Link Poster (URL)"),
+
+              const SizedBox(height: 15),
+
+              _buildLabel("Poster URL"),
               TextFormField(
                 controller: _posterController,
                 style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.url, // Keyboard khusus URL
-                decoration: _inputDecoration(
-                  "Contoh: https://imgur.com/foto.jpg",
+                decoration: _inputDecoration().copyWith(
+                  hintText: "Enter poster URL",
                 ),
-                // Validator opsional, kalau boleh kosong hapus saja validator ini
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Link poster tidak boleh kosong';
-                  }
-                  return null;
-                },
               ),
-              const SizedBox(height: 20),
 
-              // --- DESKRIPSI ---
+              const SizedBox(height: 15),
+
               _buildLabel("Deskripsi"),
               TextFormField(
                 controller: _deskripsiController,
-                maxLines: 5, // Input paragraf
+                maxLines: 4,
                 style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration("Tulis deskripsi turnamen..."),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Deskripsi tidak boleh kosong';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 40),
-
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10266A),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                  ),
-                  onPressed: _isLoading
-                      ? null
-                      : () async {
-                          if (_formKey.currentState!.validate()) {
-                            setState(() => _isLoading = true);
-
-                            final url =
-                                "http://localhost:8000/tournament/json/tournaments/${widget.tournament.id}/edit/";
-
-                            final Map<String, dynamic> dataPayload = {
-                              "namaTournaments": _namaController.text,
-                              "lokasiTournaments": _lokasiController.text,
-                              "deskripsiTournaments": _deskripsiController.text,
-                              "posterTournaments": _posterController.text,
-                              "tanggalTournaments": _dateController.text,
-                            };
-
-                            try {
-                              final response = await request.postJson(
-                                url,
-                                jsonEncode(dataPayload),
-                              );
-
-                              setState(() => _isLoading = false);
-
-                              if (response['message'] != null) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(response['message']),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-                                  Navigator.pop(context, true);
-                                }
-                              } else {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        response['error'] ??
-                                            "Terjadi kesalahan",
-                                      ),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              }
-                            } catch (e) {
-                              setState(() => _isLoading = false);
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Error: $e"),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            }
-                          }
-                        },
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          "Simpan Perubahan",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                decoration: _inputDecoration().copyWith(
+                  hintText: "Enter description",
                 ),
               ),
+
+              const SizedBox(height: 30),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  /// CANCEL
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade600,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 25,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+
+                  /// SAVE
+                  ElevatedButton(
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                            if (!_formKey.currentState!.validate()) return;
+
+                            setState(() => _isLoading = true);
+
+                            final response = await request.postJson(
+                              "http://localhost:8000/tournament/json/tournaments/${widget.tournament.id}/edit/",
+                              jsonEncode({
+                                "namaTournaments": _namaController.text,
+                                "lokasiTournaments": _lokasiController.text,
+                                "deskripsiTournaments":
+                                    _deskripsiController.text,
+                                "posterTournaments": _posterController.text,
+                                "tanggalTournaments": _dateController.text,
+                              }),
+                            );
+
+                            setState(() => _isLoading = false);
+
+                            if (response["message"] != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    response["message"],
+                                    style: const TextStyle(
+                                      color: Colors
+                                          .black, // biar kontras sama kuning
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  backgroundColor: AppColor.yellow,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              );
+                              Navigator.pop(context, true);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    response["error"] ?? "Terjadi kesalahan",
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.yellow,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            "Save",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 40),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white70,
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-        ),
-      ),
-    );
-  }
-
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: const TextStyle(color: Colors.white24),
-      filled: true,
-      fillColor: const Color(0xFF1E1E1E), // Warna box input
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.white10),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.orangeAccent),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.redAccent),
       ),
     );
   }
