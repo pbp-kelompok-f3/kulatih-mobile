@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/salman-tournament/models/tournament_model.dart';
 
-class TournamentEntryCard extends StatelessWidget {
+class TournamentEntryCard extends StatefulWidget {
   final Tournament tournament;
   final VoidCallback? onTap;
 
@@ -12,9 +12,17 @@ class TournamentEntryCard extends StatelessWidget {
   });
 
   @override
+  State<TournamentEntryCard> createState() => _TournamentEntryCardState();
+}
+
+class _TournamentEntryCardState extends State<TournamentEntryCard> {
+  @override
   Widget build(BuildContext context) {
+    // Supaya coding di bawahnya lebih rapi dan ga perlu ngetik 'widget.' terus
+    final tournament = widget.tournament; 
+
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
@@ -37,26 +45,27 @@ class TournamentEntryCard extends StatelessWidget {
                 top: Radius.circular(18),
               ),
               child: (tournament.poster.isEmpty)
-    ? Image.asset(
-        "assets/images/tournament_bg.png",
-        height: 220,
-        width: double.infinity,
-        fit: BoxFit.cover,
-      )
-    : Image.network(
-        tournament.poster,
-        height: 220,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Image.asset(
-            "images/tournament_bg.png",
-            height: 220,
-            width: double.infinity,
-            fit: BoxFit.cover,
-          );
-        },
-      )
+                  ? Image.asset(
+                      "assets/images/tournament_bg.png", // Pastikan path asset benar
+                      height: 220,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.network(
+                      // Note: Ganti localhost ke 10.0.2.2 jika pakai Emulator Android
+                      'http://localhost:8000/tournament/proxy-image/?url=${Uri.encodeComponent(tournament.poster)}',
+                      height: 220,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          "images/tournament_bg.png",
+                          height: 220,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        );
+                      },
+                    ),
             ),
 
             // CONTENT
@@ -78,9 +87,14 @@ class TournamentEntryCard extends StatelessWidget {
 
                   Row(
                     children: [
-                      const Icon(Icons.event, size: 16, color: Colors.orangeAccent),
+                      const Icon(
+                        Icons.event,
+                        size: 16,
+                        color: Colors.orangeAccent,
+                      ),
                       const SizedBox(width: 8),
                       Text(
+                        // Format tanggal sederhana
                         "${tournament.tanggal.toLocal()}".split(" ")[0],
                         style: const TextStyle(
                           color: Colors.white70,
@@ -95,8 +109,11 @@ class TournamentEntryCard extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.location_on,
-                          size: 16, color: Colors.orangeAccent),
+                      const Icon(
+                        Icons.location_on,
+                        size: 16,
+                        color: Colors.orangeAccent,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -105,13 +122,15 @@ class TournamentEntryCard extends StatelessWidget {
                             color: Colors.white70,
                             fontSize: 14,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

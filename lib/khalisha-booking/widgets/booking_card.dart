@@ -6,11 +6,18 @@ import 'package:kulatih_mobile/khalisha-booking/widgets/booking_status_badge.dar
 class BookingCard extends StatelessWidget {
   final Booking booking;
   final bool historyMode;
+  final bool isCoach;
 
+  // MEMBER actions
   final VoidCallback onCancel;
   final VoidCallback onReschedule;
 
-  // History extras
+  // COACH actions
+  final VoidCallback? onAccept;
+  final VoidCallback? onReject;
+  final VoidCallback? onConfirm;
+
+  // HISTORY extras
   final VoidCallback? onBookAgain;
   final VoidCallback? onViewReview;
 
@@ -18,8 +25,12 @@ class BookingCard extends StatelessWidget {
     super.key,
     required this.booking,
     required this.historyMode,
+    required this.isCoach,
     required this.onCancel,
     required this.onReschedule,
+    this.onAccept,
+    this.onReject,
+    this.onConfirm,
     this.onBookAgain,
     this.onViewReview,
   });
@@ -53,7 +64,7 @@ class BookingCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          /// COACH ROW
+          /// PROFILE
           Row(
             children: [
               const CircleAvatar(
@@ -89,11 +100,8 @@ class BookingCard extends StatelessWidget {
           /// LOCATION
           Row(
             children: [
-              const Icon(
-                Icons.location_on,
-                color: AppColors.textLight,
-                size: 16,
-              ),
+              const Icon(Icons.location_on,
+                  color: AppColors.textLight, size: 16),
               const SizedBox(width: 6),
               Text(
                 booking.location,
@@ -106,14 +114,20 @@ class BookingCard extends StatelessWidget {
           const Divider(color: Colors.white12),
           const SizedBox(height: 12),
 
-          historyMode ? _historyButtons() : _upcomingButtons(),
+          if (historyMode)
+            _historyButtons()
+          else if (isCoach)
+            _coachButtons()
+          else
+            _memberButtons(),
         ],
       ),
     );
   }
 
-  /// UPCOMING BUTTONS (NO VIEW DETAILS)
-  Widget _upcomingButtons() {
+  // ================= BUTTON GROUPS =================
+
+  Widget _memberButtons() {
     return Row(
       children: [
         _btn("Cancel", Colors.red, onCancel),
@@ -122,7 +136,16 @@ class BookingCard extends StatelessWidget {
     );
   }
 
-  /// HISTORY BUTTONS
+  Widget _coachButtons() {
+    return Row(
+      children: [
+        _btn("Accept", Colors.green, onAccept ?? () {}),
+        _btn("Reject", Colors.red, onReject ?? () {}),
+        _btn("Confirm", AppColors.gold, onConfirm ?? () {}),
+      ],
+    );
+  }
+
   Widget _historyButtons() {
     return Row(
       children: [

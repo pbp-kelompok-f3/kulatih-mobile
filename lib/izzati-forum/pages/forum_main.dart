@@ -5,7 +5,6 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import '../styles/colors.dart';
 import '../styles/text.dart';
 import '../widgets/forum_entry_list.dart';
-import 'forum_details.dart'; // kalau mau push ke detail nanti
 import '../models/forum_models.dart';
 import 'forum_create.dart';
 
@@ -18,17 +17,23 @@ class ForumMainPage extends StatefulWidget {
 
 class _ForumMainPageState extends State<ForumMainPage> {
   late Future<ForumEntry> _futurePosts;
+  bool _loaded = false;
 
   @override
-  void initState() {
-    super.initState();
-    final req = context.read<CookieRequest>();
-    _futurePosts = fetchPosts(req);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // fetch forum list ONLY after CookieRequest is ready (after login)
+    if (!_loaded) {
+      final req = context.read<CookieRequest>();
+      _futurePosts = fetchPosts(req);
+      _loaded = true;
+    }
   }
 
   Future<ForumEntry> fetchPosts(CookieRequest request) async {
     final response = await request.get(
-      "http://127.0.0.1:8000/forum/json/",
+      "http://localhost:8000/forum/json/",
     );
     return ForumEntry.fromJson(response);
   }
@@ -37,6 +42,7 @@ class _ForumMainPageState extends State<ForumMainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.indigo,
+
       appBar: AppBar(
         backgroundColor: AppColor.indigo,
         elevation: 0,
@@ -50,21 +56,21 @@ class _ForumMainPageState extends State<ForumMainPage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColor.yellow,
         foregroundColor: AppColor.indigoDark,
-            onPressed: () async {
-                final created = await Navigator.push(
-                context,
-                    MaterialPageRoute(
-                        builder: (_) => const ForumCreatePage(),
-                    ),
-                );
+        onPressed: () async {
+          final created = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const ForumCreatePage(),
+            ),
+          );
 
-                // kalau dari create page kita kirim true, refresh list
-                if (created == true) {
-                setState(() {
-                    final req = context.read<CookieRequest>();
-                    _futurePosts = fetchPosts(req);
-                });
-            }
+          // Refresh list AFTER creating a new post
+          if (created == true) {
+            setState(() {
+              final req = context.read<CookieRequest>();
+              _futurePosts = fetchPosts(req);
+            });
+          }
         },
         child: const Icon(Icons.add, size: 28),
       ),
@@ -72,7 +78,7 @@ class _ForumMainPageState extends State<ForumMainPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Subheading kecil (mirip di web: SHARE YOUR THOUGHTS)
+            // Subheading small (SHARE YOUR THOUGHTS)
             Padding(
               padding: const EdgeInsets.only(top: 4, bottom: 12),
               child: Text(
@@ -87,9 +93,7 @@ class _ForumMainPageState extends State<ForumMainPage> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                      ),
+                      child: CircularProgressIndicator(color: Colors.white),
                     );
                   }
 
