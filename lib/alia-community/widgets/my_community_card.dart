@@ -67,7 +67,7 @@ class MyCommunityCard extends StatelessWidget {
                       },
                     ),
                   )
-                : Container(), // Empty white circle if no image
+                : Container(), // pfp kosong kalau no image
           ),
 
           const SizedBox(width: 16),

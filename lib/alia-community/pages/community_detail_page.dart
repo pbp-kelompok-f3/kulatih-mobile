@@ -142,7 +142,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                           },
                         ),
                       )
-                    : Container(), // Empty white circle if no image
+                    : Container(), // pfp kosong kalau no image
               ),
 
               const SizedBox(height: 16),

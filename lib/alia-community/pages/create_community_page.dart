@@ -67,7 +67,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   }
 
   Widget _field(String label, TextEditingController controller,
-      {int maxLines = 1, bool optional = false}) {
+      {int maxLines = 1, bool optional = false, String? hintText}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -110,6 +110,11 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
             ),
             decoration: InputDecoration(
               border: InputBorder.none,
+              hintText: hintText,
+              hintStyle: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: 14,
+              ),
             ),
           ),
         ),
@@ -160,7 +165,9 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                     _field("Quick description", _short),
                     _field("Tell us more about your community", _long,
                         maxLines: 6),
-                    _field("Profile Picture", _profilePicture, optional: true),
+                    _field("Profile Picture", _profilePicture, 
+                        optional: true, 
+                        hintText: "URL HTTPS"),
 
                     const SizedBox(height: 10),
 
