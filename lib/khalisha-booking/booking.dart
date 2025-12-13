@@ -6,6 +6,8 @@ import 'package:kulatih_mobile/khalisha-booking/screens/booking_form.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_detail_page.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/booking_card.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/tab_switcher.dart';
+import 'package:provider/provider.dart';
+import 'package:kulatih_mobile/models/user_provider.dart';
 
 class BookingPage extends StatefulWidget {
   const BookingPage({super.key});
@@ -59,11 +61,9 @@ class _BookingPageState extends State<BookingPage> {
       _selectedTab == 0 ? _upcoming : _history;
 
   // ================================
-  // ACTIONS
+  // USER ACTIONS
   // ================================
-
   Future<void> _openCreateBooking() async {
-    // sementara pakai coachId dummy "1" biar form-nya jalan
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -96,10 +96,8 @@ class _BookingPageState extends State<BookingPage> {
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: AppColors.card,
-        title: const Text(
-          "Cancel Booking",
-          style: TextStyle(color: Colors.white),
-        ),
+        title:
+            const Text("Cancel Booking", style: TextStyle(color: Colors.white)),
         content: const Text(
           "Are you sure you want to cancel?",
           style: TextStyle(color: Colors.white70),
@@ -130,11 +128,61 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   // ================================
-  // BUILD
+  // COACH ACTIONS
   // ================================
+  Future<void> _acceptReschedule(Booking booking) async {
+    try {
+      final ok = await _service.acceptReschedule(booking.id);
+      if (ok) {
+        _fetchBookings();
+      } else {
+        throw Exception("API returned false");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to accept: $e")),
+      );
+    }
+  }
 
+  Future<void> _rejectReschedule(Booking booking) async {
+    try {
+      final ok = await _service.rejectReschedule(booking.id);
+      if (ok) {
+        _fetchBookings();
+      } else {
+        throw Exception("API returned false");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to reject: $e")),
+      );
+    }
+  }
+
+  Future<void> _confirmBooking(Booking booking) async {
+    try {
+      final ok = await _service.confirmBooking(booking.id);
+      if (ok) {
+        _fetchBookings();
+      } else {
+        throw Exception("API returned false");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to confirm: $e")),
+      );
+    }
+  }
+
+  // ================================
+  // BUILD UI
+  // ================================
   @override
   Widget build(BuildContext context) {
+    final userProvider = context.watch<UserProvider>();
+    final bool isCoach = userProvider.isCoach;
+
     return Scaffold(
       backgroundColor: AppColors.indigo,
       appBar: AppBar(
@@ -142,10 +190,7 @@ class _BookingPageState extends State<BookingPage> {
         elevation: 0,
         title: const Text(
           "MY BOOKINGS",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -155,7 +200,6 @@ class _BookingPageState extends State<BookingPage> {
               children: [
                 const SizedBox(height: 12),
 
-                /// TAB SWITCHER sesuai figma
                 TabSwitcher(
                   selectedIndex: _selectedTab,
                   onTabSelected: (index) {
@@ -165,7 +209,6 @@ class _BookingPageState extends State<BookingPage> {
 
                 const SizedBox(height: 16),
 
-                /// LIST
                 Expanded(
                   child: _filtered.isEmpty
                       ? const Center(
@@ -181,11 +224,11 @@ class _BookingPageState extends State<BookingPage> {
                           itemBuilder: (_, i) {
                             final b = _filtered[i];
 
-                            // HISTORY MODE
                             if (b.isHistory) {
                               return BookingCard(
                                 booking: b,
                                 historyMode: true,
+                                isCoach: isCoach,
                                 onCancel: () {},
                                 onReschedule: () {},
                                 onViewReview: () {
@@ -197,24 +240,27 @@ class _BookingPageState extends State<BookingPage> {
                                     ),
                                   );
                                 },
-                                onBookAgain: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        "Book Again belum dihubungkan ke flow coach.",
-                                      ),
-                                    ),
-                                  );
-                                },
+                                onBookAgain: () {},
                               );
                             }
 
-                            // UPCOMING MODE
                             return BookingCard(
                               booking: b,
                               historyMode: false,
+                              isCoach: isCoach,
                               onCancel: () => _cancelBooking(b),
                               onReschedule: () => _openReschedule(b),
+
+                              // ===== COACH BUTTONS =====
+                              onAccept: isCoach
+                                  ? () => _acceptReschedule(b)
+                                  : null,
+                              onReject: isCoach
+                                  ? () => _rejectReschedule(b)
+                                  : null,
+                              onConfirm: isCoach
+                                  ? () => _confirmBooking(b)
+                                  : null,
                             );
                           },
                         ),

@@ -8,10 +8,6 @@ enum BookingStatus {
   completed,
 }
 
-/* ============================================================
-   STATUS PARSING
-   ============================================================ */
-
 BookingStatus bookingStatusFromString(String value) {
   switch (value.toLowerCase().trim()) {
     case 'confirmed':
@@ -23,8 +19,6 @@ BookingStatus bookingStatusFromString(String value) {
       return BookingStatus.cancelled;
     case 'completed':
       return BookingStatus.completed;
-    case 'pending':
-      return BookingStatus.pending;
     default:
       return BookingStatus.pending;
   }
@@ -45,12 +39,12 @@ String bookingStatusToText(BookingStatus status) {
   }
 }
 
-/* ============================================================
-   BOOKING MODEL
-   ============================================================ */
-
 class Booking {
   final int id;
+
+  /// NEW FIELD → agar coach bisa lihat siapa membernya
+  final String memberName;
+
   final String coachName;
   final String sport;
   final String location;
@@ -63,6 +57,7 @@ class Booking {
 
   Booking({
     required this.id,
+    required this.memberName,
     required this.coachName,
     required this.sport,
     required this.location,
@@ -72,45 +67,30 @@ class Booking {
     this.imageUrl,
   });
 
-  /* ============================================================
-     FACTORY FROM JSON
-     ============================================================ */
-
   factory Booking.fromJson(Map<String, dynamic> json) {
+    DateTime parseDT(String dt) =>
+        DateTime.tryParse(dt) ?? DateTime.parse(dt.split('.').first);
+
     final date = json['date'];
     final start = json['start_time'];
     final end = json['end_time'];
 
-    DateTime safeParse(String value) {
-      try {
-        return DateTime.parse(value);
-      } catch (_) {
-        // fallback remove microseconds
-        final cleaned = value.split('.').first;
-        return DateTime.parse(cleaned);
-      }
-    }
-
-    final startDT = safeParse("$date $start");
-    final endDT = end != null
-        ? safeParse("$date $end")
-        : startDT.add(const Duration(hours: 1)); // backend fallback
+    final startDT = parseDT("$date $start");
+    final endDT =
+        end != null ? parseDT("$date $end") : startDT.add(const Duration(hours: 1));
 
     return Booking(
       id: json['id'],
-      coachName: json['coach_name'] ?? '',
-      sport: json['sport'] ?? '',
-      location: json['location'] ?? '',
+      memberName: json['member_name'] ?? "-",     // DARI BACKEND
+      coachName: json['coach_name'] ?? "-",
+      sport: json['sport'] ?? "-",
+      location: json['location'] ?? "-",
       startTime: startDT,
       endTime: endDT,
       status: bookingStatusFromString(json['status']),
       imageUrl: json['image_url'],
     );
   }
-
-  /* ============================================================
-     FORMATTED GETTERS (for UI)
-     ============================================================ */
 
   String get formattedDate =>
       DateFormat('EEEE, dd MMM yyyy').format(startTime);
@@ -123,10 +103,6 @@ class Booking {
 
   String get formattedDateTime => "$formattedDate · $formattedTimeRange";
 
-  /* ============================================================
-     STATUS HELPERS
-     ============================================================ */
-
   bool get isUpcoming =>
       (status == BookingStatus.pending ||
           status == BookingStatus.confirmed ||
@@ -138,12 +114,9 @@ class Booking {
       status == BookingStatus.cancelled ||
       endTime.isBefore(DateTime.now());
 
-  /* ============================================================
-     COPYWITH
-     ============================================================ */
-
   Booking copyWith({
     int? id,
+    String? memberName,
     String? coachName,
     String? sport,
     String? location,
@@ -154,6 +127,7 @@ class Booking {
   }) {
     return Booking(
       id: id ?? this.id,
+      memberName: memberName ?? this.memberName,
       coachName: coachName ?? this.coachName,
       sport: sport ?? this.sport,
       location: location ?? this.location,
