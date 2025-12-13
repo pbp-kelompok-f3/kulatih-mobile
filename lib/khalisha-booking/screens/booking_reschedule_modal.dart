@@ -63,7 +63,15 @@ class _RescheduleModalState extends State<RescheduleModal> {
         newStart: newStartTime,
       );
 
-      if (context.mounted) Navigator.pop(context, true);
+      if (!mounted) return;
+
+      Navigator.pop(context, false); // <-- JANGAN REFRESH LIST
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Waiting for coach confirmation..."),
+        ),
+      );
 
     } catch (e) {
       setState(() => _loading = false);
@@ -96,8 +104,10 @@ class _RescheduleModalState extends State<RescheduleModal> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Reschedule Booking",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const Text(
+              "Reschedule Booking",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
 
             const SizedBox(height: 20),
 

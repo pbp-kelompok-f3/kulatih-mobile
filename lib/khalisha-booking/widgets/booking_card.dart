@@ -7,11 +7,15 @@ class BookingCard extends StatelessWidget {
   final Booking booking;
   final bool historyMode;
 
+  final bool isCoach; // <--- PENTING
+
   final VoidCallback onCancel;
   final VoidCallback onReschedule;
-  final VoidCallback onViewDetails;
 
-  // EXTRA CALLBACKS FOR HISTORY MODE
+  final VoidCallback? onAccept;
+  final VoidCallback? onReject;
+  final VoidCallback? onConfirm;
+
   final VoidCallback? onBookAgain;
   final VoidCallback? onViewReview;
 
@@ -19,9 +23,12 @@ class BookingCard extends StatelessWidget {
     super.key,
     required this.booking,
     required this.historyMode,
+    required this.isCoach,        // <--- WAJIB
     required this.onCancel,
     required this.onReschedule,
-    required this.onViewDetails,
+    this.onAccept,
+    this.onReject,
+    this.onConfirm,
     this.onBookAgain,
     this.onViewReview,
   });
@@ -38,13 +45,16 @@ class BookingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // DATE + STATUS
+          /// DATE + STATUS
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 booking.formattedDateTime,
-                style: const TextStyle(color: AppColors.textLight, fontSize: 12),
+                style: const TextStyle(
+                  color: AppColors.textLight,
+                  fontSize: 12,
+                ),
               ),
               BookingStatusBadge(status: booking.status),
             ],
@@ -52,7 +62,7 @@ class BookingCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // COACH ROW
+          /// PROFILE (COACH lihat MEMBER / MEMBER lihat COACH)
           Row(
             children: [
               const CircleAvatar(
@@ -64,7 +74,7 @@ class BookingCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    booking.coachName,
+                    isCoach ? booking.memberName : booking.coachName,
                     style: const TextStyle(
                       color: AppColors.textWhite,
                       fontSize: 17,
@@ -73,7 +83,10 @@ class BookingCard extends StatelessWidget {
                   ),
                   Text(
                     booking.sport,
-                    style: const TextStyle(color: AppColors.textLight, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
@@ -82,10 +95,10 @@ class BookingCard extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          // LOCATION
           Row(
             children: [
-              const Icon(Icons.location_on, color: AppColors.textLight, size: 16),
+              const Icon(Icons.location_on,
+                  color: AppColors.textLight, size: 16),
               const SizedBox(width: 6),
               Text(
                 booking.location,
@@ -98,43 +111,46 @@ class BookingCard extends StatelessWidget {
           const Divider(color: Colors.white12),
           const SizedBox(height: 12),
 
-          historyMode ? _historyButtons() : _upcomingButtons(),
+          if (historyMode)
+            _historyButtons()
+          else if (isCoach)
+            _coachButtons()
+          else
+            _userButtons(),
         ],
       ),
     );
   }
 
-  /* ---------------- UPCOMING BUTTONS ---------------- */
-  Widget _upcomingButtons() {
+  Widget _userButtons() {
     return Row(
       children: [
         _btn("Cancel", Colors.red, onCancel),
-        _btn("View Details", AppColors.gold, onViewDetails),
         _btn("Reschedule", Colors.grey, onReschedule),
       ],
     );
   }
 
-  /* ---------------- HISTORY BUTTONS ---------------- */
-  Widget _historyButtons() {
+  Widget _coachButtons() {
     return Row(
       children: [
-        _btn(
-          "View Your Review",
-          AppColors.gold,
-          onViewReview ?? onViewDetails,
-        ),
-        _btn(
-          "Book Again",
-          Colors.grey.shade700,
-          onBookAgain ?? onReschedule,
-        ),
+        _btn("Accept", Colors.green, onAccept ?? () {}),
+        _btn("Reject", Colors.red, onReject ?? () {}),
+        _btn("Confirm", AppColors.gold, onConfirm ?? () {}),
       ],
     );
   }
 
-  /* ---------------- BUTTON BUILDER ---------------- */
-  Widget _btn(String label, Color bg, VoidCallback? onTap) {
+  Widget _historyButtons() {
+    return Row(
+      children: [
+        _btn("View Review", AppColors.gold, onViewReview ?? () {}),
+        _btn("Book Again", Colors.grey.shade700, onBookAgain ?? () {}),
+      ],
+    );
+  }
+
+  Widget _btn(String text, Color bg, VoidCallback onTap) {
     return Expanded(
       child: InkWell(
         onTap: onTap,
@@ -147,7 +163,7 @@ class BookingCard extends StatelessWidget {
           ),
           alignment: Alignment.center,
           child: Text(
-            label,
+            text,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 12,
