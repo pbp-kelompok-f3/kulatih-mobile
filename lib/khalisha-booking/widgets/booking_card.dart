@@ -6,18 +6,16 @@ import 'package:kulatih_mobile/khalisha-booking/widgets/booking_status_badge.dar
 class BookingCard extends StatelessWidget {
   final Booking booking;
   final bool historyMode;
-  final bool isCoach;
 
-  // MEMBER actions
+  final bool isCoach; // <--- PENTING
+
   final VoidCallback onCancel;
   final VoidCallback onReschedule;
 
-  // COACH actions
   final VoidCallback? onAccept;
   final VoidCallback? onReject;
   final VoidCallback? onConfirm;
 
-  // HISTORY extras
   final VoidCallback? onBookAgain;
   final VoidCallback? onViewReview;
 
@@ -25,7 +23,7 @@ class BookingCard extends StatelessWidget {
     super.key,
     required this.booking,
     required this.historyMode,
-    required this.isCoach,
+    required this.isCoach,        // <--- WAJIB
     required this.onCancel,
     required this.onReschedule,
     this.onAccept,
@@ -64,7 +62,7 @@ class BookingCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          /// PROFILE
+          /// PROFILE (COACH lihat MEMBER / MEMBER lihat COACH)
           Row(
             children: [
               const CircleAvatar(
@@ -76,7 +74,7 @@ class BookingCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    booking.coachName,
+                    isCoach ? booking.memberName : booking.coachName,
                     style: const TextStyle(
                       color: AppColors.textWhite,
                       fontSize: 17,
@@ -97,7 +95,6 @@ class BookingCard extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          /// LOCATION
           Row(
             children: [
               const Icon(Icons.location_on,
@@ -119,15 +116,13 @@ class BookingCard extends StatelessWidget {
           else if (isCoach)
             _coachButtons()
           else
-            _memberButtons(),
+            _userButtons(),
         ],
       ),
     );
   }
 
-  // ================= BUTTON GROUPS =================
-
-  Widget _memberButtons() {
+  Widget _userButtons() {
     return Row(
       children: [
         _btn("Cancel", Colors.red, onCancel),
