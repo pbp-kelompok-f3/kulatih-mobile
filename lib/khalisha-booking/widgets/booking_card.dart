@@ -7,7 +7,7 @@ class BookingCard extends StatelessWidget {
   final Booking booking;
   final bool historyMode;
 
-  final bool isCoach; // <--- PENTING
+  final bool isCoach;
 
   final VoidCallback onCancel;
   final VoidCallback onReschedule;
@@ -23,7 +23,7 @@ class BookingCard extends StatelessWidget {
     super.key,
     required this.booking,
     required this.historyMode,
-    required this.isCoach,        // <--- WAJIB
+    required this.isCoach,
     required this.onCancel,
     required this.onReschedule,
     this.onAccept,
@@ -62,7 +62,7 @@ class BookingCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          /// PROFILE (COACH lihat MEMBER / MEMBER lihat COACH)
+          /// PROFILE
           Row(
             children: [
               const CircleAvatar(
@@ -122,7 +122,13 @@ class BookingCard extends StatelessWidget {
     );
   }
 
+  /// ================= USER BUTTONS =================
   Widget _userButtons() {
+    // MEMBER hanya boleh action kalau belum rescheduled & belum history
+    if (booking.status == BookingStatus.rescheduled) {
+      return const SizedBox.shrink();
+    }
+
     return Row(
       children: [
         _btn("Cancel", Colors.red, onCancel),
@@ -131,16 +137,32 @@ class BookingCard extends StatelessWidget {
     );
   }
 
+  /// ================= COACH BUTTONS =================
   Widget _coachButtons() {
-    return Row(
-      children: [
-        _btn("Accept", Colors.green, onAccept ?? () {}),
-        _btn("Reject", Colors.red, onReject ?? () {}),
-        _btn("Confirm", AppColors.gold, onConfirm ?? () {}),
-      ],
-    );
+    // BOOKING BARU → Confirm saja
+    if (booking.status == BookingStatus.pending) {
+      return Row(
+        children: [
+          _btn("Confirm", AppColors.gold, onConfirm ?? () {}),
+        ],
+      );
+    }
+
+    // RESCHEDULE → Accept & Reject
+    if (booking.status == BookingStatus.rescheduled) {
+      return Row(
+        children: [
+          _btn("Accept", Colors.green, onAccept ?? () {}),
+          _btn("Reject", Colors.red, onReject ?? () {}),
+        ],
+      );
+    }
+
+    // STATUS LAIN → tidak ada tombol
+    return const SizedBox.shrink();
   }
 
+  /// ================= HISTORY BUTTONS =================
   Widget _historyButtons() {
     return Row(
       children: [

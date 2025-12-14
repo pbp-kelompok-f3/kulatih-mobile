@@ -87,7 +87,6 @@ class _BookingListPageState extends State<BookingListPage>
   }
 
   /* ---------------- COACH ACTIONS ---------------- */
-
   Future<void> _accept(Booking b) async {
     await _service.acceptReschedule(b.id);
     _fetchBookings();
@@ -202,10 +201,16 @@ class _BookingListPageState extends State<BookingListPage>
           onCancel: () => _cancelBooking(b),
           onReschedule: () => _openReschedule(b),
 
-          // COACH BUTTONS
-          onAccept: () => _accept(b),
-          onReject: () => _reject(b),
-          onConfirm: () => _confirm(b),
+          // COACH BUTTONS (callback aman, UI yang mutusin tampil)
+          onAccept: b.status == BookingStatus.rescheduled
+              ? () => _accept(b)
+              : null,
+          onReject: b.status == BookingStatus.rescheduled
+              ? () => _reject(b)
+              : null,
+          onConfirm: b.status == BookingStatus.pending
+              ? () => _confirm(b)
+              : null,
 
           // HISTORY BUTTONS
           onViewReview: () {

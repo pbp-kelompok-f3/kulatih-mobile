@@ -129,8 +129,7 @@ class BookingDetailPage extends StatelessWidget {
 
                     /// BUTTON SECTION
                     if (isCoach && isUpcoming) _coachButtons(context, service),
-                    if (!isCoach && isUpcoming)
-                      _userButtons(context, service),
+                    if (!isCoach && isUpcoming) _userButtons(context, service),
                     if (isHistory) _historyButtons(context),
 
                     const SizedBox(height: 60),
@@ -179,10 +178,19 @@ class BookingDetailPage extends StatelessWidget {
 
   // ---------------- USER BUTTONS ----------------
   Widget _userButtons(BuildContext context, BookingService service) {
+    // MEMBER: kalau status rescheduled → tidak boleh action
+    if (booking.status == BookingStatus.rescheduled) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       children: [
         _gold("View Coach", () {
-          // TODO: integrate coach profile route
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Coach profile page is not implemented yet"),
+            ),
+          );
         }),
         const SizedBox(height: 12),
         _red("Cancel Booking", () async {
@@ -202,21 +210,37 @@ class BookingDetailPage extends StatelessWidget {
 
   // ---------------- COACH BUTTONS ----------------
   Widget _coachButtons(BuildContext context, BookingService service) {
-    return Column(
-      children: [
-        _gold("Confirm", () async {
-          // TODO: connect backend confirm
-        }),
-        const SizedBox(height: 12),
-        _dark("Accept Reschedule", () async {
-          // TODO: accept reschedule
-        }),
-        const SizedBox(height: 12),
-        _red("Reject", () async {
-          // TODO: reject reschedule
-        }),
-      ],
-    );
+    // BOOKING BARU → Confirm saja
+    if (booking.status == BookingStatus.pending) {
+      return Column(
+        children: [
+          _gold("Confirm", () async {
+            await service.confirmBooking(booking.id);
+            Navigator.pop(context);
+          }),
+        ],
+      );
+    }
+
+    // RESCHEDULE → Accept & Reject
+    if (booking.status == BookingStatus.rescheduled) {
+      return Column(
+        children: [
+          _dark("Accept Reschedule", () async {
+            await service.acceptReschedule(booking.id);
+            Navigator.pop(context);
+          }),
+          const SizedBox(height: 12),
+          _red("Reject", () async {
+            await service.rejectReschedule(booking.id);
+            Navigator.pop(context);
+          }),
+        ],
+      );
+    }
+
+    // STATUS LAIN → tidak ada tombol
+    return const SizedBox.shrink();
   }
 
   // ---------------- HISTORY BUTTONS ----------------
@@ -224,7 +248,11 @@ class BookingDetailPage extends StatelessWidget {
     return Column(
       children: [
         _gold("Review Coach", () {
-          // TODO route review
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Review feature is not implemented yet"),
+            ),
+          );
         }),
         const SizedBox(height: 12),
         _dark("Book Again", () {}),
