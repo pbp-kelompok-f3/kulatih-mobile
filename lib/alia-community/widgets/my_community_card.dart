@@ -4,6 +4,7 @@ import 'package:kulatih_mobile/constants/app_colors.dart';
 import '../models/community.dart';
 import '../pages/community_detail_page.dart';
 import '../pages/community_chat_page.dart';
+import '../services/community_service.dart';
 
 class MyCommunityCard extends StatelessWidget {
   final CommunityEntry community;
@@ -17,6 +18,11 @@ class MyCommunityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // PENTING: Pakai proxy untuk load gambar
+    final proxiedImageUrl = CommunityService.getProxiedImageUrl(
+      community.profileImageUrl,
+    );
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(16),
@@ -35,11 +41,10 @@ class MyCommunityCard extends StatelessWidget {
               shape: BoxShape.circle,
               color: Colors.white,
             ),
-            child: community.profileImageUrl != null &&
-                    community.profileImageUrl!.isNotEmpty
+            child: proxiedImageUrl.isNotEmpty
                 ? ClipOval(
                     child: Image.network(
-                      community.profileImageUrl!,
+                      proxiedImageUrl,
                       width: 56,
                       height: 56,
                       fit: BoxFit.cover,

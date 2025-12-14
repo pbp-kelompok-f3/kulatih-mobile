@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import '../models/community.dart';
+import '../services/community_service.dart';
 
 class CommunityCard extends StatelessWidget {
   final CommunityEntry community;
@@ -14,6 +15,11 @@ class CommunityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // PENTING: Pakai proxy untuk load gambar
+    final proxiedImageUrl = CommunityService.getProxiedImageUrl(
+      community.profileImageUrl,
+    );
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -34,11 +40,10 @@ class CommunityCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Colors.white,
               ),
-              child: community.profileImageUrl != null &&
-                      community.profileImageUrl!.isNotEmpty
+              child: proxiedImageUrl.isNotEmpty
                   ? ClipOval(
                       child: Image.network(
-                        community.profileImageUrl!,
+                        proxiedImageUrl,
                         width: 56,
                         height: 56,
                         fit: BoxFit.cover,

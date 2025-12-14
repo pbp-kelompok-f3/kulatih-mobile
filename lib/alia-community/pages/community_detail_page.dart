@@ -107,6 +107,10 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       );
     }
 
+    final proxiedImageUrl = CommunityService.getProxiedImageUrl(
+      widget.community.profileImageUrl,
+    );
+
     return Scaffold(
       backgroundColor: AppColors.indigo,
       appBar: AppBar(
@@ -123,18 +127,35 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
               Container(
                 width: 120,
                 height: 120,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
-                child: widget.community.profileImageUrl != null &&
-                        widget.community.profileImageUrl!.isNotEmpty
+                child: proxiedImageUrl.isNotEmpty
                     ? ClipOval(
                         child: Image.network(
-                          widget.community.profileImageUrl!,
+                          proxiedImageUrl,
                           width: 120,
                           height: 120,
                           fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: SizedBox(
+                                width: 30,
+                                height: 30,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                  color: AppColors.indigo,
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              ),
+                            );
+                          },
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
                               color: Colors.white,
@@ -142,7 +163,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                           },
                         ),
                       )
-                    : Container(), // pfp kosong kalau no image
+                    : Container(), // Empty white circle if no image
               ),
 
               const SizedBox(height: 16),

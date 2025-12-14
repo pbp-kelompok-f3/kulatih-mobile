@@ -7,6 +7,24 @@ import '../models/message.dart';
 class CommunityService {
   static const String baseUrl = "http://localhost:8000/community";
 
+  /// Convert external image URL to proxied URL
+  static String getProxiedImageUrl(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return '';
+    }
+    
+    // If it's already a proxied URL, return as is
+    if (imageUrl.contains('/proxy-image/')) {
+      return imageUrl;
+    }
+    
+    // Encode the image URL
+    final encodedUrl = Uri.encodeComponent(imageUrl);
+    
+    // Return proxied URL
+    return '$baseUrl/proxy-image/?url=$encodedUrl';
+  }
+
   /// Safely handle unknown creator usernames
   static Map<String, dynamic> normalizeCreator(Map<String, dynamic> json) {
     final newJson = Map<String, dynamic>.from(json);
