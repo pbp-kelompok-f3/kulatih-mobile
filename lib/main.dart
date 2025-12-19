@@ -9,7 +9,7 @@ import 'package:kulatih_mobile/navigationbar.dart';
 import 'package:kulatih_mobile/salman-tournament/page/tournament_main.dart';
 import 'package:kulatih_mobile/azizah-rating/screens/reviews_list_page.dart';
 import 'package:kulatih_mobile/alia-community/pages/community_page.dart';
-
+import 'package:kulatih_mobile/theme/app_colors.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,14 +27,22 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'KuLatih',
+
         theme: ThemeData(
           useMaterial3: true,
           fontFamily: 'BeVietnamPro',
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFFE8B923),
-            brightness: Brightness.dark,
+
+          scaffoldBackgroundColor: AppColors.bg,
+          canvasColor: AppColors.bg,
+
+          colorScheme: ColorScheme.dark(
+            primary: AppColors.primary,
+            surface: AppColors.cardBg,
+            onSurface: AppColors.textPrimary,
+            onPrimary: AppColors.buttonText,
           ),
         ),
+
         home: const LoginPage(),
         debugShowCheckedModeBanner: false,
       ),
@@ -70,11 +78,13 @@ class _MyHomePageState extends State<MyHomePage> {
             CircleAvatar(
               radius: 60,
               backgroundColor: const Color(0xFFE8B923),
-              backgroundImage: profile?.profile?.profilePhoto != null &&
+              backgroundImage:
+                  profile?.profile?.profilePhoto != null &&
                       profile!.profile!.profilePhoto!.isNotEmpty
                   ? NetworkImage(profile.profile!.profilePhoto!)
                   : null,
-              child: profile?.profile?.profilePhoto == null ||
+              child:
+                  profile?.profile?.profilePhoto == null ||
                       profile!.profile!.profilePhoto!.isEmpty
                   ? Text(
                       profile?.username.substring(0, 1).toUpperCase() ?? 'U',
@@ -170,8 +180,7 @@ class _MyHomePageState extends State<MyHomePage> {
               _buildInfoCard(
                 icon: Icons.attach_money,
                 label: 'Hourly Fee',
-                value:
-                    'Rp ${profile?.profile?.hourlyFee?.toString() ?? '0'}',
+                value: 'Rp ${profile?.profile?.hourlyFee?.toString() ?? '0'}',
               ),
             ],
 
@@ -203,8 +212,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 child: Container(
                   width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFE8B923),
                     borderRadius: BorderRadius.circular(12),
@@ -259,7 +270,10 @@ class _MyHomePageState extends State<MyHomePage> {
           text: const TextSpan(
             style: TextStyle(fontFamily: 'BebasNeue', fontSize: 32),
             children: [
-              TextSpan(text: 'KU', style: TextStyle(color: Colors.white)),
+              TextSpan(
+                text: 'KU',
+                style: TextStyle(color: Colors.white),
+              ),
               TextSpan(
                 text: 'LATIH',
                 style: TextStyle(color: Color(0xFFE8B923)),
@@ -278,9 +292,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 userProvider.logout();
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const LoginPage(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const LoginPage()),
                 );
               }
             },
@@ -301,9 +313,7 @@ class _MyHomePageState extends State<MyHomePage> {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFFE8B923).withOpacity(0.3),
-        ),
+        border: Border.all(color: const Color(0xFFE8B923).withOpacity(0.3)),
       ),
       child: Row(
         children: [
