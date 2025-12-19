@@ -4,7 +4,7 @@ class UserProfile {
   final String? lastName;
   final String? email;
   final String role;
-  final ProfileData? profile; // ✅ Ubah jadi nullable
+  final ProfileData? profile;
 
   UserProfile({
     required this.username,
@@ -12,7 +12,7 @@ class UserProfile {
     this.lastName,
     this.email,
     required this.role,
-    this.profile, // ✅ Ubah jadi optional
+    this.profile,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -22,7 +22,6 @@ class UserProfile {
       lastName: json['last_name'],
       email: json['email'],
       role: json['role'],
-      // ✅ Handle jika json['profile'] null
       profile: json['profile'] != null 
           ? ProfileData.fromJson(json['profile'], json['role']) 
           : null,

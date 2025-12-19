@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kulatih_mobile/theme/app_colors.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -15,7 +16,7 @@ class BottomNavBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: const BoxDecoration(
-        color: Color(0x111024),
+        color: AppColors.navBarBg,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(26),
           topRight: Radius.circular(26),
@@ -72,11 +73,7 @@ class BottomNavBar extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 32,
-            color: isActive ? activeColor : Colors.white,
-          ),
+          Icon(icon, size: 32, color: isActive ? activeColor : Colors.white),
           const SizedBox(height: 6),
           Text(
             label,

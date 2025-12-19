@@ -35,11 +35,11 @@ class Coach {
     id: json["id"],
     username: json["username"],
     fullName: json["full_name"],
-    sport: json["sport_display"],
+    sport: json["sport"],
     city: json["city"],
     hourlyFee: (json["hourly_fee"] as num).toInt(),
-    description: json["description"],
-    profilePhoto: json["profile_photo"],
+    description: json["description"]?.toString() ?? '',
+    profilePhoto: json["profile_photo"]?.toString() ?? '',
   );
 
   Map<String, dynamic> toJson() => {

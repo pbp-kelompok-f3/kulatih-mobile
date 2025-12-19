@@ -10,6 +10,7 @@ import 'package:kulatih_mobile/salman-tournament/page/tournament_main.dart';
 import 'package:kulatih_mobile/azizah-rating/screens/reviews_list_page.dart';
 import 'package:kulatih_mobile/alia-community/pages/community_page.dart';
 import 'package:kulatih_mobile/theme/app_colors.dart';
+import 'package:kulatih_mobile/albert-user/screens/find_coach.dart';
 
 void main() {
   runApp(const MyApp());
@@ -68,190 +69,19 @@ class _MyHomePageState extends State<MyHomePage> {
     final profile = userProvider.userProfile;
 
     List<Widget> pages = [
-      // ================= PROFILE PAGE =================
-      SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // avatar
-            CircleAvatar(
-              radius: 60,
-              backgroundColor: const Color(0xFFE8B923),
-              backgroundImage:
-                  profile?.profile?.profilePhoto != null &&
-                      profile!.profile!.profilePhoto!.isNotEmpty
-                  ? NetworkImage(profile.profile!.profilePhoto!)
-                  : null,
-              child:
-                  profile?.profile?.profilePhoto == null ||
-                      profile!.profile!.profilePhoto!.isEmpty
-                  ? Text(
-                      profile?.username.substring(0, 1).toUpperCase() ?? 'U',
-                      style: const TextStyle(
-                        fontFamily: 'BebasNeue',
-                        fontSize: 48,
-                        color: Color(0xFF1A1625),
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(height: 24),
+      // ================= INDEX 0: FIND COACH (HOME) =================
+      const FindCoach(),
 
-            // name
-            Text(
-              profile?.fullName ?? 'User',
-              style: const TextStyle(
-                fontFamily: 'BebasNeue',
-                fontSize: 32,
-                color: Color(0xFFE8B923),
-              ),
-            ),
-            const SizedBox(height: 8),
+      // ================= INDEX 1: TOURNAMENT =================
+      const TournamentMainPage(),
 
-            // username
-            Text(
-              '@${profile?.username ?? 'username'}',
-              style: const TextStyle(
-                fontFamily: 'BeVietnamPro',
-                fontSize: 18,
-                color: Colors.white70,
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // badge COACH / MEMBER
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: userProvider.isCoach
-                    ? const Color(0xFFE8B923).withOpacity(0.2)
-                    : Colors.blue.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: userProvider.isCoach
-                      ? const Color(0xFFE8B923)
-                      : Colors.blue,
-                ),
-              ),
-              child: Text(
-                userProvider.isCoach ? 'COACH' : 'MEMBER',
-                style: TextStyle(
-                  fontFamily: 'BebasNeue',
-                  fontSize: 16,
-                  color: userProvider.isCoach
-                      ? const Color(0xFFE8B923)
-                      : Colors.blue,
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // basic info
-            _buildInfoCard(
-              icon: Icons.location_city,
-              label: 'City',
-              value: profile?.profile?.city ?? '-',
-            ),
-            const SizedBox(height: 12),
-
-            _buildInfoCard(
-              icon: Icons.phone,
-              label: 'Phone',
-              value: profile?.profile?.phone ?? '-',
-            ),
-            const SizedBox(height: 12),
-
-            _buildInfoCard(
-              icon: Icons.email,
-              label: 'Email',
-              value: profile?.email ?? '-',
-            ),
-
-            // khusus coach
-            if (userProvider.isCoach) ...[
-              const SizedBox(height: 12),
-              _buildInfoCard(
-                icon: Icons.sports,
-                label: 'Sport',
-                value: profile?.profile?.sportLabel ?? '-',
-              ),
-              const SizedBox(height: 12),
-              _buildInfoCard(
-                icon: Icons.attach_money,
-                label: 'Hourly Fee',
-                value: 'Rp ${profile?.profile?.hourlyFee?.toString() ?? '0'}',
-              ),
-            ],
-
-            if (profile?.profile?.description != null &&
-                profile!.profile!.description!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _buildInfoCard(
-                icon: Icons.description,
-                label: 'Description',
-                value: profile.profile!.description!,
-              ),
-            ],
-
-            // ================= MY REVIEWS BUTTON (COACH ONLY) =================
-            if (userProvider.isCoach && profile?.profile != null) ...[
-              const SizedBox(height: 24),
-              GestureDetector(
-                onTap: () {
-                  final coachId = profile!.profile!.id.toString();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReviewsListPage(
-                        coachId: coachId,
-                        coachName: profile.fullName,
-                      ),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                    horizontal: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8B923),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.star, color: Color(0xFF1A1625)),
-                          SizedBox(width: 8),
-                          Text(
-                            'My Reviews',
-                            style: TextStyle(
-                              fontFamily: 'BeVietnamPro',
-                              fontSize: 16,
-                              color: Color(0xFF1A1625),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Icon(Icons.chevron_right, color: Color(0xFF1A1625)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-
-      // ================= OTHER TABS =================
-      TournamentMainPage(),
+      // ================= INDEX 2: BOOKINGS =================
       const BookingListPage(),
-      ForumMainPage(),
+
+      // ================= INDEX 3: FORUM =================
+      const ForumMainPage(),
+
+      // ================= INDEX 4: COMMUNITY =================
       const CommunityPage(),
     ];
 
@@ -263,41 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
         onTap: (index) {
           setState(() => currentIndex = index);
         },
-      ),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1625),
-        title: RichText(
-          text: const TextSpan(
-            style: TextStyle(fontFamily: 'BebasNeue', fontSize: 32),
-            children: [
-              TextSpan(
-                text: 'KU',
-                style: TextStyle(color: Colors.white),
-              ),
-              TextSpan(
-                text: 'LATIH',
-                style: TextStyle(color: Color(0xFFE8B923)),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () async {
-              final response = await request.logout(
-                "http://localhost:8000/auth/logout/",
-              );
-              if (context.mounted && response['status']) {
-                userProvider.logout();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginPage()),
-                );
-              }
-            },
-          ),
-        ],
       ),
     );
   }
