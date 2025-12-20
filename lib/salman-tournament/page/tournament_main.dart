@@ -56,10 +56,9 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
                     );
 
                     if (result == true) {
-                      setState(() {}); // REFRESH UI
+                      setState(() {});
                     }
                   },
-
                   child: const Icon(
                     Icons.add_rounded,
                     size: 28,
@@ -69,10 +68,10 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
               : const SizedBox.shrink(),
         ),
       ),
-
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
+            // ===== HEADER =====
             SliverToBoxAdapter(
               child: Stack(
                 children: [
@@ -87,7 +86,6 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
                   ),
                   Container(
                     height: 260,
-                    width: double.infinity,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -103,17 +101,13 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          "FIND YOUR",
-                          style: heading(50, color: AppColor.white),
-                        ),
-                        Text(
-                          "PERFECT TOURNAMENT",
-                          style: heading(50, color: AppColor.yellow),
-                        ),
-                        SizedBox(height: 14),
+                        Text("FIND YOUR",
+                            style: heading(50, color: AppColor.white)),
+                        Text("PERFECT TOURNAMENT",
+                            style: heading(50, color: AppColor.yellow)),
+                        const SizedBox(height: 14),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 40),
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
                           child: Text(
                             "Discover, join, and compete in tournaments that match your passion and skills.",
                             textAlign: TextAlign.center,
@@ -126,7 +120,10 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
                 ],
               ),
             ),
+
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
+            // ===== SEARCH BAR =====
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -138,7 +135,8 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
                         style: body(14, color: Colors.grey.shade500),
                         decoration: InputDecoration(
                           hintText: "Search Tournament...",
-                          hintStyle: TextStyle(color: Colors.grey.shade500),
+                          hintStyle:
+                              TextStyle(color: Colors.grey.shade500),
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20,
                             vertical: 16,
@@ -173,7 +171,8 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: () => _onSearchChanged(searchController.text),
+                      onPressed: () =>
+                          _onSearchChanged(searchController.text),
                       child: const Icon(
                         Icons.search_rounded,
                         color: Colors.black,
@@ -186,6 +185,8 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
             ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+            // ===== FILTER =====
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -200,8 +201,11 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
             ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
-            SliverToBoxAdapter(
-              child: TournamentEntryList(key: ValueKey(DateTime.now().toIso8601String()), query: query, filter: currentFilter),
+
+            // ===== TOURNAMENT LIST (SLIVER LANGSUNG) =====
+            TournamentEntryList(
+              query: query,
+              filter: currentFilter,
             ),
           ],
         ),
@@ -215,9 +219,7 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            currentFilter = label;
-          });
+          setState(() => currentFilter = label);
         },
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -229,7 +231,8 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
           alignment: Alignment.center,
           child: Text(
             label,
-            style: body(14, color: isActive ? Colors.black : AppColor.yellow),
+            style: body(14,
+                color: isActive ? Colors.black : AppColor.yellow),
           ),
         ),
       ),

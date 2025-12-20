@@ -26,122 +26,112 @@ class _TournamentEntryListState extends State<TournamentEntryList> {
   String currentUsername = '';
 
   Future<void> _fetchTournaments() async {
-    setState(() => isLoading = true);
-
     final request = context.read<CookieRequest>();
-    final raw = await request.get(
-      'http://localhost:8000/tournament/json/tournaments/',
-    );
+    final raw =
+        await request.get('http://localhost:8000/tournament/json/tournaments/');
 
     final Map<String, dynamic> normalized = raw is Map
         ? Map<String, dynamic>.from(raw)
-        : <String, dynamic>{};
-
-    if (raw is List) {
-      normalized['role'] = 'unknown';
-      normalized['username'] = '';
-      normalized['tournaments'] = raw;
-    }
+        : {
+            'role': 'unknown',
+            'username': '',
+            'tournaments': raw,
+          };
 
     final entry = TournamentEntry.fromJson(normalized);
 
-    if (mounted) {
-      setState(() {
-        allTournaments = entry.tournaments;
-        userRole = entry.role;
-        currentUsername =
-            entry.namaUser;
-        isLoading = false;
-      });
-    }
+    if (!mounted) return;
+
+    setState(() {
+      allTournaments = entry.tournaments;
+      userRole = entry.role;
+      currentUsername = entry.namaUser;
+      isLoading = false;
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(_fetchTournaments);
+    _fetchTournaments();
   }
 
   @override
   Widget build(BuildContext context) {
-  final q = widget.query.trim().toLowerCase();
+    final q = widget.query.trim().toLowerCase();
 
-  List<Tournament> filtered = allTournaments;
+    List<Tournament> filtered = allTournaments;
 
-  if (q.isNotEmpty) {
-    filtered = filtered.where((t) {
-      final nama = t.nama.toLowerCase();
-      final lokasi = t.lokasi.toLowerCase();
-      final pembuat = t.pembuat.toLowerCase();
-      final tipe = t.tipe.toLowerCase();
-
-      return nama.contains(q) ||
-             lokasi.contains(q) ||
-             pembuat.contains(q) ||
-             tipe.contains(q);
-    }).toList();
-  }
+    if (q.isNotEmpty) {
+      filtered = filtered.where((t) {
+        return t.nama.toLowerCase().contains(q) ||
+            t.lokasi.toLowerCase().contains(q) ||
+            t.pembuat.toLowerCase().contains(q) ||
+            t.tipe.toLowerCase().contains(q);
+      }).toList();
+    }
 
     if (widget.filter == "My Tournaments") {
       filtered = filtered.where((t) {
         final isCreator = t.pembuat == currentUsername;
-        final isParticipant = t.participants.any(
-          (p) => p.member.username == currentUsername,
-        );
-
+        final isParticipant =
+            t.participants.any((p) => p.member.username == currentUsername);
         return isCreator || isParticipant;
       }).toList();
     }
 
     if (isLoading) {
-      return const Center(
+      return const SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsets.only(top: 60),
-          child: CircularProgressIndicator(color: Colors.orangeAccent),
-        ),
-      );
-    }
-
-    if (filtered.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.only(top: 60),
-          child: Text(
-            "No tournaments found.",
-            style: TextStyle(color: Colors.white70, fontSize: 16),
+          child: Center(
+            child: CircularProgressIndicator(color: Colors.orangeAccent),
           ),
         ),
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 40),
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: filtered.length,
-        itemBuilder: (context, index) {
-          final tournament = filtered[index];
+    if (filtered.isEmpty) {
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.only(top: 60),
+          child: Center(
+            child: Text(
+              "No tournaments found.",
+              style: TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+          ),
+        ),
+      );
+    }
 
-          return TournamentEntryCard(
-            tournament: tournament,
-            onTap: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => TournamentDetailPage(
-                    tournament: tournament,
-                    role: userRole,
-                    currentUsername: currentUsername,
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final tournament = filtered[index];
+            return TournamentEntryCard(
+              tournament: tournament,
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TournamentDetailPage(
+                      tournament: tournament,
+                      role: userRole,
+                      currentUsername: currentUsername,
+                    ),
                   ),
-                ),
-              );
-              _fetchTournaments();
-            },
-          );
-        },
+                );
+                _fetchTournaments();
+              },
+            );
+          },
+          childCount: filtered.length,
+        ),
       ),
     );
   }
 }
+
