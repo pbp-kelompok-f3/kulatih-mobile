@@ -4,6 +4,8 @@ import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/theme/app_colors.dart';
 import 'package:kulatih_mobile/albert-user/models/coach.dart';
 import 'package:kulatih_mobile/albert-user/widgets/coach_card.dart'; // Sport category
+import 'package:kulatih_mobile/albert-user/screens/coach_profile.dart';
+import 'package:kulatih_mobile/albert-user/screens/member_profile.dart';
 
 class CoachDetail extends StatelessWidget {
   final Coach coach;
@@ -42,13 +44,30 @@ class CoachDetail extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 20.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey[800],
-              backgroundImage: appBarImageProvider,
-              // Jika tidak ada gambar, tampilkan Icon
-              child: (appBarImageProvider == null)
-                  ? const Icon(Icons.person, color: Colors.white)
-                  : null,
+            
+            child: GestureDetector(
+              onTap: () {
+                // Logika navigasi ke halaman profil
+                if (context.read<UserProvider>().userProfile?.isCoach ?? false) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const CoachProfile()),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MemberProfile()),
+                  );
+                }
+              },
+              child: CircleAvatar(
+                backgroundColor: Colors.grey[800],
+                backgroundImage: appBarImageProvider,
+                // Jika tidak ada gambar, tampilkan Icon
+                child: (appBarImageProvider == null)
+                    ? const Icon(Icons.person, color: Colors.white)
+                    : null,
+              ),
             ),
           ),
         ],
