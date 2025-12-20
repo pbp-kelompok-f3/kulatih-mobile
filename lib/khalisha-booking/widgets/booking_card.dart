@@ -60,29 +60,42 @@ class BookingCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          /// PROFILE
-          Row(
-            children: [
-              const CircleAvatar(
-                radius: 26,
-                backgroundImage: AssetImage("assets/default_user.png"),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isCoach ? booking.memberName : booking.coachName,
-                    style: heading(17, color: AppColors.textWhite),
-                  ),
-                  Text(
-                    booking.sport,
-                    style: body(13, color: AppColors.textLight),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          /// PROFILE INFO
+                    Row(
+                      children: [
+                        ClipOval(
+                          child: Image.network(
+                            booking.imageUrl != null && booking.imageUrl!.isNotEmpty
+                                ? 'http://localhost:8000/booking/proxy-image/?url=${Uri.encodeComponent(booking.imageUrl!)}'
+                                : 'https://via.placeholder.com/80',
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              width: 80,
+                              height: 80,
+                              color: Colors.grey.shade700,
+                              alignment: Alignment.center,
+                              child: const Icon(Icons.person, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 18),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isCoach ? booking.memberName : booking.coachName,
+                              style: heading(22, color: AppColors.textWhite),
+                            ),
+                            Text(
+                              booking.sport,
+                              style: body(16, color: AppColors.textLight),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
 
           const SizedBox(height: 14),
 
