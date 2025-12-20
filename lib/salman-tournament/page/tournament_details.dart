@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kulatih_mobile/constants/app_colors.dart';
+import 'package:kulatih_mobile/izzati-forum/styles/text.dart';
 import 'package:kulatih_mobile/salman-tournament/models/tournament_model.dart';
 import 'package:kulatih_mobile/salman-tournament/widgets/tournament_assign.dart';
 import 'package:kulatih_mobile/salman-tournament/page/tournament_edit.dart';
@@ -88,7 +90,7 @@ ScaffoldMessenger.of(context).showSnackBar(
     content: const Text(
       "Data turnamen diperbarui!",
       style: TextStyle(
-        color: Colors.black,     // biar kontras sama kuning
+        color: Colors.black,
         fontWeight: FontWeight.w600,
       ),
     ),
@@ -114,13 +116,14 @@ ScaffoldMessenger.of(context).showSnackBar(
 
     final bool canSeeParticipants =
         widget.role == "coach" && data.pembuat == widget.currentUsername;
-
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: Text(data.nama),
+        backgroundColor: AppColor.indigo,
+        foregroundColor: AppColor.yellow,
+        title: Text(data.nama,
+        style: heading(24, color: AppColor.yellow),
+        ),
         actions: [
           if (_isRefreshing)
             const Padding(
@@ -129,7 +132,7 @@ ScaffoldMessenger.of(context).showSnackBar(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
-                  color: Colors.white,
+                  color: AppColor.yellow,
                   strokeWidth: 2,
                 ),
               ),
@@ -139,10 +142,10 @@ ScaffoldMessenger.of(context).showSnackBar(
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.only(top: 20, left: 30, right: 30),
+          color: AppColor.indigoDark,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Poster
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(30),
@@ -161,7 +164,6 @@ ScaffoldMessenger.of(context).showSnackBar(
                   ),
                 ),
               ),
-
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -170,10 +172,7 @@ ScaffoldMessenger.of(context).showSnackBar(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         data.nama,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
+                        style: heading(30, color: AppColor.yellow
                         ),
                       ),
                     ),
@@ -183,7 +182,7 @@ ScaffoldMessenger.of(context).showSnackBar(
                     child: Text(
                       "Participants (${data.participantCount})",
                       style: const TextStyle(
-                        color: Colors.orangeAccent,
+                        color: AppColor.yellow,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -191,19 +190,16 @@ ScaffoldMessenger.of(context).showSnackBar(
                   ),
                 ],
               ),
-
               const Divider(
                 color: Colors.white24,
                 thickness: 1,
                 indent: 16,
                 endIndent: 16,
               ),
-
-              // Tipe
               const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E),
+                  color: AppColor.indigoLight,
                   borderRadius: BorderRadius.circular(100),
                 ),
                 width: 100,
@@ -212,8 +208,8 @@ ScaffoldMessenger.of(context).showSnackBar(
                 child: Center(
                   child: Text(
                     data.tipe,
-                    style: const TextStyle(
-                      color: Colors.white70,
+                    style: TextStyle(
+                      color: AppColor.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -225,13 +221,13 @@ ScaffoldMessenger.of(context).showSnackBar(
                 child: Row(
                   children: [
                     const Icon(Icons.event,
-                        color: Colors.orangeAccent, size: 18),
+                        color: AppColor.yellow, size: 30),
                     const SizedBox(width: 8),
                     Text(
                       formatTanggal(data.tanggal),
                       style: const TextStyle(
                         color: Colors.white70,
-                        fontSize: 14,
+                        fontSize: 20,
                       ),
                     ),
                   ],
@@ -243,19 +239,18 @@ ScaffoldMessenger.of(context).showSnackBar(
                 child: Row(
                   children: [
                     const Icon(Icons.location_on,
-                        color: Colors.orangeAccent, size: 18),
+                        color: AppColor.yellow, size: 30),
                     const SizedBox(width: 8),
                     Text(
                       data.lokasi,
                       style: const TextStyle(
                         color: Colors.white70,
-                        fontSize: 14,
+                        fontSize: 20,
                       ),
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 16),
               const Divider(
                 color: Colors.white24,
@@ -303,7 +298,7 @@ ScaffoldMessenger.of(context).showSnackBar(
               const SizedBox(height: 20),
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3E5E1),
+                  color: AppColor.indigoLight,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -311,16 +306,13 @@ ScaffoldMessenger.of(context).showSnackBar(
                 child: Text(
                   data.deskripsi,
                   style: const TextStyle(
-                    color: Colors.black87,
+                    color: AppColor.white,
                     fontSize: 15,
                     height: 1.5,
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              // Tombol Edit & Hapus hanya untuk coach pembuat
               if (isCoach && data.pembuat == widget.currentUsername) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -360,9 +352,7 @@ ScaffoldMessenger.of(context).showSnackBar(
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 12),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Material(
@@ -390,9 +380,7 @@ ScaffoldMessenger.of(context).showSnackBar(
                                     context: context,
                                     tournamentId: data.id,
                                   );
-
                                   if (!context.mounted) return;
-
                                   if (success) {
                                     Navigator.pushReplacement(
                                       context,
@@ -483,12 +471,7 @@ ScaffoldMessenger.of(context).showSnackBar(
                   ),
                 ),
               ],
-
               const SizedBox(height: 30),
-
-              // ---------------------------
-              // LIST PESERTA – ONLY CREATOR
-              // ---------------------------
               if (canSeeParticipants) ...[
                 const Divider(
                   color: Colors.white24,
