@@ -151,4 +151,28 @@ class ReviewApi {
           'Failed to delete review (${res.statusCode}): ${res.body}');
     }
   }
+
+  Future<int?> getMyReviewIdForCoach({
+    required String coachId,
+    int pageSize = 50,
+  }) async {
+    int page = 1;
+
+    while (true) {
+      final res = await getCoachReviews(
+        coachId: coachId,
+        page: page,
+        pageSize: pageSize,
+      );
+
+      final mine = res.items.where((it) => it.isOwner).toList();
+      if (mine.isNotEmpty) {
+        return int.tryParse(mine.first.id);
+      }
+
+      if (!res.pagination.hasNext) return null;
+      page++;
+    }
+  }
+
 }

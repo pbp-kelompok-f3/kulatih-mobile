@@ -8,17 +8,48 @@ import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/booking_status_badge.dart';
-import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart';
+import 'package:kulatih_mobile/azizah-rating/services/review_api.dart';
+import 'package:kulatih_mobile/azizah-rating/screens/review_detail_page.dart';
+import 'package:kulatih_mobile/azizah-rating/widgets/review_form_dialog.dart';
 
-class BookingDetailPage extends StatelessWidget {
+class BookingDetailPage extends StatefulWidget {
   final Booking booking;
 
   const BookingDetailPage({super.key, required this.booking});
 
-  String _fmtDate(DateTime dt) =>
-      DateFormat('EEEE, dd MMM yyyy').format(dt);
+  @override
+  State<BookingDetailPage> createState() => _BookingDetailPageState();
+}
 
+class _BookingDetailPageState extends State<BookingDetailPage> {
+  final ReviewApi _reviewApi = ReviewApi();
+
+  Future<int?>? _myReviewIdFuture;
+
+  String _fmtDate(DateTime dt) => DateFormat('EEEE, dd MMM yyyy').format(dt);
   String _fmtTime(DateTime dt) => DateFormat('HH:mm').format(dt);
+
+  @override
+  void initState() {
+    super.initState();
+    _primeReviewCheck();
+  }
+
+  void _primeReviewCheck() {
+    if (widget.booking.isHistory &&
+        widget.booking.status == BookingStatus.completed) {
+      _myReviewIdFuture =
+          _reviewApi.getMyReviewIdForCoach(coachId: widget.booking.coachId);
+    }
+  }
+
+  Future<void> _reloadReview() async {
+    setState(() {
+      _myReviewIdFuture =
+          _reviewApi.getMyReviewIdForCoach(coachId: widget.booking.coachId);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +57,8 @@ class BookingDetailPage extends StatelessWidget {
     final user = context.watch<UserProvider>();
     final isCoach = user.isCoach;
 
-    final isUpcoming = booking.isUpcoming;
-    final isHistory = booking.isHistory;
+    final isUpcoming = widget.booking.isUpcoming;
+    final isHistory = widget.booking.isHistory;
 
     return Scaffold(
       backgroundColor: AppColors.indigo,
@@ -69,8 +100,9 @@ class BookingDetailPage extends StatelessWidget {
                       children: [
                         ClipOval(
                           child: Image.network(
-                            booking.imageUrl != null && booking.imageUrl!.isNotEmpty
-                                ? 'http://localhost:8000/booking/proxy-image/?url=${Uri.encodeComponent(booking.imageUrl!)}'
+                            widget.booking.imageUrl != null &&
+                                    widget.booking.imageUrl!.isNotEmpty
+                                ? 'http://localhost:8000/booking/proxy-image/?url=${Uri.encodeComponent(widget.booking.imageUrl!)}'
                                 : 'https://via.placeholder.com/80',
                             width: 80,
                             height: 80,
@@ -80,7 +112,8 @@ class BookingDetailPage extends StatelessWidget {
                               height: 80,
                               color: Colors.grey.shade700,
                               alignment: Alignment.center,
-                              child: const Icon(Icons.person, color: Colors.white),
+                              child: const Icon(Icons.person,
+                                  color: Colors.white),
                             ),
                           ),
                         ),
@@ -89,11 +122,13 @@ class BookingDetailPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isCoach ? booking.memberName : booking.coachName,
+                              isCoach
+                                  ? widget.booking.memberName
+                                  : widget.booking.coachName,
                               style: heading(22, color: AppColors.textWhite),
                             ),
                             Text(
-                              booking.sport,
+                              widget.booking.sport,
                               style: body(16, color: AppColors.textLight),
                             ),
                           ],
@@ -102,29 +137,29 @@ class BookingDetailPage extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 24),
-                    BookingStatusBadge(status: booking.status),
+                    BookingStatusBadge(status: widget.booking.status),
 
                     const SizedBox(height: 24),
                     _title("Schedule"),
                     _infoBox(
                       icon: Icons.calendar_month,
-                      title: _fmtDate(booking.startTime),
+                      title: _fmtDate(widget.booking.startTime),
                       subtitle:
-                          "${_fmtTime(booking.startTime)} - ${_fmtTime(booking.endTime)} WIB",
+                          "${_fmtTime(widget.booking.startTime)} - ${_fmtTime(widget.booking.endTime)} WIB",
                     ),
 
                     const SizedBox(height: 20),
                     _title("Location"),
                     _infoBox(
                       icon: Icons.location_on,
-                      title: booking.location,
+                      title: widget.booking.location,
                     ),
 
                     const SizedBox(height: 20),
                     _title("Booking ID"),
                     _infoBox(
                       icon: Icons.confirmation_number,
-                      title: "#${booking.id}",
+                      title: "#${widget.booking.id}",
                     ),
 
                     const SizedBox(height: 40),
@@ -132,7 +167,7 @@ class BookingDetailPage extends StatelessWidget {
                     /// BUTTON SECTION
                     if (isCoach && isUpcoming) _coachButtons(context, service),
                     if (!isCoach && isUpcoming) _userButtons(context, service),
-                    if (isHistory) _historyButtons(context),
+                    if (isHistory) _historyButtons(context, isCoach),
 
                     const SizedBox(height: 60),
                   ],
@@ -180,7 +215,7 @@ class BookingDetailPage extends StatelessWidget {
 
   // ---------------- USER BUTTONS ----------------
   Widget _userButtons(BuildContext context, BookingService service) {
-    if (booking.status == BookingStatus.rescheduled) {
+    if (widget.booking.status == BookingStatus.rescheduled) {
       return const SizedBox.shrink();
     }
 
@@ -195,14 +230,14 @@ class BookingDetailPage extends StatelessWidget {
         }),
         const SizedBox(height: 12),
         _red("Cancel Booking", () async {
-          await service.cancelBooking(booking.id);
+          await service.cancelBooking(widget.booking.id);
           Navigator.pop(context);
         }),
         const SizedBox(height: 12),
         _gold("Reschedule", () {
           showDialog(
             context: context,
-            builder: (_) => RescheduleModal(booking: booking),
+            builder: (_) => RescheduleModal(booking: widget.booking),
           );
         }),
       ],
@@ -211,27 +246,27 @@ class BookingDetailPage extends StatelessWidget {
 
   // ---------------- COACH BUTTONS ----------------
   Widget _coachButtons(BuildContext context, BookingService service) {
-    if (booking.status == BookingStatus.pending) {
+    if (widget.booking.status == BookingStatus.pending) {
       return Column(
         children: [
           _gold("Confirm", () async {
-            await service.confirmBooking(booking.id);
+            await service.confirmBooking(widget.booking.id);
             Navigator.pop(context);
           }),
         ],
       );
     }
 
-    if (booking.status == BookingStatus.rescheduled) {
+    if (widget.booking.status == BookingStatus.rescheduled) {
       return Column(
         children: [
           _dark("Accept Reschedule", () async {
-            await service.acceptReschedule(booking.id);
+            await service.acceptReschedule(widget.booking.id);
             Navigator.pop(context);
           }),
           const SizedBox(height: 12),
           _red("Reject", () async {
-            await service.rejectReschedule(booking.id);
+            await service.rejectReschedule(widget.booking.id);
             Navigator.pop(context);
           }),
         ],
@@ -242,19 +277,78 @@ class BookingDetailPage extends StatelessWidget {
   }
 
   // ---------------- HISTORY BUTTONS ----------------
-  Widget _historyButtons(BuildContext context) {
-    return Column(
-      children: [
-        _gold("Review Coach", () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Review feature is not implemented yet"),
+  Widget _historyButtons(BuildContext context, bool isCoach) {
+    // Coach ga perlu review
+    if (isCoach) {
+      return Column(
+        children: [
+          _dark("Book Again", () {}),
+        ],
+      );
+    }
+
+    // Hanya booking completed yang boleh review
+    if (widget.booking.status != BookingStatus.completed) {
+      return Column(
+        children: [
+          _dark("Book Again", () {}),
+        ],
+      );
+    }
+
+    return FutureBuilder<int?>(
+      future: _myReviewIdFuture,
+      builder: (context, snap) {
+        final loading = snap.connectionState == ConnectionState.waiting;
+        final reviewId = snap.data; // null = belum review
+
+        return Column(
+          children: [
+            _gold(
+              loading
+                  ? "Loading..."
+                  : (reviewId == null ? "Leave Review" : "View Your Review"),
+              () async {
+                if (loading) return;
+
+                // ===== Belum pernah review -> buka form create =====
+                if (reviewId == null) {
+                  final created = await ReviewFormDialog.showCreate(
+                    context,
+                    coachId: widget.booking.coachId,
+                  );
+
+                  // setelah submit sukses: refresh state -> button berubah jadi View
+                  if (created == true) {
+                    await _reloadReview();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Review submitted"),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                } else {
+                  // ===== CASE 2: Sudah review -> buka detail review sendiri =====
+                  final changed = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReviewDetailPage(reviewId: reviewId),
+                    ),
+                  );
+
+                  // kalau edit/delete, detail page pop(true) -> refresh button state
+                  if (changed == true) {
+                    await _reloadReview();
+                  }
+                }
+              },
             ),
-          );
-        }),
-        const SizedBox(height: 12),
-        _dark("Book Again", () {}),
-      ],
+            const SizedBox(height: 12),
+            _dark("Book Again", () {}),
+          ],
+        );
+      },
     );
   }
 
