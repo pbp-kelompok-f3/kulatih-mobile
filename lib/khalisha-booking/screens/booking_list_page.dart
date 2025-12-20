@@ -8,6 +8,9 @@ import 'package:kulatih_mobile/khalisha-booking/widgets/booking_card.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_detail_page.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal.dart';
+import 'package:kulatih_mobile/azizah-rating/services/review_api.dart';
+import 'package:kulatih_mobile/azizah-rating/screens/review_detail_page.dart';
+import 'package:kulatih_mobile/azizah-rating/widgets/review_form_dialog.dart';
 
 class BookingListPage extends StatefulWidget {
   const BookingListPage({super.key});
@@ -19,6 +22,9 @@ class BookingListPage extends StatefulWidget {
 class _BookingListPageState extends State<BookingListPage>
     with SingleTickerProviderStateMixin {
   final BookingService _service = BookingService();
+
+  // ===== REVIEW API (TETAP) =====
+  final ReviewApi _reviewApi = ReviewApi();
 
   late TabController _tabController;
 
@@ -47,19 +53,16 @@ class _BookingListPageState extends State<BookingListPage>
   }
 
   /* ---------------- FILTER LOGIC ---------------- */
-  List<Booking> get upcoming {
-    return _bookings.where((b) => b.isUpcoming).toList();
-  }
+  List<Booking> get upcoming =>
+      _bookings.where((b) => b.isUpcoming).toList();
 
-  List<Booking> get history {
-    return _bookings.where((b) => b.isHistory).toList();
-  }
+  List<Booking> get history =>
+      _bookings.where((b) => b.isHistory).toList();
 
   /* ---------------- CANCEL ---------------- */
   Future<void> _cancelBooking(Booking booking) async {
     try {
       final ok = await _service.cancelBooking(booking.id);
-
       if (!ok) return;
 
       setState(() {
@@ -86,21 +89,77 @@ class _BookingListPageState extends State<BookingListPage>
     }
   }
 
-  /* ---------------- COACH ACTIONS ---------------- */
-
-  Future<void> _accept(Booking b) async {
-    await _service.acceptReschedule(b.id);
-    _fetchBookings();
+  /* ================= COACH ACTIONS (WRAPPER ONLY) ================= */
+  Future<void> _accept(Booking booking) async {
+    final ok = await _service.acceptReschedule(booking.id);
+    if (ok) await _fetchBookings();
   }
 
-  Future<void> _reject(Booking b) async {
-    await _service.rejectReschedule(b.id);
-    _fetchBookings();
+  Future<void> _reject(Booking booking) async {
+    final ok = await _service.rejectReschedule(booking.id);
+    if (ok) await _fetchBookings();
   }
 
-  Future<void> _confirm(Booking b) async {
-    await _service.confirmBooking(b.id);
-    _fetchBookings();
+  Future<void> _confirm(Booking booking) async {
+    final ok = await _service.confirmBooking(booking.id);
+    if (ok) await _fetchBookings();
+  }
+
+  /* ---------------- VIEW / CREATE REVIEW ---------------- */
+  Future<void> _handleViewReview(Booking b) async {
+    if (b.status != BookingStatus.completed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You can only review completed bookings.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final coachId = b.coachId.toString();
+
+    try {
+      final resp = await _reviewApi.getCoachReviews(
+        coachId: coachId,
+        page: 1,
+        pageSize: 20,
+      );
+
+      var myReview = resp.items.cast<dynamic>().firstWhere(
+            (it) => it.isOwner == true,
+            orElse: () => null,
+          );
+
+      if (myReview != null) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ReviewDetailPage(
+              reviewId: int.parse(myReview.id.toString()),
+            ),
+          ),
+        );
+        return;
+      }
+
+      final created = await ReviewFormDialog.showCreate(
+        context,
+        coachId: coachId,
+      );
+
+      if (created == true) {
+        await _fetchBookings();
+      }
+    } catch (e) {
+      debugPrint("Error handling review: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to open review: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   /* ---------------- UI ---------------- */
@@ -115,8 +174,6 @@ class _BookingListPageState extends State<BookingListPage>
         child: Column(
           children: [
             const SizedBox(height: 20),
-
-            /// HEADER
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Text(
@@ -128,12 +185,8 @@ class _BookingListPageState extends State<BookingListPage>
                 ),
               ),
             ),
-
             const SizedBox(height: 20),
-
-            /// TABS
             _buildTabs(),
-
             Expanded(
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
@@ -193,30 +246,21 @@ class _BookingListPageState extends State<BookingListPage>
       itemBuilder: (_, i) {
         final b = items[i];
 
-        return BookingCard(
-          booking: b,
-          historyMode: historyMode,
-          isCoach: isCoach,
-
-          // USER BUTTONS
-          onCancel: () => _cancelBooking(b),
-          onReschedule: () => _openReschedule(b),
-
-          // COACH BUTTONS
-          onAccept: () => _accept(b),
-          onReject: () => _reject(b),
-          onConfirm: () => _confirm(b),
-
-          // HISTORY BUTTONS
-          onViewReview: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BookingDetailPage(booking: b),
-              ),
-            );
-          },
-          onBookAgain: () {},
+        return Column(
+          children: [
+            BookingCard(
+              booking: b,
+              historyMode: historyMode,
+              isCoach: isCoach,
+              onCancel: () => _cancelBooking(b),
+              onReschedule: () => _openReschedule(b),
+              onAccept: () => _accept(b),
+              onReject: () => _reject(b),
+              onConfirm: () => _confirm(b),
+              onViewReview: () => _handleViewReview(b),
+            ),
+            const SizedBox(height: 8),
+          ],
         );
       },
     );
