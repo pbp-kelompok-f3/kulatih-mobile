@@ -9,6 +9,7 @@ import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/booking_status_badge.dart';
 import 'package:kulatih_mobile/khalisha-booking/style/text.dart';
+
 import 'package:kulatih_mobile/azizah-rating/services/review_api.dart';
 import 'package:kulatih_mobile/azizah-rating/screens/review_detail_page.dart';
 import 'package:kulatih_mobile/azizah-rating/widgets/review_form_dialog.dart';
@@ -25,31 +26,9 @@ class BookingDetailPage extends StatefulWidget {
 class _BookingDetailPageState extends State<BookingDetailPage> {
   final ReviewApi _reviewApi = ReviewApi();
 
-  Future<int?>? _myReviewIdFuture;
-
-  String _fmtDate(DateTime dt) => DateFormat('EEEE, dd MMM yyyy').format(dt);
+  String _fmtDate(DateTime dt) =>
+      DateFormat('EEEE, dd MMM yyyy').format(dt);
   String _fmtTime(DateTime dt) => DateFormat('HH:mm').format(dt);
-
-  @override
-  void initState() {
-    super.initState();
-    _primeReviewCheck();
-  }
-
-  void _primeReviewCheck() {
-    if (widget.booking.isHistory &&
-        widget.booking.status == BookingStatus.completed) {
-      _myReviewIdFuture =
-          _reviewApi.getMyReviewIdForCoach(coachId: widget.booking.coachId);
-    }
-  }
-
-  Future<void> _reloadReview() async {
-    setState(() {
-      _myReviewIdFuture =
-          _reviewApi.getMyReviewIdForCoach(coachId: widget.booking.coachId);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -180,6 +159,8 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     );
   }
 
+  // ================= UI HELPERS =================
+
   Widget _title(String t) => Text(
         t,
         style: heading(20, color: AppColors.gold),
@@ -213,7 +194,8 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     );
   }
 
-  // ---------------- USER BUTTONS ----------------
+  // ================= USER BUTTONS =================
+
   Widget _userButtons(BuildContext context, BookingService service) {
     if (widget.booking.status == BookingStatus.rescheduled) {
       return const SizedBox.shrink();
@@ -244,17 +226,14 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     );
   }
 
-  // ---------------- COACH BUTTONS ----------------
+  // ================= COACH BUTTONS =================
+
   Widget _coachButtons(BuildContext context, BookingService service) {
     if (widget.booking.status == BookingStatus.pending) {
-      return Column(
-        children: [
-          _gold("Confirm", () async {
-            await service.confirmBooking(widget.booking.id);
-            Navigator.pop(context);
-          }),
-        ],
-      );
+      return _gold("Confirm", () async {
+        await service.confirmBooking(widget.booking.id);
+        Navigator.pop(context);
+      });
     }
 
     if (widget.booking.status == BookingStatus.rescheduled) {
@@ -276,7 +255,8 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     return const SizedBox.shrink();
   }
 
-  // ---------------- HISTORY BUTTONS ----------------
+  // ================= HISTORY / REVIEW =================
+
   Widget _historyButtons(BuildContext context, bool isCoach) {
     // Coach ga perlu review
     if (isCoach) {
@@ -287,8 +267,8 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
       );
     }
 
-    // Hanya booking completed yang boleh review
-    if (widget.booking.status != BookingStatus.completed) {
+    // Kalau cancelled, ga bisa review
+    if (widget.booking.status == BookingStatus.cancelled) {
       return Column(
         children: [
           _dark("Book Again", () {}),
@@ -296,54 +276,81 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
       );
     }
 
-    return FutureBuilder<int?>(
-      future: _myReviewIdFuture,
-      builder: (context, snap) {
-        final loading = snap.connectionState == ConnectionState.waiting;
-        final reviewId = snap.data; // null = belum review
+    final sessionEnded = widget.booking.endTime.isBefore(DateTime.now());
+    final canReview = sessionEnded || widget.booking.status == BookingStatus.completed;
 
+    if (!canReview) {
+      // masih upcoming beneran → jangan tampilin review
+      return Column(
+        children: [
+          _dark("Book Again", () {}),
+        ],
+      );
+    }
+
+    // Coach ID wajib ada
+    if (widget.booking.coachId.trim().isEmpty) {
+      return Column(
+        children: [
+          _gold("Leave Review", () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Coach ID not found (backend booking belum ngirim coach_id)")),
+            );
+          }),
+          const SizedBox(height: 12),
+          _dark("Book Again", () {}),
+        ],
+      );
+    }
+
+    return FutureBuilder<int?>(
+      future: _reviewApi.getMyReviewIdForCoach(coachId: widget.booking.coachId),
+      builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return Column(
+            children: [
+              _gold("Loading...", () {}),
+              const SizedBox(height: 12),
+              _dark("Book Again", () {}),
+            ],
+          );
+        }
+
+        final reviewId = snap.data;
+
+        // Belum pernah review
+        if (reviewId == null) {
+          return Column(
+            children: [
+              _gold("Leave Review", () async {
+                final ok = await ReviewFormDialog.showCreate(
+                  context,
+                  coachId: widget.booking.coachId,
+                );
+                if (ok == true && context.mounted) {
+                  setState(() {}); // refresh → tombol berubah
+                }
+              }),
+              const SizedBox(height: 12),
+              _dark("Book Again", () {}),
+            ],
+          );
+        }
+
+        // Sudah review → bisa view/edit/delete dari detail
         return Column(
           children: [
-            _gold(
-              loading
-                  ? "Loading..."
-                  : (reviewId == null ? "Leave Review" : "View Your Review"),
-              () async {
-                if (loading) return;
-
-                // ===== Belum pernah review -> buka form create =====
-                if (reviewId == null) {
-                  final created = await ReviewFormDialog.showCreate(
-                    context,
-                    coachId: widget.booking.coachId,
-                  );
-
-                  // setelah submit sukses: refresh state -> button berubah jadi View
-                  if (created == true) {
-                    await _reloadReview();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Review submitted"),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                } else {
-                  // ===== CASE 2: Sudah review -> buka detail review sendiri =====
-                  final changed = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReviewDetailPage(reviewId: reviewId),
-                    ),
-                  );
-
-                  // kalau edit/delete, detail page pop(true) -> refresh button state
-                  if (changed == true) {
-                    await _reloadReview();
-                  }
-                }
-              },
-            ),
+            _gold("View Your Review", () async {
+              final changed = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ReviewDetailPage(reviewId: reviewId),
+                ),
+              );
+              if (changed == true && context.mounted) {
+                setState(() {});
+              }
+            }),
             const SizedBox(height: 12),
             _dark("Book Again", () {}),
           ],
@@ -352,7 +359,8 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     );
   }
 
-  // -------- BUTTON HELPERS --------
+  // ================= BUTTON HELPERS =================
+
   Widget _gold(String t, VoidCallback a) =>
       _btn(t, AppColors.gold, Colors.black, a);
   Widget _red(String t, VoidCallback a) =>

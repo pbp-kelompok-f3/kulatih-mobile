@@ -9,8 +9,6 @@ class ReviewFormDialog {
   static Future<bool?> showCreate(
     BuildContext context, {
     required String coachId,
-    String? cookie,
-    String? csrfToken,
   }) async {
     return _show(
       context,
@@ -21,8 +19,6 @@ class ReviewFormDialog {
           coachId: coachId,
           rating: rating,
           comment: comment,
-          cookie: cookie,
-          csrfToken: csrfToken,
         );
       },
     );
@@ -33,8 +29,6 @@ class ReviewFormDialog {
     required int reviewId,
     required int initialRating,
     required String initialComment,
-    String? cookie,
-    String? csrfToken,
   }) async {
     return _show(
       context,
@@ -47,8 +41,6 @@ class ReviewFormDialog {
           reviewId: reviewId,
           rating: rating,
           comment: comment,
-          cookie: cookie,
-          csrfToken: csrfToken,
         );
       },
     );
