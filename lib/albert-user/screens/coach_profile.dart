@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/albert-user/widgets/profile_layout.dart';
 import 'package:kulatih_mobile/albert-user/widgets/coach_card.dart'; // Import constant sportChoices
-import 'package:kulatih_mobile/navigationbar.dart';
 
 class CoachProfile extends StatelessWidget {
   const CoachProfile({super.key});

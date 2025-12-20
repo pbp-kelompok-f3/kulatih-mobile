@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/albert-user/widgets/profile_layout.dart';
-import 'package:kulatih_mobile/navigationbar.dart';
 
 class MemberProfile extends StatelessWidget {
   const MemberProfile({super.key});

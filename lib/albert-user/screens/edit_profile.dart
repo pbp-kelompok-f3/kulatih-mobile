@@ -277,12 +277,14 @@ class _EditProfileState extends State<EditProfile> {
 
               if (userProvider.isCoach) ...[
                 const SizedBox(height: 24),
-                const Text(
-                  "Coach Information",
-                  style: TextStyle(
-                    color: AppColors.textHeading,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                const Center(
+                  child: Text(
+                    "Coach Information",
+                    style: TextStyle(
+                      color: AppColors.textHeading,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),

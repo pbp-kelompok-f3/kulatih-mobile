@@ -4,7 +4,6 @@ import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/theme/app_colors.dart';
 import 'package:kulatih_mobile/albert-user/models/coach.dart';
 import 'package:kulatih_mobile/albert-user/widgets/coach_card.dart'; // Sport category
-import 'package:kulatih_mobile/navigationbar.dart';
 
 class CoachDetail extends StatelessWidget {
   final Coach coach;
@@ -22,7 +21,7 @@ class CoachDetail extends StatelessWidget {
     ImageProvider? appBarImageProvider;
     if (rawPhotoUrl != null && rawPhotoUrl.isNotEmpty) {
       final proxyUrl =
-          'http://10.0.2.2:8000/account/proxy-image/?url=${Uri.encodeComponent(rawPhotoUrl)}';
+          'http://localhost:8000/account/proxy-image/?url=${Uri.encodeComponent(rawPhotoUrl)}';
       appBarImageProvider = NetworkImage(proxyUrl);
     }
 
@@ -31,9 +30,14 @@ class CoachDetail extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.navBarBg,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          "Coach Detail",
+          style: const TextStyle(color: AppColors.textPrimary),
         ),
         actions: [
           Padding(
@@ -221,13 +225,6 @@ class CoachDetail extends StatelessWidget {
             const SizedBox(height: 30),
           ],
         ),
-      ),
-
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: 0, // Index 0 = Coach/Find Coach
-        onTap: (index) {
-          Navigator.pop(context);
-        },
       ),
     );
   }

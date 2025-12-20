@@ -35,22 +35,17 @@ class ProfileLayout extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.navBarBg,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey[800],
-              backgroundImage: imageProvider,
-              child: (imageProvider == null)
-                  ? const Icon(Icons.person, color: Colors.white)
-                  : null,
-            ),
-          ),
-        ],
+        title: Text(
+          user.isCoach ? "Coach Profile" : "Member Profile",
+          style: const TextStyle(color: AppColors.textPrimary),
+        ),
+        centerTitle: true,
+        actions: [],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -84,15 +79,7 @@ class ProfileLayout extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user.isCoach ? "Coach Profile" : "Member Profile",
-                        style: const TextStyle(
-                          color: AppColors.textHeading,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        user.fullName, // Menggunakan getter fullName dari model
+                        user.fullName,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
