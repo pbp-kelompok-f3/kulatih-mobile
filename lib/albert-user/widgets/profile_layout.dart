@@ -4,7 +4,6 @@ import 'package:kulatih_mobile/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/albert-user/screens/login.dart';
-import 'package:kulatih_mobile/main.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class ProfileLayout extends StatelessWidget {

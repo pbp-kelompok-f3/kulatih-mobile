@@ -4,7 +4,6 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/theme/app_colors.dart';
 import 'package:kulatih_mobile/albert-user/models/coach.dart';
-import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/albert-user/widgets/coach_card.dart';
 import 'package:kulatih_mobile/albert-user/screens/coach_detail.dart';
 
