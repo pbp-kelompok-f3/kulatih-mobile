@@ -11,6 +11,7 @@ import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal
 import 'package:kulatih_mobile/azizah-rating/services/review_api.dart';
 import 'package:kulatih_mobile/azizah-rating/screens/review_detail_page.dart';
 import 'package:kulatih_mobile/azizah-rating/widgets/review_form_dialog.dart';
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; // ⬅️ FONT DARI SINI
 
 class BookingListPage extends StatefulWidget {
   const BookingListPage({super.key});
@@ -89,11 +90,7 @@ class _BookingListPageState extends State<BookingListPage>
     }
   }
 
-  /* =====================================================
-     COACH ACTIONS (INI YANG KURANG TADI)
-     TIDAK UBAH LOGIC — CUMA WRAPPER KE SERVICE
-     ===================================================== */
-
+  /* ---------------- COACH ACTIONS ---------------- */
   Future<void> _accept(Booking booking) async {
     final ok = await _service.acceptReschedule(booking.id);
     if (ok) await _fetchBookings();
@@ -122,15 +119,11 @@ class _BookingListPageState extends State<BookingListPage>
           children: [
             const SizedBox(height: 20),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 "MY BOOKINGS",
-                style: TextStyle(
-                  color: AppColors.gold,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: heading(26, color: AppColors.gold),
               ),
             ),
 
@@ -183,10 +176,10 @@ class _BookingListPageState extends State<BookingListPage>
   /* ---------------- LIST BUILDER ---------------- */
   Widget _buildList(List<Booking> items, bool historyMode, bool isCoach) {
     if (items.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           "No bookings found",
-          style: TextStyle(color: Colors.white70, fontSize: 16),
+          style: body(16, color: Colors.white70),
         ),
       );
     }

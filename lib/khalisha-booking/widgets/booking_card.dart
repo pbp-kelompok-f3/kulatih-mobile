@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/booking_status_badge.dart';
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
 
 class BookingCard extends StatelessWidget {
   final Booking booking;
@@ -51,10 +52,7 @@ class BookingCard extends StatelessWidget {
             children: [
               Text(
                 booking.formattedDateTime,
-                style: const TextStyle(
-                  color: AppColors.textLight,
-                  fontSize: 12,
-                ),
+                style: body(12, color: AppColors.textLight),
               ),
               BookingStatusBadge(status: booking.status),
             ],
@@ -75,18 +73,11 @@ class BookingCard extends StatelessWidget {
                 children: [
                   Text(
                     isCoach ? booking.memberName : booking.coachName,
-                    style: const TextStyle(
-                      color: AppColors.textWhite,
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: heading(17, color: AppColors.textWhite),
                   ),
                   Text(
                     booking.sport,
-                    style: const TextStyle(
-                      color: AppColors.textLight,
-                      fontSize: 13,
-                    ),
+                    style: body(13, color: AppColors.textLight),
                   ),
                 ],
               ),
@@ -97,12 +88,15 @@ class BookingCard extends StatelessWidget {
 
           Row(
             children: [
-              const Icon(Icons.location_on,
-                  color: AppColors.textLight, size: 16),
+              const Icon(
+                Icons.location_on,
+                color: AppColors.textLight,
+                size: 16,
+              ),
               const SizedBox(width: 6),
               Text(
                 booking.location,
-                style: const TextStyle(color: AppColors.textLight),
+                style: body(13, color: AppColors.textLight),
               ),
             ],
           ),
@@ -124,7 +118,6 @@ class BookingCard extends StatelessWidget {
 
   /// ================= USER BUTTONS =================
   Widget _userButtons() {
-    // MEMBER hanya boleh action kalau belum rescheduled & belum history
     if (booking.status == BookingStatus.rescheduled) {
       return const SizedBox.shrink();
     }
@@ -139,7 +132,6 @@ class BookingCard extends StatelessWidget {
 
   /// ================= COACH BUTTONS =================
   Widget _coachButtons() {
-    // BOOKING BARU → Confirm saja
     if (booking.status == BookingStatus.pending) {
       return Row(
         children: [
@@ -148,7 +140,6 @@ class BookingCard extends StatelessWidget {
       );
     }
 
-    // RESCHEDULE → Accept & Reject
     if (booking.status == BookingStatus.rescheduled) {
       return Row(
         children: [
@@ -158,7 +149,6 @@ class BookingCard extends StatelessWidget {
       );
     }
 
-    // STATUS LAIN → tidak ada tombol
     return const SizedBox.shrink();
   }
 
@@ -186,11 +176,7 @@ class BookingCard extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
+            style: heading(12, color: Colors.white),
           ),
         ),
       ),

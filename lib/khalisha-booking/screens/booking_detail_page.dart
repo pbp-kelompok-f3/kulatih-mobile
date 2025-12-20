@@ -8,6 +8,7 @@ import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/booking_status_badge.dart';
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
 
 class BookingDetailPage extends StatelessWidget {
   final Booking booking;
@@ -49,11 +50,7 @@ class BookingDetailPage extends StatelessWidget {
                   const SizedBox(width: 12),
                   Text(
                     isCoach ? "Client Booking" : "Booking Details",
-                    style: const TextStyle(
-                      color: AppColors.gold,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: heading(26, color: AppColors.gold),
                   )
                 ],
               ),
@@ -70,10 +67,10 @@ class BookingDetailPage extends StatelessWidget {
                     /// PROFILE INFO
                     Row(
                       children: [
-                        CircleAvatar(
+                        const CircleAvatar(
                           radius: 40,
                           backgroundImage:
-                              const AssetImage("assets/default_user.png"),
+                              AssetImage("assets/default_user.png"),
                         ),
                         const SizedBox(width: 18),
                         Column(
@@ -81,18 +78,11 @@ class BookingDetailPage extends StatelessWidget {
                           children: [
                             Text(
                               isCoach ? booking.memberName : booking.coachName,
-                              style: const TextStyle(
-                                color: AppColors.textWhite,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: heading(22, color: AppColors.textWhite),
                             ),
                             Text(
                               booking.sport,
-                              style: const TextStyle(
-                                color: AppColors.textLight,
-                                fontSize: 16,
-                              ),
+                              style: body(16, color: AppColors.textLight),
                             ),
                           ],
                         )
@@ -145,14 +135,14 @@ class BookingDetailPage extends StatelessWidget {
 
   Widget _title(String t) => Text(
         t,
-        style: const TextStyle(
-          color: AppColors.gold,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+        style: heading(20, color: AppColors.gold),
       );
 
-  Widget _infoBox({required IconData icon, required String title, String? subtitle}) {
+  Widget _infoBox({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -166,9 +156,9 @@ class BookingDetailPage extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(color: Colors.white)),
+              Text(title, style: body(15, color: Colors.white)),
               if (subtitle != null)
-                Text(subtitle, style: const TextStyle(color: Colors.white54)),
+                Text(subtitle, style: body(13, color: Colors.white54)),
             ],
           )
         ],
@@ -178,7 +168,6 @@ class BookingDetailPage extends StatelessWidget {
 
   // ---------------- USER BUTTONS ----------------
   Widget _userButtons(BuildContext context, BookingService service) {
-    // MEMBER: kalau status rescheduled → tidak boleh action
     if (booking.status == BookingStatus.rescheduled) {
       return const SizedBox.shrink();
     }
@@ -210,7 +199,6 @@ class BookingDetailPage extends StatelessWidget {
 
   // ---------------- COACH BUTTONS ----------------
   Widget _coachButtons(BuildContext context, BookingService service) {
-    // BOOKING BARU → Confirm saja
     if (booking.status == BookingStatus.pending) {
       return Column(
         children: [
@@ -222,7 +210,6 @@ class BookingDetailPage extends StatelessWidget {
       );
     }
 
-    // RESCHEDULE → Accept & Reject
     if (booking.status == BookingStatus.rescheduled) {
       return Column(
         children: [
@@ -239,7 +226,6 @@ class BookingDetailPage extends StatelessWidget {
       );
     }
 
-    // STATUS LAIN → tidak ada tombol
     return const SizedBox.shrink();
   }
 
@@ -282,11 +268,7 @@ class BookingDetailPage extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: TextStyle(
-            color: tc,
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-          ),
+          style: body(15, color: tc),
         ),
       ),
     );

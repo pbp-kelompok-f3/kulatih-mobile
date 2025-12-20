@@ -107,13 +107,10 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       );
     }
 
-<<<<<<< HEAD
-=======
     final proxiedImageUrl = CommunityService.getProxiedImageUrl(
       widget.community.profileImageUrl,
     );
 
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
     return Scaffold(
       backgroundColor: AppColors.indigo,
       appBar: AppBar(
@@ -126,17 +123,6 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
-<<<<<<< HEAD
-              // Judul
-              Center(
-                child: Text(
-                  widget.community.name.toUpperCase(),
-                  style: TextStyle(
-                    color: AppColors.gold,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
-=======
               // Profile Picture
               Container(
                 width: 120,
@@ -190,30 +176,12 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                   color: AppColors.gold,
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
                 ),
               ),
 
               const SizedBox(height: 16),
 
               // Members count
-<<<<<<< HEAD
-              Center(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
-                  decoration: BoxDecoration(
-                    color: AppColors.card,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Text(
-                    "Members: ${widget.community.membersCount}",
-                    style: TextStyle(
-                      color: AppColors.textWhite,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-=======
               Container(
                 padding:
                     const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
@@ -227,7 +195,6 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                     color: AppColors.textWhite,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
                   ),
                 ),
               ),
@@ -317,8 +284,4 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       ),
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1

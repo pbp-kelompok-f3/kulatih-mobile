@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import '../models/community.dart';
-<<<<<<< HEAD
-=======
 import '../services/community_service.dart';
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
 
 class CommunityCard extends StatelessWidget {
   final CommunityEntry community;
@@ -18,35 +15,24 @@ class CommunityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-<<<<<<< HEAD
-=======
     // PENTING: Pakai proxy untuk load gambar
     final proxiedImageUrl = CommunityService.getProxiedImageUrl(
       community.profileImageUrl,
     );
 
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-<<<<<<< HEAD
-          color: AppColors.card, 
-=======
           color: AppColors.card,
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-<<<<<<< HEAD
-            // dummy avatar
-=======
             // Profile Picture
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
             Container(
               width: 56,
               height: 56,
@@ -54,8 +40,6 @@ class CommunityCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Colors.white,
               ),
-<<<<<<< HEAD
-=======
               child: proxiedImageUrl.isNotEmpty
                   ? ClipOval(
                       child: Image.network(
@@ -88,7 +72,6 @@ class CommunityCard extends StatelessWidget {
                       ),
                     )
                   : Container(), // pfp kosong kalau no image
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
             ),
 
             const SizedBox(width: 16),
@@ -116,19 +99,11 @@ class CommunityCard extends StatelessWidget {
                       fontSize: 12,
                     ),
                   ),
-<<<<<<< HEAD
-                  const SizedBox(height: 8), 
-                  Text(
-                    "Click to view detail",
-                    style: TextStyle(
-                      color: AppColors.gold, 
-=======
                   const SizedBox(height: 8),
                   Text(
                     "Click to view detail",
                     style: TextStyle(
                       color: AppColors.gold,
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
                       fontSize: 11,
                       fontStyle: FontStyle.italic,
                     ),

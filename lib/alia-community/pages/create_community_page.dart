@@ -17,10 +17,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   final _name = TextEditingController();
   final _short = TextEditingController();
   final _long = TextEditingController();
-<<<<<<< HEAD
-=======
   final _profilePicture = TextEditingController();
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
 
   bool _submitting = false;
 
@@ -29,11 +26,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
         _short.text.trim().isEmpty ||
         _long.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-<<<<<<< HEAD
-        const SnackBar(content: Text("Please fill in all fields")),
-=======
         const SnackBar(content: Text("Please fill in all required fields")),
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
       );
       return;
     }
@@ -47,11 +40,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       _name.text.trim(),
       _short.text.trim(),
       _long.text.trim(),
-<<<<<<< HEAD
-      null,
-=======
       _profilePicture.text.trim().isEmpty ? null : _profilePicture.text.trim(),
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
     );
 
     setState(() => _submitting = false);
@@ -78,19 +67,6 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   }
 
   Widget _field(String label, TextEditingController controller,
-<<<<<<< HEAD
-      {int maxLines = 1}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: AppColors.textWhite,
-            fontWeight: FontWeight.w700,
-            fontSize: 15,
-          ),
-=======
       {int maxLines = 1, bool optional = false, String? hintText}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +91,6 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                 ),
               ),
           ],
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
         ),
         const SizedBox(height: 8),
 
@@ -135,14 +110,11 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
             ),
             decoration: InputDecoration(
               border: InputBorder.none,
-<<<<<<< HEAD
-=======
               hintText: hintText,
               hintStyle: TextStyle(
                 color: Colors.grey.shade500,
                 fontSize: 14,
               ),
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
             ),
           ),
         ),
@@ -155,11 +127,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-<<<<<<< HEAD
-      backgroundColor: AppColors.indigo,   
-=======
       backgroundColor: AppColors.indigo,
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 20),
@@ -187,11 +155,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
                 decoration: BoxDecoration(
-<<<<<<< HEAD
-                  color: AppColors.indigoDark,  
-=======
                   color: AppColors.indigoDark,
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Column(
@@ -201,12 +165,9 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                     _field("Quick description", _short),
                     _field("Tell us more about your community", _long,
                         maxLines: 6),
-<<<<<<< HEAD
-=======
                     _field("Profile Picture", _profilePicture, 
                         optional: true, 
                         hintText: "URL HTTPS"),
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
 
                     const SizedBox(height: 10),
 
@@ -247,8 +208,4 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       ),
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
