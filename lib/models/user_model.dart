@@ -41,6 +41,15 @@ class UserProfile {
     }
     return username;
   }
+
+  Map<String, dynamic> toJson() => {
+        'username': username,
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+        'role': role,
+        'profile': profile?.toJson(),
+      };
 }
 
 class ProfileData {
@@ -72,9 +81,19 @@ class ProfileData {
       description: json['description'],
       profilePhoto: json['profile_photo'],
       sport: role == 'coach' ? json['sport'] : null,
-      hourlyFee: role == 'coach' ? json['hourly_fee'] : null,
+      hourlyFee: role == 'coach' ? (json['hourly_fee'] as num?)?.toInt() : null,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'city': city,
+        'phone': phone,
+        'description': description,
+        'profile_photo': profilePhoto,
+        'sport': sport,
+        'hourly_fee': hourlyFee,
+      };
 
   String get sportLabel {
     const sportLabels = {

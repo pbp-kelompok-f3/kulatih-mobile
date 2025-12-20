@@ -32,12 +32,6 @@ class CoachProfile extends StatelessWidget {
         _buildCoachRow("Sport", sportLabel),
         _buildCoachRow("Hourly Fee", feeLabel),
       ],
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: 0, // Index 0 = Coach/Find Coach
-        onTap: (index) {
-          Navigator.pop(context);
-        },
-      ),
     );
   }
 

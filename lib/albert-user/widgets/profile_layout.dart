@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/albert-user/screens/login.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:kulatih_mobile/albert-user/screens/edit_profile.dart';
 
 class ProfileLayout extends StatelessWidget {
   final UserProfile user;
@@ -153,7 +154,10 @@ class ProfileLayout extends StatelessWidget {
 
             // --- MENU BUTTONS ---
             _buildMenuButton(context, "Edit Profile", Icons.edit, () {
-              // Navigasi Edit Profile
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const EditProfile()),
+              );
             }),
             const SizedBox(height: 20),
             _buildMenuButton(context, "My Bookings", Icons.calendar_today, () {

@@ -20,12 +20,6 @@ class MemberProfile extends StatelessWidget {
     return ProfileLayout(
       user: userProfile,
       extraInfoRows: const [], // Member tidak punya extra info
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: 0, // Index 0 = Coach/Find Coach
-        onTap: (index) {
-          Navigator.pop(context);
-        },
-      ),
     );
   }
 }
