@@ -91,35 +91,22 @@ class BookingService {
     return res.statusCode == 200;
   }
 
-  /* ===================== COACH ACTIONS (FIXED ENDPOINTS) ===================== */
+  /* ===================== COACH ACTIONS (FIXED) ===================== */
 
-  /// Accept reschedule → uses /booking/json/<id>/accept/
   Future<bool> acceptReschedule(int id) async {
-    final url = Uri.parse("$baseUrl/booking/json/$id/accept/");
-    final res = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-    );
+    final url = Uri.parse("$baseUrl/booking/api/accept/$id/");
+    final res = await http.post(url);
     return res.statusCode == 200;
   }
 
-  /// Reject reschedule → uses /booking/json/<id>/reject/
   Future<bool> rejectReschedule(int id) async {
-    final url = Uri.parse("$baseUrl/booking/json/$id/reject/");
-    final res = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-    );
+    final url = Uri.parse("$baseUrl/booking/api/reject/$id/");
+    final res = await http.post(url);
     return res.statusCode == 200;
   }
 
-  /// Confirm booking → uses /booking/json/<id>/confirm/
   Future<bool> confirmBooking(int id) async {
-    final url = Uri.parse("$baseUrl/booking/json/$id/confirm/");
-    final res = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-    );
+    final url = Uri.parse("$baseUrl/booking/api/confirm/$id/");
+    final res = await http.post(url);
     return res.statusCode == 200;
-  }
-}
+  }}

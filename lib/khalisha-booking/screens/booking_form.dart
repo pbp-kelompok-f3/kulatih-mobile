@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
 
 class BookingFormPage extends StatefulWidget {
   final bool isReschedule;
@@ -81,7 +82,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
       );
     } else {
       success = await _service.createBooking(
-        coachId: widget.coachId ?? "1", // fallback aman
+        coachId: widget.coachId ?? "1",
         location: _locationController.text.trim(),
         dateTime: _selectedDateTime!,
       );
@@ -97,7 +98,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
+      SnackBar(content: Text(msg, style: body(14))),
     );
   }
 
@@ -112,7 +113,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
         elevation: 0,
         title: Text(
           isEditing ? "Reschedule Booking" : "New Booking",
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: heading(20),
         ),
       ),
       body: Padding(
@@ -120,9 +121,9 @@ class _BookingFormPageState extends State<BookingFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Choose Schedule",
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: body(16),
             ),
             const SizedBox(height: 8),
 
@@ -137,25 +138,26 @@ class _BookingFormPageState extends State<BookingFormPage> {
                 child: Text(
                   _selectedDateTime == null
                       ? "Tap to pick date & time"
-                      : DateFormat("EEE, dd MMM yyyy • HH:mm").format(_selectedDateTime!),
-                  style: const TextStyle(color: Colors.white),
+                      : DateFormat("EEE, dd MMM yyyy • HH:mm")
+                          .format(_selectedDateTime!),
+                  style: body(14),
                 ),
               ),
             ),
 
             const SizedBox(height: 24),
-            const Text(
+            Text(
               "Location",
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: body(16),
             ),
             const SizedBox(height: 8),
 
             TextField(
               controller: _locationController,
-              style: const TextStyle(color: Colors.white),
+              style: body(14),
               decoration: InputDecoration(
                 hintText: "Enter location",
-                hintStyle: const TextStyle(color: Colors.white54),
+                hintStyle: body(14, color: Colors.white54),
                 filled: true,
                 fillColor: AppColors.card,
                 border: OutlineInputBorder(
@@ -179,11 +181,7 @@ class _BookingFormPageState extends State<BookingFormPage> {
                 ),
                 child: Text(
                   isEditing ? "Save Changes" : "Book Now",
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  style: heading(16, color: Colors.black),
                 ),
               ),
             ),

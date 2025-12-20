@@ -8,6 +8,10 @@ import 'package:kulatih_mobile/khalisha-booking/widgets/booking_card.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_detail_page.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal.dart';
+import 'package:kulatih_mobile/azizah-rating/services/review_api.dart';
+import 'package:kulatih_mobile/azizah-rating/screens/review_detail_page.dart';
+import 'package:kulatih_mobile/azizah-rating/widgets/review_form_dialog.dart';
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; // ⬅️ FONT DARI SINI
 
 class BookingListPage extends StatefulWidget {
   const BookingListPage({super.key});
@@ -19,6 +23,9 @@ class BookingListPage extends StatefulWidget {
 class _BookingListPageState extends State<BookingListPage>
     with SingleTickerProviderStateMixin {
   final BookingService _service = BookingService();
+
+  // ===== REVIEW API (TETAP) =====
+  final ReviewApi _reviewApi = ReviewApi();
 
   late TabController _tabController;
 
@@ -47,19 +54,16 @@ class _BookingListPageState extends State<BookingListPage>
   }
 
   /* ---------------- FILTER LOGIC ---------------- */
-  List<Booking> get upcoming {
-    return _bookings.where((b) => b.isUpcoming).toList();
-  }
+  List<Booking> get upcoming =>
+      _bookings.where((b) => b.isUpcoming).toList();
 
-  List<Booking> get history {
-    return _bookings.where((b) => b.isHistory).toList();
-  }
+  List<Booking> get history =>
+      _bookings.where((b) => b.isHistory).toList();
 
   /* ---------------- CANCEL ---------------- */
   Future<void> _cancelBooking(Booking booking) async {
     try {
       final ok = await _service.cancelBooking(booking.id);
-
       if (!ok) return;
 
       setState(() {
@@ -87,20 +91,19 @@ class _BookingListPageState extends State<BookingListPage>
   }
 
   /* ---------------- COACH ACTIONS ---------------- */
-
-  Future<void> _accept(Booking b) async {
-    await _service.acceptReschedule(b.id);
-    _fetchBookings();
+  Future<void> _accept(Booking booking) async {
+    final ok = await _service.acceptReschedule(booking.id);
+    if (ok) await _fetchBookings();
   }
 
-  Future<void> _reject(Booking b) async {
-    await _service.rejectReschedule(b.id);
-    _fetchBookings();
+  Future<void> _reject(Booking booking) async {
+    final ok = await _service.rejectReschedule(booking.id);
+    if (ok) await _fetchBookings();
   }
 
-  Future<void> _confirm(Booking b) async {
-    await _service.confirmBooking(b.id);
-    _fetchBookings();
+  Future<void> _confirm(Booking booking) async {
+    final ok = await _service.confirmBooking(booking.id);
+    if (ok) await _fetchBookings();
   }
 
   /* ---------------- UI ---------------- */
@@ -116,24 +119,15 @@ class _BookingListPageState extends State<BookingListPage>
           children: [
             const SizedBox(height: 20),
 
-            /// HEADER
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 "MY BOOKINGS",
-                style: TextStyle(
-                  color: AppColors.gold,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: heading(26, color: AppColors.gold),
               ),
             ),
-
             const SizedBox(height: 20),
-
-            /// TABS
             _buildTabs(),
-
             Expanded(
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
@@ -179,10 +173,10 @@ class _BookingListPageState extends State<BookingListPage>
   /* ---------------- LIST BUILDER ---------------- */
   Widget _buildList(List<Booking> items, bool historyMode, bool isCoach) {
     if (items.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           "No bookings found",
-          style: TextStyle(color: Colors.white70, fontSize: 16),
+          style: body(16, color: Colors.white70),
         ),
       );
     }
@@ -203,11 +197,17 @@ class _BookingListPageState extends State<BookingListPage>
           onReschedule: () => _openReschedule(b),
 
           // COACH BUTTONS
-          onAccept: () => _accept(b),
-          onReject: () => _reject(b),
-          onConfirm: () => _confirm(b),
+          onAccept: b.status == BookingStatus.rescheduled
+              ? () => _accept(b)
+              : null,
+          onReject: b.status == BookingStatus.rescheduled
+              ? () => _reject(b)
+              : null,
+          onConfirm: b.status == BookingStatus.pending
+              ? () => _confirm(b)
+              : null,
 
-          // HISTORY BUTTONS
+          // HISTORY
           onViewReview: () {
             Navigator.push(
               context,
@@ -216,7 +216,6 @@ class _BookingListPageState extends State<BookingListPage>
               ),
             );
           },
-          onBookAgain: () {},
         );
       },
     );

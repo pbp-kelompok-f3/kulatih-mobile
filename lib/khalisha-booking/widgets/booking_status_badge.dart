@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
 
 class BookingStatusBadge extends StatelessWidget {
   final BookingStatus status;
@@ -17,10 +18,9 @@ class BookingStatusBadge extends StatelessWidget {
       ),
       child: Text(
         bookingStatusToText(status).toUpperCase(),
-        style: const TextStyle(
+        style: heading(
+          10,
           color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );
