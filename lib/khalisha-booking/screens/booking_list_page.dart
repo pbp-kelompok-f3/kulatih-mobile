@@ -126,11 +126,8 @@ class _BookingListPageState extends State<BookingListPage>
                 style: heading(26, color: AppColors.gold),
               ),
             ),
-
             const SizedBox(height: 20),
-
             _buildTabs(),
-
             Expanded(
               child: _loading
                   ? const Center(child: CircularProgressIndicator())

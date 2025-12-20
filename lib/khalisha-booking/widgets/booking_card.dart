@@ -88,11 +88,8 @@ class BookingCard extends StatelessWidget {
 
           Row(
             children: [
-              const Icon(
-                Icons.location_on,
-                color: AppColors.textLight,
-                size: 16,
-              ),
+              const Icon(Icons.location_on,
+                  color: AppColors.textLight, size: 16),
               const SizedBox(width: 6),
               Text(
                 booking.location,

@@ -80,8 +80,8 @@ class Booking {
 
     return Booking(
       id: json['id'],
-      coachId: json['coach_id']?.toString() ?? '',
       memberName: json['member_name'] ?? "-", // DARI BACKEND
+      coachId: json['coach_id']?.toString() ?? '',
       coachName: json['coach_name'] ?? "-",
       sport: json['sport'] ?? "-",
       location: json['location'] ?? "-",
@@ -115,8 +115,8 @@ class Booking {
 
   Booking copyWith({
     int? id,
-    String? coachId,
     String? memberName,
+    String? coachId,
     String? coachName,
     String? sport,
     String? location,
