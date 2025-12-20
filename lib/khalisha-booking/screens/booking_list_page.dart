@@ -8,6 +8,9 @@ import 'package:kulatih_mobile/khalisha-booking/widgets/booking_card.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_detail_page.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal.dart';
+import 'package:kulatih_mobile/azizah-rating/services/review_api.dart';
+import 'package:kulatih_mobile/azizah-rating/screens/review_detail_page.dart';
+import 'package:kulatih_mobile/azizah-rating/widgets/review_form_dialog.dart';
 
 class BookingListPage extends StatefulWidget {
   const BookingListPage({super.key});
@@ -19,6 +22,9 @@ class BookingListPage extends StatefulWidget {
 class _BookingListPageState extends State<BookingListPage>
     with SingleTickerProviderStateMixin {
   final BookingService _service = BookingService();
+
+  // ===== REVIEW API (TETAP) =====
+  final ReviewApi _reviewApi = ReviewApi();
 
   late TabController _tabController;
 
@@ -47,19 +53,16 @@ class _BookingListPageState extends State<BookingListPage>
   }
 
   /* ---------------- FILTER LOGIC ---------------- */
-  List<Booking> get upcoming {
-    return _bookings.where((b) => b.isUpcoming).toList();
-  }
+  List<Booking> get upcoming =>
+      _bookings.where((b) => b.isUpcoming).toList();
 
-  List<Booking> get history {
-    return _bookings.where((b) => b.isHistory).toList();
-  }
+  List<Booking> get history =>
+      _bookings.where((b) => b.isHistory).toList();
 
   /* ---------------- CANCEL ---------------- */
   Future<void> _cancelBooking(Booking booking) async {
     try {
       final ok = await _service.cancelBooking(booking.id);
-
       if (!ok) return;
 
       setState(() {
@@ -86,20 +89,24 @@ class _BookingListPageState extends State<BookingListPage>
     }
   }
 
-  /* ---------------- COACH ACTIONS ---------------- */
-  Future<void> _accept(Booking b) async {
-    await _service.acceptReschedule(b.id);
-    _fetchBookings();
+  /* =====================================================
+     COACH ACTIONS (INI YANG KURANG TADI)
+     TIDAK UBAH LOGIC — CUMA WRAPPER KE SERVICE
+     ===================================================== */
+
+  Future<void> _accept(Booking booking) async {
+    final ok = await _service.acceptReschedule(booking.id);
+    if (ok) await _fetchBookings();
   }
 
-  Future<void> _reject(Booking b) async {
-    await _service.rejectReschedule(b.id);
-    _fetchBookings();
+  Future<void> _reject(Booking booking) async {
+    final ok = await _service.rejectReschedule(booking.id);
+    if (ok) await _fetchBookings();
   }
 
-  Future<void> _confirm(Booking b) async {
-    await _service.confirmBooking(b.id);
-    _fetchBookings();
+  Future<void> _confirm(Booking booking) async {
+    final ok = await _service.confirmBooking(booking.id);
+    if (ok) await _fetchBookings();
   }
 
   /* ---------------- UI ---------------- */
@@ -115,7 +122,6 @@ class _BookingListPageState extends State<BookingListPage>
           children: [
             const SizedBox(height: 20),
 
-            /// HEADER
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Text(
@@ -130,7 +136,6 @@ class _BookingListPageState extends State<BookingListPage>
 
             const SizedBox(height: 20),
 
-            /// TABS
             _buildTabs(),
 
             Expanded(
@@ -201,7 +206,7 @@ class _BookingListPageState extends State<BookingListPage>
           onCancel: () => _cancelBooking(b),
           onReschedule: () => _openReschedule(b),
 
-          // COACH BUTTONS (callback aman, UI yang mutusin tampil)
+          // COACH BUTTONS
           onAccept: b.status == BookingStatus.rescheduled
               ? () => _accept(b)
               : null,
@@ -212,7 +217,7 @@ class _BookingListPageState extends State<BookingListPage>
               ? () => _confirm(b)
               : null,
 
-          // HISTORY BUTTONS
+          // HISTORY
           onViewReview: () {
             Navigator.push(
               context,
@@ -221,7 +226,6 @@ class _BookingListPageState extends State<BookingListPage>
               ),
             );
           },
-          onBookAgain: () {},
         );
       },
     );

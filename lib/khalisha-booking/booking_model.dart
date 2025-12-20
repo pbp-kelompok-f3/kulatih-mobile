@@ -1,12 +1,6 @@
 import 'package:intl/intl.dart';
 
-enum BookingStatus {
-  pending,
-  confirmed,
-  rescheduled,
-  cancelled,
-  completed,
-}
+enum BookingStatus { pending, confirmed, rescheduled, cancelled, completed }
 
 BookingStatus bookingStatusFromString(String value) {
   switch (value.toLowerCase().trim()) {
@@ -45,6 +39,9 @@ class Booking {
   /// NEW FIELD → agar coach bisa lihat siapa membernya
   final String memberName;
 
+  // buat modul review
+  final String coachId;
+
   final String coachName;
   final String sport;
   final String location;
@@ -58,6 +55,7 @@ class Booking {
   Booking({
     required this.id,
     required this.memberName,
+    required this.coachId,
     required this.coachName,
     required this.sport,
     required this.location,
@@ -76,12 +74,14 @@ class Booking {
     final end = json['end_time'];
 
     final startDT = parseDT("$date $start");
-    final endDT =
-        end != null ? parseDT("$date $end") : startDT.add(const Duration(hours: 1));
+    final endDT = end != null
+        ? parseDT("$date $end")
+        : startDT.add(const Duration(hours: 1));
 
     return Booking(
       id: json['id'],
-      memberName: json['member_name'] ?? "-",     // DARI BACKEND
+      coachId: json['coach_id']?.toString() ?? '',
+      memberName: json['member_name'] ?? "-", // DARI BACKEND
       coachName: json['coach_name'] ?? "-",
       sport: json['sport'] ?? "-",
       location: json['location'] ?? "-",
@@ -92,8 +92,7 @@ class Booking {
     );
   }
 
-  String get formattedDate =>
-      DateFormat('EEEE, dd MMM yyyy').format(startTime);
+  String get formattedDate => DateFormat('EEEE, dd MMM yyyy').format(startTime);
 
   String get formattedTimeRange {
     final s = DateFormat('HH:mm').format(startTime);
@@ -116,6 +115,7 @@ class Booking {
 
   Booking copyWith({
     int? id,
+    String? coachId,
     String? memberName,
     String? coachName,
     String? sport,
@@ -127,6 +127,7 @@ class Booking {
   }) {
     return Booking(
       id: id ?? this.id,
+      coachId: coachId ?? this.coachId,
       memberName: memberName ?? this.memberName,
       coachName: coachName ?? this.coachName,
       sport: sport ?? this.sport,

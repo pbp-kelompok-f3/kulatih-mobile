@@ -107,6 +107,13 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       );
     }
 
+<<<<<<< HEAD
+=======
+    final proxiedImageUrl = CommunityService.getProxiedImageUrl(
+      widget.community.profileImageUrl,
+    );
+
+>>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
     return Scaffold(
       backgroundColor: AppColors.indigo,
       appBar: AppBar(
@@ -119,6 +126,7 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
+<<<<<<< HEAD
               // Judul
               Center(
                 child: Text(
@@ -128,12 +136,68 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
                   ),
+=======
+              // Profile Picture
+              Container(
+                width: 120,
+                height: 120,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: proxiedImageUrl.isNotEmpty
+                    ? ClipOval(
+                        child: Image.network(
+                          proxiedImageUrl,
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: SizedBox(
+                                width: 30,
+                                height: 30,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                  color: AppColors.indigo,
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.white,
+                            );
+                          },
+                        ),
+                      )
+                    : Container(), // Empty white circle if no image
+              ),
+
+              const SizedBox(height: 16),
+
+              // Judul
+              Text(
+                widget.community.name.toUpperCase(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.gold,
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+>>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
                 ),
               ),
 
               const SizedBox(height: 16),
 
               // Members count
+<<<<<<< HEAD
               Center(
                 child: Container(
                   padding:
@@ -149,6 +213,21 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
+=======
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                decoration: BoxDecoration(
+                  color: AppColors.card,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  "Members: ${widget.community.membersCount}",
+                  style: TextStyle(
+                    color: AppColors.textWhite,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+>>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
                   ),
                 ),
               ),
@@ -238,4 +317,8 @@ class _CommunityDetailPageState extends State<CommunityDetailPage> {
       ),
     );
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 26f881cfd85d4334a73816b8428d92ab95e6f3b1
