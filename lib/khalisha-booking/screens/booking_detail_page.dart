@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
+import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/booking_status_badge.dart';
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
 
 class BookingDetailPage extends StatelessWidget {
   final Booking booking;
 
   const BookingDetailPage({super.key, required this.booking});
 
-  String _formatDate(DateTime dt) =>
-      DateFormat('EEEE, dd MMMM yyyy', 'en').format(dt);
+  String _fmtDate(DateTime dt) =>
+      DateFormat('EEEE, dd MMM yyyy').format(dt);
 
-  String _formatTime(DateTime dt) => DateFormat('HH:mm').format(dt);
+  String _fmtTime(DateTime dt) => DateFormat('HH:mm').format(dt);
 
   @override
   Widget build(BuildContext context) {
     final service = BookingService();
+    final user = context.watch<UserProvider>();
+    final isCoach = user.isCoach;
 
     final isUpcoming = booking.isUpcoming;
     final isHistory = booking.isHistory;
@@ -31,7 +37,7 @@ class BookingDetailPage extends StatelessWidget {
           children: [
             const SizedBox(height: 16),
 
-            // HEADER
+            /// HEADER
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -42,13 +48,9 @@ class BookingDetailPage extends StatelessWidget {
                         color: Colors.white, size: 18),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    "Booking Details",
-                    style: TextStyle(
-                      color: AppColors.gold,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Text(
+                    isCoach ? "Client Booking" : "Booking Details",
+                    style: heading(26, color: AppColors.gold),
                   )
                 ],
               ),
@@ -62,34 +64,37 @@ class BookingDetailPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // COACH INFO
+                    /// PROFILE INFO
                     Row(
                       children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundImage: booking.imageUrl != null
-                              ? NetworkImage(booking.imageUrl!)
-                              : const AssetImage("assets/default_user.png")
-                                  as ImageProvider,
+                        ClipOval(
+                          child: Image.network(
+                            booking.imageUrl != null && booking.imageUrl!.isNotEmpty
+                                ? 'http://localhost:8000/booking/proxy-image/?url=${Uri.encodeComponent(booking.imageUrl!)}'
+                                : 'https://via.placeholder.com/80',
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              width: 80,
+                              height: 80,
+                              color: Colors.grey.shade700,
+                              alignment: Alignment.center,
+                              child: const Icon(Icons.person, color: Colors.white),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 18),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              booking.coachName,
-                              style: const TextStyle(
-                                color: AppColors.textWhite,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              isCoach ? booking.memberName : booking.coachName,
+                              style: heading(22, color: AppColors.textWhite),
                             ),
                             Text(
                               booking.sport,
-                              style: const TextStyle(
-                                color: AppColors.textLight,
-                                fontSize: 16,
-                              ),
+                              style: body(16, color: AppColors.textLight),
                             ),
                           ],
                         )
@@ -98,20 +103,17 @@ class BookingDetailPage extends StatelessWidget {
 
                     const SizedBox(height: 24),
                     BookingStatusBadge(status: booking.status),
-                    const SizedBox(height: 24),
 
-                    // SCHEDULE
+                    const SizedBox(height: 24),
                     _title("Schedule"),
                     _infoBox(
                       icon: Icons.calendar_month,
-                      title: _formatDate(booking.startTime),
+                      title: _fmtDate(booking.startTime),
                       subtitle:
-                          "${_formatTime(booking.startTime)} - ${_formatTime(booking.endTime)} WIB",
+                          "${_fmtTime(booking.startTime)} - ${_fmtTime(booking.endTime)} WIB",
                     ),
 
                     const SizedBox(height: 20),
-
-                    // LOCATION
                     _title("Location"),
                     _infoBox(
                       icon: Icons.location_on,
@@ -119,8 +121,6 @@ class BookingDetailPage extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 20),
-
-                    // BOOKING ID
                     _title("Booking ID"),
                     _infoBox(
                       icon: Icons.confirmation_number,
@@ -129,9 +129,9 @@ class BookingDetailPage extends StatelessWidget {
 
                     const SizedBox(height: 40),
 
-                    // BUTTONS SECTION
-                    if (isUpcoming) _upcomingButtons(context, service),
-
+                    /// BUTTON SECTION
+                    if (isCoach && isUpcoming) _coachButtons(context, service),
+                    if (!isCoach && isUpcoming) _userButtons(context, service),
                     if (isHistory) _historyButtons(context),
 
                     const SizedBox(height: 60),
@@ -145,18 +145,10 @@ class BookingDetailPage extends StatelessWidget {
     );
   }
 
-  // UI HELPERS ------------------------------------------------------------
-
-  Widget _title(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        color: AppColors.gold,
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
+  Widget _title(String t) => Text(
+        t,
+        style: heading(20, color: AppColors.gold),
+      );
 
   Widget _infoBox({
     required IconData icon,
@@ -171,22 +163,14 @@ class BookingDetailPage extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.textLight, size: 24),
+          Icon(icon, color: AppColors.textLight),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style: const TextStyle(
-                      color: AppColors.textWhite, fontSize: 16)),
+              Text(title, style: body(15, color: Colors.white)),
               if (subtitle != null)
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    color: AppColors.textLight,
-                    fontSize: 12,
-                  ),
-                ),
+                Text(subtitle, style: body(13, color: Colors.white54)),
             ],
           )
         ],
@@ -194,135 +178,109 @@ class BookingDetailPage extends StatelessWidget {
     );
   }
 
-  // UPCOMING BUTTONS (Cancel + Reschedule + View Coach)
-  Widget _upcomingButtons(BuildContext context, BookingService service) {
+  // ---------------- USER BUTTONS ----------------
+  Widget _userButtons(BuildContext context, BookingService service) {
+    if (booking.status == BookingStatus.rescheduled) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       children: [
-        _goldButton(
-          "View Coach",
-          () {
-            Navigator.pushNamed(
-              context,
-              "/coach/detail",
-              arguments: {
-                "coachName": booking.coachName,
-                "coachId": booking.id, // ganti kalau backend beda
-              },
-            );
-          },
-        ),
+        _gold("View Coach", () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Coach profile page is not implemented yet"),
+            ),
+          );
+        }),
         const SizedBox(height: 12),
-
-        // Cancel
-        _redButton(
-          "Cancel Booking",
-          () async {
-            await service.cancelBooking(booking.id);
-            Navigator.pop(context);
-          },
-        ),
+        _red("Cancel Booking", () async {
+          await service.cancelBooking(booking.id);
+          Navigator.pop(context);
+        }),
         const SizedBox(height: 12),
-
-        // Reschedule
-        _goldButton(
-          "Reschedule",
-          () => showDialog(
+        _gold("Reschedule", () {
+          showDialog(
             context: context,
             builder: (_) => RescheduleModal(booking: booking),
-          ),
-        ),
+          );
+        }),
       ],
     );
   }
 
-  // HISTORY BUTTONS (Review + Book Again + View Coach)
+  // ---------------- COACH BUTTONS ----------------
+  Widget _coachButtons(BuildContext context, BookingService service) {
+    if (booking.status == BookingStatus.pending) {
+      return Column(
+        children: [
+          _gold("Confirm", () async {
+            await service.confirmBooking(booking.id);
+            Navigator.pop(context);
+          }),
+        ],
+      );
+    }
+
+    if (booking.status == BookingStatus.rescheduled) {
+      return Column(
+        children: [
+          _dark("Accept Reschedule", () async {
+            await service.acceptReschedule(booking.id);
+            Navigator.pop(context);
+          }),
+          const SizedBox(height: 12),
+          _red("Reject", () async {
+            await service.rejectReschedule(booking.id);
+            Navigator.pop(context);
+          }),
+        ],
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  // ---------------- HISTORY BUTTONS ----------------
   Widget _historyButtons(BuildContext context) {
     return Column(
       children: [
-        _goldButton(
-          "View Coach",
-          () {
-            Navigator.pushNamed(
-              context,
-              "/coach/detail",
-              arguments: {
-                "coachName": booking.coachName,
-                "coachId": booking.id,
-              },
-            );
-          },
-        ),
+        _gold("Review Coach", () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Review feature is not implemented yet"),
+            ),
+          );
+        }),
         const SizedBox(height: 12),
-
-        if (booking.status == BookingStatus.completed)
-          _darkButton(
-            "View Your Review",
-            () {
-              Navigator.pushNamed(
-                context,
-                "/coach/review",
-                arguments: booking.id,
-              );
-            },
-          ),
-
-        const SizedBox(height: 12),
-
-        _darkButton(
-          "Book Again",
-          () {
-            Navigator.pushNamed(
-              context,
-              "/booking/create",
-              arguments: {"coachId": booking.id},
-            );
-          },
-        ),
+        _dark("Book Again", () {}),
       ],
     );
   }
 
-  // BUTTON COMPONENTS -----------------------------------------------------
+  // -------- BUTTON HELPERS --------
+  Widget _gold(String t, VoidCallback a) =>
+      _btn(t, AppColors.gold, Colors.black, a);
+  Widget _red(String t, VoidCallback a) =>
+      _btn(t, Colors.red, Colors.white, a);
+  Widget _dark(String t, VoidCallback a) =>
+      _btn(t, Colors.grey.shade700, Colors.white, a);
 
-  Widget _goldButton(String text, VoidCallback onTap) => _btn(
-        text: text,
-        bg: AppColors.gold,
-        textColor: Colors.black,
-        onTap: onTap,
-      );
-
-  Widget _redButton(String text, VoidCallback onTap) => _btn(
-        text: text,
-        bg: Colors.red,
-        onTap: onTap,
-      );
-
-  Widget _darkButton(String text, VoidCallback onTap) => _btn(
-        text: text,
-        bg: Colors.grey.shade700,
-        onTap: onTap,
-      );
-
-  Widget _btn({
-    required String text,
-    required Color bg,
-    Color textColor = Colors.white,
-    required VoidCallback onTap,
-  }) {
+  Widget _btn(String text, Color bg, Color tc, VoidCallback onTap) {
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: 52,
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: bg,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
         child: Text(
           text,
-          style: TextStyle(
-              color: textColor, fontSize: 15, fontWeight: FontWeight.bold),
+          style: body(15, color: tc),
         ),
       ),
     );

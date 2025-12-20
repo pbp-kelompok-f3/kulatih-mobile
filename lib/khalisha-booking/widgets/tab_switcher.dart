@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart';
 
 class TabSwitcher extends StatelessWidget {
   final int selectedIndex;
@@ -13,41 +14,65 @@ class TabSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 48,
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: AppColors.indigoDark,
-        borderRadius: BorderRadius.circular(40),
-      ),
-      child: Row(
-        children: [
-          _buildTab("Upcoming", 0),
-          _buildTab("Booking History", 1),
-        ],
+    return Center(
+      child: Container(
+        height: 56,
+        width: MediaQuery.of(context).size.width * 0.9,
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: AppColors.indigoDark,
+          borderRadius: BorderRadius.circular(40),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.25),
+            width: 2,
+          ),
+        ),
+        child: Stack(
+          children: [
+            /// GOLD SLIDER
+            AnimatedAlign(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOut,
+              alignment: selectedIndex == 0
+                  ? Alignment.centerLeft
+                  : Alignment.centerRight,
+              child: Container(
+                width:
+                    (MediaQuery.of(context).size.width * 0.9 - 8) / 2,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.gold,
+                  borderRadius: BorderRadius.circular(36),
+                ),
+              ),
+            ),
+
+            /// TAB LABELS
+            Row(
+              children: [
+                _tab("Upcoming", 0),
+                _tab("History", 1),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildTab(String label, int index) {
-    final bool isSelected = selectedIndex == index;
+  Widget _tab(String label, int index) {
+    final bool selected = selectedIndex == index;
 
     return Expanded(
       child: GestureDetector(
         onTap: () => onTabSelected(index),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.gold : Colors.transparent,
-            borderRadius: BorderRadius.circular(40),
-          ),
-          alignment: Alignment.center,
+        behavior: HitTestBehavior.opaque,
+        child: Center(
           child: Text(
             label,
-            style: TextStyle(
-              color: isSelected ? Colors.black : AppColors.textWhite,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
+            style: heading(
+              14,
+              color: selected ? Colors.black : Colors.white,
             ),
           ),
         ),

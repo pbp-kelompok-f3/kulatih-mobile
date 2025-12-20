@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
 
 class RescheduleModal extends StatefulWidget {
   final Booking booking;
@@ -42,7 +43,12 @@ class _RescheduleModalState extends State<RescheduleModal> {
   Future<void> _submit() async {
     if (_newDate == null || _newStart == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select new date & time")),
+        SnackBar(
+          content: Text(
+            "Please select new date & time",
+            style: body(14),
+          ),
+        ),
       );
       return;
     }
@@ -63,12 +69,28 @@ class _RescheduleModalState extends State<RescheduleModal> {
         newStart: newStartTime,
       );
 
-      if (context.mounted) Navigator.pop(context, true);
+      if (!mounted) return;
 
+      Navigator.pop(context, false); // JANGAN REFRESH LIST
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Waiting for coach confirmation...",
+            style: body(14),
+          ),
+        ),
+      );
     } catch (e) {
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Failed: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Failed: $e",
+            style: body(14),
+          ),
+        ),
+      );
     }
   }
 
@@ -81,7 +103,10 @@ class _RescheduleModalState extends State<RescheduleModal> {
           color: Colors.grey.shade200,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Text(text, style: const TextStyle(color: Colors.black)),
+        child: Text(
+          text,
+          style: body(14, color: Colors.black),
+        ),
       ),
     );
   }
@@ -96,8 +121,10 @@ class _RescheduleModalState extends State<RescheduleModal> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Reschedule Booking",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(
+              "Reschedule Booking",
+              style: heading(20, color: Colors.black),
+            ),
 
             const SizedBox(height: 20),
 
@@ -125,9 +152,9 @@ class _RescheduleModalState extends State<RescheduleModal> {
                       backgroundColor: const Color(0xFFD4BC4E),
                       minimumSize: const Size(double.infinity, 48),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Submit",
-                      style: TextStyle(color: Colors.black),
+                      style: heading(14, color: Colors.black),
                     ),
                   ),
           ],

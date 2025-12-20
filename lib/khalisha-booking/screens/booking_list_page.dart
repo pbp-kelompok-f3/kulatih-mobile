@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:kulatih_mobile/constants/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
+import 'package:kulatih_mobile/khalisha-booking/widgets/booking_card.dart';
+import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_detail_page.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal.dart';
 import 'package:kulatih_mobile/azizah-rating/services/review_api.dart';
 import 'package:kulatih_mobile/azizah-rating/screens/review_detail_page.dart';
 import 'package:kulatih_mobile/azizah-rating/widgets/review_form_dialog.dart';
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; // ⬅️ FONT DARI SINI
 
 class BookingListPage extends StatefulWidget {
   const BookingListPage({super.key});
@@ -18,7 +24,7 @@ class _BookingListPageState extends State<BookingListPage>
     with SingleTickerProviderStateMixin {
   final BookingService _service = BookingService();
 
-  // ====== PUNYAMU (REVIEW API) ======
+  // ===== REVIEW API (TETAP) =====
   final ReviewApi _reviewApi = ReviewApi();
 
   late TabController _tabController;
@@ -48,31 +54,28 @@ class _BookingListPageState extends State<BookingListPage>
   }
 
   /* ---------------- FILTER LOGIC ---------------- */
-  List<Booking> get upcoming {
-    final now = DateTime.now();
-    return _bookings.where((b) {
-      final activeStatus =
-          b.status == BookingStatus.pending ||
-          b.status == BookingStatus.confirmed ||
-          b.status == BookingStatus.rescheduled;
-      return activeStatus && b.startTime.isAfter(now);
-    }).toList();
-  }
+  List<Booking> get upcoming =>
+      _bookings.where((b) => b.isUpcoming).toList();
 
-  List<Booking> get history {
-    final now = DateTime.now();
-    return _bookings.where((b) {
-      final pastStatus =
-          b.status == BookingStatus.completed ||
-          b.status == BookingStatus.cancelled;
-      return pastStatus || b.endTime.isBefore(now);
-    }).toList();
-  }
+  List<Booking> get history =>
+      _bookings.where((b) => b.isHistory).toList();
 
   /* ---------------- CANCEL ---------------- */
   Future<void> _cancelBooking(Booking booking) async {
-    await _service.cancelBooking(booking.id);
-    await _fetchBookings();
+    try {
+      final ok = await _service.cancelBooking(booking.id);
+      if (!ok) return;
+
+      setState(() {
+        final idx = _bookings.indexWhere((b) => b.id == booking.id);
+        if (idx != -1) {
+          _bookings[idx] =
+              _bookings[idx].copyWith(status: BookingStatus.cancelled);
+        }
+      });
+    } catch (e) {
+      debugPrint("Cancel failed: $e");
+    }
   }
 
   /* ---------------- OPEN RESCHEDULE ---------------- */
@@ -87,134 +90,52 @@ class _BookingListPageState extends State<BookingListPage>
     }
   }
 
-  /* ---------------- VIEW / CREATE REVIEW ---------------- */
-  Future<void> _handleViewReview(Booking b) async {
-    // kalau mau strict: cuma completed yang bisa direview
-    if (b.status != BookingStatus.completed) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You can only review completed bookings.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
+  /* ---------------- COACH ACTIONS ---------------- */
+  Future<void> _accept(Booking booking) async {
+    final ok = await _service.acceptReschedule(booking.id);
+    if (ok) await _fetchBookings();
+  }
 
-    final coachId = b.coachId.toString();
+  Future<void> _reject(Booking booking) async {
+    final ok = await _service.rejectReschedule(booking.id);
+    if (ok) await _fetchBookings();
+  }
 
-    try {
-      // 1. cek dulu apakah user SUDAH punya review untuk coach ini
-      final resp = await _reviewApi.getCoachReviews(
-        coachId: coachId,
-        page: 1,
-        pageSize: 20,
-      );
-
-      var myReview = resp.items.cast<dynamic>().firstWhere(
-            (it) => it.isOwner == true,
-            orElse: () => null,
-          );
-
-      if (myReview != null) {
-        // SUDAH PUNYA REVIEW -> langsung buka detail
-        final changed = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ReviewDetailPage(
-              reviewId: int.parse(myReview.id.toString()),
-            ),
-          ),
-        );
-
-        if (changed == true) {
-          await _fetchBookings();
-        }
-        return;
-      }
-
-      // BELUM PUNYA REVIEW -> buka dialog create
-      final created = await ReviewFormDialog.showCreate(
-        context,
-        coachId: coachId,
-        // TODO: inject cookie + csrf kalau nanti auth sudah disambung
-      );
-
-      if (created == true) {
-        // setelah create, ambil lagi review-nya lalu buka detail (kalau mau)
-        final resp2 = await _reviewApi.getCoachReviews(
-          coachId: coachId,
-          page: 1,
-          pageSize: 20,
-        );
-
-        myReview = resp2.items.cast<dynamic>().firstWhere(
-              (it) => it.isOwner == true,
-              orElse: () => null,
-            );
-
-        if (myReview != null) {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ReviewDetailPage(
-                reviewId: int.parse(myReview.id.toString()),
-              ),
-            ),
-          );
-        }
-
-        await _fetchBookings();
-      }
-    } catch (e) {
-      debugPrint("Error handling review: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to open review: $e'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+  Future<void> _confirm(Booking booking) async {
+    final ok = await _service.confirmBooking(booking.id);
+    if (ok) await _fetchBookings();
   }
 
   /* ---------------- UI ---------------- */
   @override
   Widget build(BuildContext context) {
-    const indigo = Color(0xFF0F0F38);
-    const gold = Color(0xFFD4BC4E);
+    final user = context.watch<UserProvider>();
+    final isCoach = user.isCoach;
 
     return Scaffold(
-      backgroundColor: indigo,
+      backgroundColor: AppColors.indigo,
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 20),
 
-            /// HEADER
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 "MY BOOKINGS",
-                style: TextStyle(
-                  color: gold,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: heading(26, color: AppColors.gold),
               ),
             ),
-
             const SizedBox(height: 20),
-
-            /// TABS
             _buildTabs(),
-
             Expanded(
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : TabBarView(
                       controller: _tabController,
                       children: [
-                        _buildList(upcoming, false),
-                        _buildList(history, true),
+                        _buildList(upcoming, false, isCoach),
+                        _buildList(history, true, isCoach),
                       ],
                     ),
             ),
@@ -236,26 +157,26 @@ class _BookingListPageState extends State<BookingListPage>
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: const Color(0xFFD4BC4E),
+          color: AppColors.gold,
           borderRadius: BorderRadius.circular(40),
         ),
         labelColor: Colors.black,
         unselectedLabelColor: Colors.white,
         tabs: const [
           Tab(text: "Upcoming"),
-          Tab(text: "Booking History"),
+          Tab(text: "History"),
         ],
       ),
     );
   }
 
   /* ---------------- LIST BUILDER ---------------- */
-  Widget _buildList(List<Booking> items, bool historyMode) {
+  Widget _buildList(List<Booking> items, bool historyMode, bool isCoach) {
     if (items.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           "No bookings found",
-          style: TextStyle(color: Colors.white70, fontSize: 16),
+          style: body(16, color: Colors.white70),
         ),
       );
     }
@@ -263,195 +184,40 @@ class _BookingListPageState extends State<BookingListPage>
     return ListView.builder(
       padding: const EdgeInsets.all(20),
       itemCount: items.length,
-      itemBuilder: (_, i) => _bookingCard(items[i], historyMode),
-    );
-  }
+      itemBuilder: (_, i) {
+        final b = items[i];
 
-  /* ---------------- BOOKING CARD ---------------- */
-  Widget _bookingCard(Booking b, bool historyMode) {
-    const cardBg = Color(0xFF1C1C4A);
+        return BookingCard(
+          booking: b,
+          historyMode: historyMode,
+          isCoach: isCoach,
 
-    return Container(
-      padding: const EdgeInsets.all(18),
-      margin: const EdgeInsets.only(bottom: 18),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// DATE + STATUS
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                b.formattedDateTime,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                ),
-              ),
-              _statusBadge(b.status),
-            ],
-          ),
+          // USER BUTTONS
+          onCancel: () => _cancelBooking(b),
+          onReschedule: () => _openReschedule(b),
 
-          const SizedBox(height: 12),
+          // COACH BUTTONS
+          onAccept: b.status == BookingStatus.rescheduled
+              ? () => _accept(b)
+              : null,
+          onReject: b.status == BookingStatus.rescheduled
+              ? () => _reject(b)
+              : null,
+          onConfirm: b.status == BookingStatus.pending
+              ? () => _confirm(b)
+              : null,
 
-          /// COACH ROW
-          Row(
-            children: [
-              const CircleAvatar(
-                radius: 26,
-                backgroundImage: AssetImage("assets/default_user.png"),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    b.coachName,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    b.sport,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 14),
-
-          /// LOCATION ROW
-          Row(
-            children: [
-              const Icon(Icons.location_on, color: Colors.white70, size: 16),
-              const SizedBox(width: 6),
-              Text(b.location, style: const TextStyle(color: Colors.white70)),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-          const Divider(color: Colors.white12),
-          const SizedBox(height: 12),
-
-          historyMode ? _historyButtons(b) : _upcomingButtons(b),
-        ],
-      ),
-    );
-  }
-
-  /* ---------------- STATUS BADGE ---------------- */
-  Widget _statusBadge(BookingStatus status) {
-    Color c;
-    switch (status) {
-      case BookingStatus.confirmed:
-        c = Colors.green;
-        break;
-      case BookingStatus.rescheduled:
-        c = Colors.purple;
-        break;
-      case BookingStatus.completed:
-        c = Colors.blue;
-        break;
-      case BookingStatus.cancelled:
-        c = Colors.grey;
-        break;
-      default:
-        c = Colors.orange;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: c,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        bookingStatusToText(status).toUpperCase(),
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  /* ---------------- UPCOMING BUTTONS ---------------- */
-  Widget _upcomingButtons(Booking b) {
-    return Row(
-      children: [
-        _btn("Cancel", Colors.red, () => _cancelBooking(b)),
-        _btn(
-          "View Details",
-          const Color(0xFFD4BC4E),
-          () async {
-            final updated = await Navigator.push(
+          // HISTORY
+          onViewReview: () {
+            Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => BookingDetailPage(booking: b)),
+              MaterialPageRoute(
+                builder: (_) => BookingDetailPage(booking: b),
+              ),
             );
-
-            if (updated == true) _fetchBookings();
           },
-        ),
-        _btn("Reschedule", Colors.grey, () => _openReschedule(b)),
-      ],
-    );
-  }
-
-  /* ---------------- HISTORY BUTTONS ---------------- */
-  Widget _historyButtons(Booking b) {
-    return Row(
-      children: [
-        _btn(
-          "View Your Review",
-          const Color(0xFFD4BC4E),
-          () => _handleViewReview(b),
-        ),
-        _btn(
-          "Book Again",
-          Colors.grey.shade700,
-          () {
-            // masih kosong, sesuai punya temanmu
-          },
-        ),
-      ],
-    );
-  }
-
-  /* ---------------- REUSABLE BUTTON ---------------- */
-  Widget _btn(String label, Color bg, VoidCallback onTap) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
