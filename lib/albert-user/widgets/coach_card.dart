@@ -62,29 +62,41 @@ class CoachCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: AppColors.textPrimary,
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     // Mengambil teks sport dari key (misal 'martial_arts' -> 'Martial Arts')
-                    "${sportChoices[coach.sport] ?? coach.sport} • ${coach.city}",
+                    "${sportChoices[coach.sport] ?? coach.sport} · ${coach.city}",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.textPrimary,
                       fontSize: 10,
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    "IDR ${coach.hourlyFee}/hour",
-                    style: const TextStyle(
-                      color: AppColors.textHeading,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Row(
+                    children:[
+                      Text(
+                        "IDR ${coach.hourlyFee}",
+                        style: const TextStyle(
+                          color: AppColors.textHeading,
+                          fontSize: 20,
+                          fontFamily: 'BebasNeue',
+                        ),
+                      ),
+                      Text(
+                        "/hour",
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 10,
+                          fontFamily: 'BeVietnamPro',
+                        ),
+                      ),
+                    ]
                   ),
                 ],
               ),

@@ -13,8 +13,18 @@ class CoachDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userProfile = context.watch<UserProvider>().userProfile;
     final formattedPrice = "IDR ${coach.hourlyFee}";
     final sportLabel = sportChoices[coach.sport] ?? coach.sport;
+
+    // Logika avatar di AppBar
+    final String? rawPhotoUrl = userProfile?.profile?.profilePhoto;
+    ImageProvider? appBarImageProvider;
+    if (rawPhotoUrl != null && rawPhotoUrl.isNotEmpty) {
+      final proxyUrl =
+          'http://10.0.2.2:8000/account/proxy-image/?url=${Uri.encodeComponent(rawPhotoUrl)}';
+      appBarImageProvider = NetworkImage(proxyUrl);
+    }
 
     return Scaffold(
       backgroundColor: AppColors.bg,
@@ -30,11 +40,9 @@ class CoachDetail extends StatelessWidget {
             padding: const EdgeInsets.only(right: 20.0),
             child: CircleAvatar(
               backgroundColor: Colors.grey[800],
-              backgroundImage: NetworkImage(
-                'http://localhost:8000/account/proxy-image/?url=${Uri.encodeComponent(context.watch<UserProvider>().userProfile?.profile?.profilePhoto ?? '')}',
-              ),
-              onBackgroundImageError: (_, __) {},
-              child: coach.profilePhoto.isEmpty
+              backgroundImage: appBarImageProvider,
+              // Jika tidak ada gambar, tampilkan Icon
+              child: (appBarImageProvider == null)
                   ? const Icon(Icons.person, color: Colors.white)
                   : null,
             ),
@@ -46,6 +54,8 @@ class CoachDetail extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 30),
+
             // --- COACH INFO CARD ---
             Container(
               decoration: BoxDecoration(
@@ -216,9 +226,7 @@ class CoachDetail extends StatelessWidget {
       bottomNavigationBar: BottomNavBar(
         currentIndex: 0, // Index 0 = Coach/Find Coach
         onTap: (index) {
-          // Pop back ke MyHomePage dan pindah ke tab yang dipilih
           Navigator.pop(context);
-          // Jika ingin navigasi ke tab lain, Anda perlu menggunakan callback atau state management
         },
       ),
     );

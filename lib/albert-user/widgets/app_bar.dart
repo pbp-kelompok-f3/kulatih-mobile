@@ -29,18 +29,16 @@ class KulatihAppBar extends StatelessWidget implements PreferredSizeWidget {
             "KU",
             style: TextStyle(
               color: AppColors.logoWhite,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Bebas Neue',
+              fontSize: 40,
+              fontFamily: 'BebasNeue',
             ),
           ),
           Text(
             "LATIH",
             style: TextStyle(
               color: AppColors.logoYellow,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Bebas Neue',
+              fontSize: 40,
+              fontFamily: 'BebasNeue',
             ),
           ),
         ],
@@ -56,14 +54,12 @@ class KulatihAppBar extends StatelessWidget implements PreferredSizeWidget {
               if (userProvider.isCoach) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const CoachProfileScreen()),
+                  MaterialPageRoute(builder: (_) => const CoachProfile()),
                 );
               } else {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const MemberProfileScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const MemberProfile()),
                 );
               }
             },

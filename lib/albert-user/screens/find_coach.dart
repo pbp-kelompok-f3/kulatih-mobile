@@ -64,7 +64,6 @@ class _FindCoachState extends State<FindCoach> {
   @override
   Widget build(BuildContext context) {
     final request = context.watch<CookieRequest>();
-    final userProfile = context.watch<UserProvider>().userProfile;
 
     return Scaffold(
       backgroundColor: AppColors.bg,

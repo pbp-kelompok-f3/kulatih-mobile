@@ -3,9 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/albert-user/widgets/profile_layout.dart';
 import 'package:kulatih_mobile/albert-user/widgets/coach_card.dart'; // Import constant sportChoices
+import 'package:kulatih_mobile/navigationbar.dart';
 
-class CoachProfileScreen extends StatelessWidget {
-  const CoachProfileScreen({super.key});
+class CoachProfile extends StatelessWidget {
+  const CoachProfile({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,9 +14,7 @@ class CoachProfileScreen extends StatelessWidget {
     final userProfile = context.watch<UserProvider>().userProfile;
 
     if (userProfile == null) {
-      return const Scaffold(
-        body: Center(child: Text("User not found")),
-      );
+      return const Scaffold(body: Center(child: Text("User not found")));
     }
 
     // Menyiapkan Data Khusus Coach
@@ -33,6 +32,12 @@ class CoachProfileScreen extends StatelessWidget {
         _buildCoachRow("Sport", sportLabel),
         _buildCoachRow("Hourly Fee", feeLabel),
       ],
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: 0, // Index 0 = Coach/Find Coach
+        onTap: (index) {
+          Navigator.pop(context);
+        },
+      ),
     );
   }
 
@@ -47,14 +52,14 @@ class CoachProfileScreen extends StatelessWidget {
             width: 100,
             child: Text(
               label,
-              style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                color: Colors.white70,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(color: Colors.white),
-            ),
+            child: Text(value, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),

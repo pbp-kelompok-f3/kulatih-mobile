@@ -12,6 +12,7 @@ class AppColors {
   static const Color _red = Color(0xFFC00F0C);
   static const Color _orange = Color(0xFFBF6A02);
   static const Color _green = Color(0xFF14AE5C);
+  static const Color _lightGray = Color(0xFFD9D9D9);
 
   // Main Backgrounds
   static const Color bg = _indigo;          // App Background
@@ -24,7 +25,7 @@ class AppColors {
   // Typography
   static const Color textHeading = _pastelYellow;       // Text Heading
   static const Color textPrimary = _white;              // Text Body
-  static const Color textSecondary = _veryLightIndigo;  // Text Subtitles, etc.
+  static const Color textSecondary = _lightGray;  // Text Subtitles, etc.
 
   // Navigation
   static const Color navBarBg = _darkIndigo;      // NavBar Background

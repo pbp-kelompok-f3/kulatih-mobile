@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/models/user_model.dart';
 import 'package:kulatih_mobile/theme/app_colors.dart';
+import 'package:provider/provider.dart';
+import 'package:kulatih_mobile/models/user_provider.dart';
+import 'package:kulatih_mobile/albert-user/screens/login.dart';
+import 'package:kulatih_mobile/main.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class ProfileLayout extends StatelessWidget {
   final UserProfile user;
   final List<Widget> extraInfoRows; // Widget tambahan khusus Coach
+  final Widget? bottomNavigationBar;
 
   const ProfileLayout({
     super.key,
     required this.user,
     this.extraInfoRows = const [],
+    this.bottomNavigationBar,
   });
 
   @override
@@ -77,7 +84,7 @@ class ProfileLayout extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user.isCoach ? "Coach Profile" : "User Profile",
+                        user.isCoach ? "Coach Profile" : "Member Profile",
                         style: const TextStyle(
                           color: AppColors.textHeading,
                           fontSize: 12,
@@ -149,18 +156,23 @@ class ProfileLayout extends StatelessWidget {
             _buildMenuButton(context, "Edit Profile", Icons.edit, () {
               // Navigasi Edit Profile
             }),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             _buildMenuButton(context, "My Bookings", Icons.calendar_today, () {
               // Navigasi Booking
             }),
-            const SizedBox(height: 10),
-            _buildMenuButton(context, "My Ratings", Icons.star_border, () {
-              // Navigasi Ratings
-            }),
+            const SizedBox(height: 20),
+            if (user.isCoach)
+              _buildMenuButton(context, "My Ratings", Icons.star_border, () {
+                // Navigasi Ratings
+              }),
+            if (user.isCoach) const SizedBox(height: 20),
+
+            _buildLogoutButton(context),
             const SizedBox(height: 30),
           ],
         ),
       ),
+      bottomNavigationBar: bottomNavigationBar,
     );
   }
 
@@ -214,6 +226,45 @@ class ProfileLayout extends StatelessWidget {
           size: 16,
         ),
         onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.cardBg,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: ListTile(
+        leading: const Icon(Icons.logout, color: Colors.redAccent),
+        title: const Text(
+          "Logout",
+          style: TextStyle(
+            color: Colors.redAccent,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        onTap: () async {
+          final request = context.read<CookieRequest>();
+          final userProvider = context.read<UserProvider>();
+
+          // Panggil API logout
+          // Ganti URL jika berbeda
+          await request.logout("http://localhost:8000/account/logout-flutter/");
+
+          // Bersihkan data user dari state
+          userProvider.logout();
+
+          // Arahkan ke halaman Login dan hapus semua halaman sebelumnya
+          if (context.mounted) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+              (Route<dynamic> route) => false,
+            );
+          }
+        },
       ),
     );
   }
