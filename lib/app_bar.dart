@@ -23,13 +23,13 @@ class KulatihAppBar extends StatelessWidget implements PreferredSizeWidget {
           false, // Matikan tombol back default jika ini halaman utama
 
       title: const Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
             "KU",
             style: TextStyle(
               color: AppColors.logoWhite,
-              fontSize: 40,
+              fontSize: 36,
               fontFamily: 'BebasNeue',
             ),
           ),
@@ -37,7 +37,7 @@ class KulatihAppBar extends StatelessWidget implements PreferredSizeWidget {
             "LATIH",
             style: TextStyle(
               color: AppColors.logoYellow,
-              fontSize: 40,
+              fontSize: 36,
               fontFamily: 'BebasNeue',
             ),
           ),
