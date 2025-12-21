@@ -29,7 +29,7 @@ class _ForumEditPageState extends State<ForumEditPage> {
     final req = context.read<CookieRequest>();
 
     final url =
-        "http://localhost:8000/forum/json/${widget.post.id}/edit/";
+        "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/forum/json/${widget.post.id}/edit/";
 
     final response = await req.postJson(
     url,
