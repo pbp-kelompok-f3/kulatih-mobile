@@ -7,8 +7,13 @@ import 'package:provider/provider.dart';
 
 class TournamentEntryList extends StatefulWidget {
   final String query;
+  final String filter;
 
-  const TournamentEntryList({super.key, required this.query});
+  const TournamentEntryList({
+    super.key,
+    required this.query,
+    required this.filter,
+  });
 
   @override
   State<TournamentEntryList> createState() => _TournamentEntryListState();
@@ -21,105 +26,112 @@ class _TournamentEntryListState extends State<TournamentEntryList> {
   String currentUsername = '';
 
   Future<void> _fetchTournaments() async {
-    setState(() => isLoading = true);
-
     final request = context.read<CookieRequest>();
-    // Pastikan URL benar (localhost vs 10.0.2.2)
-    final raw = await request.get(
-      'http://localhost:8000/tournament/json/tournaments/',
-    );
+    final raw =
+        await request.get('http://localhost:8000/tournament/json/tournaments/');
 
     final Map<String, dynamic> normalized = raw is Map
         ? Map<String, dynamic>.from(raw)
-        : <String, dynamic>{};
-
-    if (raw is List) {
-      normalized['role'] = 'unknown';
-      normalized['username'] = '';
-      normalized['tournaments'] = raw;
-    }
+        : {
+            'role': 'unknown',
+            'username': '',
+            'tournaments': raw,
+          };
 
     final entry = TournamentEntry.fromJson(normalized);
 
-    // Cek mounted agar aman saat setState
-    if (mounted) {
-      setState(() {
-        allTournaments = entry.tournaments;
-        userRole = entry.role;
-        currentUsername = entry.namaUser; // Pastikan key di model sesuai (namaUser/username)
-        isLoading = false;
-      });
-    }
+    if (!mounted) return;
+
+    setState(() {
+      allTournaments = entry.tournaments;
+      userRole = entry.role;
+      currentUsername = entry.namaUser;
+      isLoading = false;
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(_fetchTournaments);
+    _fetchTournaments();
   }
 
   @override
   Widget build(BuildContext context) {
     final q = widget.query.trim().toLowerCase();
 
-    final filtered = q.isEmpty
-        ? allTournaments
-        : allTournaments
-            .where((t) => t.nama.toLowerCase().contains(q))
-            .toList();
+    List<Tournament> filtered = allTournaments;
 
-    if (isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.only(top: 60),
-          child: CircularProgressIndicator(color: Colors.orangeAccent),
-        ),
-      );
+    if (q.isNotEmpty) {
+      filtered = filtered.where((t) {
+        return t.nama.toLowerCase().contains(q) ||
+            t.lokasi.toLowerCase().contains(q) ||
+            t.pembuat.toLowerCase().contains(q) ||
+            t.tipe.toLowerCase().contains(q);
+      }).toList();
     }
 
-    if (filtered.isEmpty) {
-      return const Center(
+    if (widget.filter == "My Tournaments") {
+      filtered = filtered.where((t) {
+        final isCreator = t.pembuat == currentUsername;
+        final isParticipant =
+            t.participants.any((p) => p.member.username == currentUsername);
+        return isCreator || isParticipant;
+      }).toList();
+    }
+
+    if (isLoading) {
+      return const SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsets.only(top: 60),
-          child: Text(
-            "No tournaments found.",
-            style: TextStyle(color: Colors.white70, fontSize: 16),
+          child: Center(
+            child: CircularProgressIndicator(color: Colors.orangeAccent),
           ),
         ),
       );
     }
 
-    return Padding(
+    if (filtered.isEmpty) {
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.only(top: 60),
+          child: Center(
+            child: Text(
+              "No tournaments found.",
+              style: TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 40),
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: filtered.length,
-        itemBuilder: (context, index) {
-          final tournament = filtered[index];
-
-          return TournamentEntryCard(
-            tournament: tournament,
-            onTap: () async { // <--- UPDATE DI SINI
-              // 1. Tunggu user selesai lihat detail / edit
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => TournamentDetailPage(
-                    tournament: tournament,
-                    role: userRole,
-                    currentUsername: currentUsername,
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final tournament = filtered[index];
+            return TournamentEntryCard(
+              tournament: tournament,
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TournamentDetailPage(
+                      tournament: tournament,
+                      role: userRole,
+                      currentUsername: currentUsername,
+                    ),
                   ),
-                ),
-              );
-
-              // 2. Refresh list setelah user kembali
-              _fetchTournaments(); 
-            },
-          );
-        },
+                );
+                _fetchTournaments();
+              },
+            );
+          },
+          childCount: filtered.length,
+        ),
       ),
     );
   }
 }
+

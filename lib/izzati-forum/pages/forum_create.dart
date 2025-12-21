@@ -67,9 +67,6 @@ class _ForumCreatePageState extends State<ForumCreatePage> {
                 ),
                 onPressed: () async {
                   if (!_formKey.currentState!.validate()) return;
-
-                  debugPrint("DEBUG: Creating post = $_content");
-
                   final response = await request.postJson(
                     "http://localhost:8000/forum/json/create/",
                     jsonEncode({"content": _content}),
