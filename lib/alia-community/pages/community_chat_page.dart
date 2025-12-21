@@ -175,27 +175,36 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Community info
+                  // Community info dalam box kuning
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.community.name,
-                          style: TextStyle(
-                            color: AppColors.gold,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                      decoration: BoxDecoration(
+                        color: AppColors.gold,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            widget.community.name.toUpperCase(),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: AppColors.indigoDark,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
-                        ),
-                        Text(
-                          "Start chatting with others to get more information",
-                          style: TextStyle(
-                            color: AppColors.textLight,
-                            fontSize: 12,
+                          const SizedBox(height: 4),
+                          Text(
+                            "Start chatting with others to get more information about this community",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: AppColors.indigoDark,
+                              fontSize: 11,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],

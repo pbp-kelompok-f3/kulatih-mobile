@@ -5,7 +5,7 @@ import '../models/community.dart';
 import '../models/message.dart';
 
 class CommunityService {
-  static const String baseUrl = "http://localhost:8000/community";
+  static const String baseUrl = "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/community";
 
   /// Convert external image URL to proxied URL
   static String getProxiedImageUrl(String? imageUrl) {

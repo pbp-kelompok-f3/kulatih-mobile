@@ -28,7 +28,7 @@ class _TournamentEntryListState extends State<TournamentEntryList> {
   Future<void> _fetchTournaments() async {
     final request = context.read<CookieRequest>();
     final raw =
-        await request.get('http://localhost:8000/tournament/json/tournaments/');
+        await request.get('https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/tournament/json/tournaments/');
 
     final Map<String, dynamic> normalized = raw is Map
         ? Map<String, dynamic>.from(raw)

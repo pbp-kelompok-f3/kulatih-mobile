@@ -188,3 +188,9 @@ Agar aplikasi dapat mengakses internet, tambahkan izin akses internet pada file 
 
 Dengan mengikuti langkah-langkah di atas, aplikasi Flutter kini dapat berinteraksi dengan web service Django, melakukan autentikasi, serta mengakses data secara terintegrasi. Integrasi ini menjadi fondasi penting untuk membuat aplikasi mobile yang terhubung dengan backend secara real-time dan aman.
 </details>
+
+
+<details align="justify">
+<summary><b>Link Youtube</b></summary>
+https://youtu.be/VTbgNmEM2_A?si=82y82_xbd-rqwqUi
+</details>

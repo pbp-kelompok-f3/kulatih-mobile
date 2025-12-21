@@ -60,7 +60,7 @@ class _TournamentDetailPageState extends State<TournamentDetailPage> {
 
     try {
       final response = await request.get(
-        'http://localhost:8000/tournament/json/tournaments/',
+        'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/tournament/json/tournaments/',
       );
 
       final Map<String, dynamic> normalized =
@@ -152,7 +152,7 @@ ScaffoldMessenger.of(context).showSnackBar(
                   bottom: Radius.circular(30),
                 ),
                 child: Image.network(
-                  'http://localhost:8000/tournament/proxy-image/?url=${Uri.encodeComponent(data.poster)}',
+                  'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/tournament/proxy-image/?url=${Uri.encodeComponent(data.poster)}',
                   height: 500,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -267,7 +267,7 @@ ScaffoldMessenger.of(context).showSnackBar(
                     CircleAvatar(
                       radius: 20,
                       backgroundImage: NetworkImage(
-                        'http://localhost:8000/tournament/proxy-image/?url=${Uri.encodeComponent(data.pembuatFoto)}',
+                        'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/tournament/proxy-image/?url=${Uri.encodeComponent(data.pembuatFoto)}',
                       ),
                       onBackgroundImageError: (_, __) {},
                     ),
@@ -516,7 +516,7 @@ ScaffoldMessenger.of(context).showSnackBar(
                           child: ListTile(
                             leading: CircleAvatar(
                               backgroundImage: NetworkImage(
-                                'http://localhost:8000/tournament/proxy-image/?url=${Uri.encodeComponent(member.photo)}',
+                                'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/tournament/proxy-image/?url=${Uri.encodeComponent(member.photo)}',
                               ),
                               backgroundColor: Colors.grey.shade800,
                             ),

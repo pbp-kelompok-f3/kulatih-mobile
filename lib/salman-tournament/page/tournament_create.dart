@@ -248,7 +248,7 @@ class _TournamentCreatePageUIState extends State<TournamentCreatePage> {
         if (!_formKey.currentState!.validate()) return;
 
         final res = await request.postJson(
-          "http://localhost:8000/tournament/json/tournaments/create/",
+          "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/tournament/json/tournaments/create/",
           jsonEncode({
             "namaTournaments": _nama,
             "tipeTournaments": _tipe,
