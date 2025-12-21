@@ -27,10 +27,7 @@ class BookingDetailPage extends StatefulWidget {
 }
 
 class _BookingDetailPageState extends State<BookingDetailPage> {
-  late ReviewApi _reviewApi;
-
-  String _fmtDate(DateTime dt) => DateFormat('EEEE, dd MMM yyyy').format(dt);
-  String _fmtTime(DateTime dt) => DateFormat('HH:mm').format(dt);
+  late final ReviewApi _reviewApi;
 
   @override
   void didChangeDependencies() {
@@ -39,9 +36,13 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     _reviewApi = ReviewApi(request);
   }
 
+  String _fmtDate(DateTime dt) => DateFormat('EEEE, dd MMM yyyy').format(dt);
+  String _fmtTime(DateTime dt) => DateFormat('HH:mm').format(dt);
+
   @override
   Widget build(BuildContext context) {
     final service = BookingService();
+    final request = context.read<CookieRequest>();
     final user = context.watch<UserProvider>();
     final isCoach = user.isCoach;
 
@@ -63,11 +64,8 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                      size: 18,
-                    ),
+                    child: const Icon(Icons.arrow_back_ios,
+                        color: Colors.white, size: 18),
                   ),
                   const SizedBox(width: 12),
                   Text(
@@ -103,7 +101,8 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                               height: 80,
                               color: Colors.grey.shade700,
                               alignment: Alignment.center,
-                              child: const Icon(Icons.person, color: Colors.white),
+                              child: const Icon(Icons.person,
+                                  color: Colors.white),
                             ),
                           ),
                         ),
@@ -155,8 +154,8 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                     const SizedBox(height: 40),
 
                     /// BUTTON SECTION
-                    if (isCoach && isUpcoming) _coachButtons(context, service),
-                    if (!isCoach && isUpcoming) _userButtons(context, service),
+                    if (isCoach && isUpcoming) _coachButtons(context, service, request),
+                    if (!isCoach && isUpcoming) _userButtons(context, service, request),
                     if (isHistory) _historyButtons(context, isCoach),
 
                     const SizedBox(height: 60),
@@ -207,7 +206,8 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
 
   // ================= USER BUTTONS =================
 
-  Widget _userButtons(BuildContext context, BookingService service) {
+  Widget _userButtons(
+      BuildContext context, BookingService service, CookieRequest request) {
     if (widget.booking.status == BookingStatus.rescheduled) {
       return const SizedBox.shrink();
     }
@@ -223,7 +223,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
         }),
         const SizedBox(height: 12),
         _red("Cancel Booking", () async {
-          await service.cancelBooking(widget.booking.id);
+          await service.cancelBooking(request, widget.booking.id);
           Navigator.pop(context);
         }),
         const SizedBox(height: 12),
@@ -239,10 +239,11 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
 
   // ================= COACH BUTTONS =================
 
-  Widget _coachButtons(BuildContext context, BookingService service) {
+  Widget _coachButtons(
+      BuildContext context, BookingService service, CookieRequest request) {
     if (widget.booking.status == BookingStatus.pending) {
       return _gold("Confirm", () async {
-        await service.confirmBooking(widget.booking.id);
+        await service.confirmBooking(request, widget.booking.id);
         Navigator.pop(context);
       });
     }
@@ -251,12 +252,12 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
       return Column(
         children: [
           _dark("Accept Reschedule", () async {
-            await service.acceptReschedule(widget.booking.id);
+            await service.acceptReschedule(request, widget.booking.id);
             Navigator.pop(context);
           }),
           const SizedBox(height: 12),
           _red("Reject", () async {
-            await service.rejectReschedule(widget.booking.id);
+            await service.rejectReschedule(request, widget.booking.id);
             Navigator.pop(context);
           }),
         ],
@@ -269,6 +270,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
   // ================= HISTORY / REVIEW =================
 
   Widget _historyButtons(BuildContext context, bool isCoach) {
+    // Coach ga perlu review
     if (isCoach) {
       return Column(
         children: [
@@ -277,6 +279,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
       );
     }
 
+    // Kalau cancelled, ga bisa review
     if (widget.booking.status == BookingStatus.cancelled) {
       return Column(
         children: [
@@ -304,8 +307,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(
-                  "Coach ID not found (backend booking belum ngirim coach_id)",
-                ),
+                    "Coach ID not found (backend booking belum ngirim coach_id)"),
               ),
             );
           }),
@@ -338,7 +340,9 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                   context,
                   coachId: widget.booking.coachId,
                 );
-                if (ok == true && context.mounted) setState(() {});
+                if (ok == true && context.mounted) {
+                  setState(() {});
+                }
               }),
               const SizedBox(height: 12),
               _dark("Book Again", () {}),
@@ -355,7 +359,9 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                   builder: (_) => ReviewDetailPage(reviewId: reviewId),
                 ),
               );
-              if (changed == true && context.mounted) setState(() {});
+              if (changed == true && context.mounted) {
+                setState(() {});
+              }
             }),
             const SizedBox(height: 12),
             _dark("Book Again", () {}),
@@ -367,10 +373,8 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
 
   // ================= BUTTON HELPERS =================
 
-  Widget _gold(String t, VoidCallback a) =>
-      _btn(t, AppColors.gold, Colors.black, a);
-  Widget _red(String t, VoidCallback a) =>
-      _btn(t, Colors.red, Colors.white, a);
+  Widget _gold(String t, VoidCallback a) => _btn(t, AppColors.gold, Colors.black, a);
+  Widget _red(String t, VoidCallback a) => _btn(t, Colors.red, Colors.white, a);
   Widget _dark(String t, VoidCallback a) =>
       _btn(t, Colors.grey.shade700, Colors.white, a);
 
