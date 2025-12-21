@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/booking_status_badge.dart';
-import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart';
+
+const String kBaseUrl = 'http://localhost:8000';
 
 class BookingCard extends StatelessWidget {
   final Booking booking;
@@ -46,7 +48,6 @@ class BookingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          
           /// DATE + STATUS
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -61,7 +62,7 @@ class BookingCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          /// LINE SEPARATOR (kayak desain)
+          /// LINE SEPARATOR
           const Divider(
             color: Colors.white12,
             thickness: 1,
@@ -70,41 +71,41 @@ class BookingCard extends StatelessWidget {
           const SizedBox(height: 14),
 
           /// PROFILE INFO
-                    Row(
-                      children: [
-                        ClipOval(
-                          child: Image.network(
-                            booking.imageUrl != null && booking.imageUrl!.isNotEmpty
-                                ? 'http://localhost:8000/booking/proxy-image/?url=${Uri.encodeComponent(booking.imageUrl!)}'
-                                : 'https://via.placeholder.com/80',
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              width: 80,
-                              height: 80,
-                              color: Colors.grey.shade700,
-                              alignment: Alignment.center,
-                              child: const Icon(Icons.person, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 18),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              isCoach ? booking.memberName : booking.coachName,
-                              style: heading(22, color: AppColors.textWhite),
-                            ),
-                            Text(
-                              booking.sport,
-                              style: body(16, color: AppColors.textLight),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
+          Row(
+            children: [
+              ClipOval(
+                child: Image.network(
+                  booking.imageUrl != null && booking.imageUrl!.isNotEmpty
+                      ? '$kBaseUrl/booking/proxy-image/?url=${Uri.encodeComponent(booking.imageUrl!)}'
+                      : 'https://via.placeholder.com/80',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 80,
+                    height: 80,
+                    color: Colors.grey.shade700,
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.person, color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 18),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isCoach ? booking.memberName : booking.coachName,
+                    style: heading(22, color: AppColors.textWhite),
+                  ),
+                  Text(
+                    booking.sport,
+                    style: body(16, color: AppColors.textLight),
+                  ),
+                ],
+              )
+            ],
+          ),
 
           const SizedBox(height: 14),
 

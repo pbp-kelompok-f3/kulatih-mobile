@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
-import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart';
 
 class RescheduleModal extends StatefulWidget {
   final Booking booking;
@@ -63,8 +65,11 @@ class _RescheduleModalState extends State<RescheduleModal> {
 
     setState(() => _loading = true);
 
+    final request = context.read<CookieRequest>();
+
     try {
       await _service.rescheduleBooking(
+        request: request,
         id: widget.booking.id,
         newStart: newStartTime,
       );
@@ -82,84 +87,54 @@ class _RescheduleModalState extends State<RescheduleModal> {
         ),
       );
     } catch (e) {
-      setState(() => _loading = false);
+      if (!mounted) return;
+
+      Navigator.pop(context);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            "Failed: $e",
+            "Reschedule failed: $e",
             style: body(14),
           ),
         ),
       );
     }
-  }
 
-  Widget _picker(String text, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(
-          text,
-          style: body(14, color: Colors.black),
-        ),
-      ),
-    );
+    setState(() => _loading = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Reschedule Booking",
-              style: heading(20, color: Colors.black),
-            ),
-
-            const SizedBox(height: 20),
-
-            _picker(
-              _newDate == null
-                  ? "Select New Date"
-                  : "${_newDate!.day}/${_newDate!.month}/${_newDate!.year}",
-              _pickDate,
-            ),
-            const SizedBox(height: 12),
-
-            _picker(
-              _newStart == null
-                  ? "Select Start Time"
-                  : "${_newStart!.hour.toString().padLeft(2, '0')}:${_newStart!.minute.toString().padLeft(2, '0')}",
-              _pickStart,
-            ),
-            const SizedBox(height: 20),
-
-            _loading
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFD4BC4E),
-                      minimumSize: const Size(double.infinity, 48),
-                    ),
-                    child: Text(
-                      "Submit",
-                      style: heading(14, color: Colors.black),
-                    ),
-                  ),
-          ],
-        ),
+    return AlertDialog(
+      backgroundColor: Colors.black87,
+      title: Text("Reschedule", style: heading(18)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ElevatedButton(
+            onPressed: _pickDate,
+            child: Text("Pick new date", style: body(14)),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: _pickStart,
+            child: Text("Pick new time", style: body(14)),
+          ),
+          const SizedBox(height: 14),
+          if (_loading) const CircularProgressIndicator(),
+        ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text("Cancel", style: body(14)),
+        ),
+        TextButton(
+          onPressed: _loading ? null : _submit,
+          child: Text("Submit", style: body(14)),
+        ),
+      ],
     );
   }
 }
