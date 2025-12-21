@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                       String password = _passwordController.text;
 
                       final response = await request.login(
-                        "http://localhost:8000/auth/login/",
+                        "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/auth/login/",
                         {'username': username, 'password': password},
                       );
 

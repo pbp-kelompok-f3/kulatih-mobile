@@ -4,7 +4,7 @@ import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/booking_status_badge.dart';
 import 'package:kulatih_mobile/khalisha-booking/style/text.dart';
 
-const String kBaseUrl = 'http://localhost:8000';
+const String kBaseUrl = 'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id';
 
 class BookingCard extends StatelessWidget {
   final Booking booking;

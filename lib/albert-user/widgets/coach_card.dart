@@ -41,7 +41,7 @@ class CoachCard extends StatelessWidget {
             // Image
             Expanded(
               child: Image.network(
-                'http://localhost:8000/account/proxy-image/?url=${Uri.encodeComponent(coach.profilePhoto)}',
+                'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/account/proxy-image/?url=${Uri.encodeComponent(coach.profilePhoto)}',
                 width: double.infinity,
                 fit: BoxFit.cover,
                 errorBuilder: (ctx, error, stackTrace) => Container(

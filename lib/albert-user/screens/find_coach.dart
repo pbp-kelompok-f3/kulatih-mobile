@@ -42,7 +42,7 @@ class _FindCoachState extends State<FindCoach> {
 
   Future<List<Coach>> _fetchCoaches(CookieRequest request) async {
     String url =
-        'http://localhost:8000/account/coaches-json/?q=$_searchQuery&sport=$_selectedSportKey';
+        'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/account/coaches-json/?q=$_searchQuery&sport=$_selectedSportKey';
 
     try {
       final response = await request.get(url);

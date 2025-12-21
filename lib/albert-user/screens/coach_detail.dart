@@ -28,7 +28,7 @@ class CoachDetail extends StatelessWidget {
     ImageProvider? appBarImageProvider;
     if (rawPhotoUrl != null && rawPhotoUrl.isNotEmpty) {
       final proxyUrl =
-          'http://localhost:8000/account/proxy-image/?url=${Uri.encodeComponent(rawPhotoUrl)}';
+          'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/account/proxy-image/?url=${Uri.encodeComponent(rawPhotoUrl)}';
       appBarImageProvider = NetworkImage(proxyUrl);
     }
 
@@ -96,7 +96,7 @@ class CoachDetail extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(15),
                     child: Image.network(
-                      'http://localhost:8000/account/proxy-image/?url=${Uri.encodeComponent(coach.profilePhoto)}',
+                      'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/account/proxy-image/?url=${Uri.encodeComponent(coach.profilePhoto)}',
                       width: 100,
                       height: 100,
                       fit: BoxFit.cover,

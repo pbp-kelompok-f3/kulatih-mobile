@@ -181,7 +181,7 @@ class _RegisterMemberPageState extends State<RegisterMemberPage> {
                     // API Call
                     try {
                       final response = await request.postJson(
-                        "http://localhost:8000/auth/register/",
+                        "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/auth/register/",
                         jsonEncode({
                           "username": username,
                           "first_name": firstName,

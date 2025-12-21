@@ -118,7 +118,7 @@ class _EditProfileState extends State<EditProfile> {
 
     try {
       final response = await request.postJson(
-        "http://localhost:8000/account/edit-profile-flutter/",
+        "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/account/edit-profile-flutter/",
         jsonEncode(data),
       );
 
@@ -214,7 +214,7 @@ class _EditProfileState extends State<EditProfile> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.network(
-                        'http://localhost:8000/account/proxy-image/?url=${Uri.encodeComponent(_photoPreviewUrl)}',
+                        'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/account/proxy-image/?url=${Uri.encodeComponent(_photoPreviewUrl)}',
                         height: 120,
                         width: 120,
                         fit: BoxFit.cover,
