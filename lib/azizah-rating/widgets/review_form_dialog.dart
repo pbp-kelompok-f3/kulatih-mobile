@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 import '../services/review_api.dart';
 import 'review_theme.dart';
 
 class ReviewFormDialog {
-  static final _api = ReviewApi();
-
   static Future<bool?> showCreate(
     BuildContext context, {
     required String coachId,
   }) async {
+    final api = ReviewApi(context.read<CookieRequest>());
+
     return _show(
       context,
       title: 'RATE YOUR COACH',
       subtitle: 'Your honest feedback is valuable to us.',
       onSubmit: (rating, comment) async {
-        await _api.createReview(
+        await api.createReview(
           coachId: coachId,
           rating: rating,
           comment: comment,
@@ -30,6 +32,8 @@ class ReviewFormDialog {
     required int initialRating,
     required String initialComment,
   }) async {
+    final api = ReviewApi(context.read<CookieRequest>());
+
     return _show(
       context,
       title: 'RATE YOUR COACH',
@@ -37,7 +41,7 @@ class ReviewFormDialog {
       initialRating: initialRating,
       initialComment: initialComment,
       onSubmit: (rating, comment) async {
-        await _api.updateReview(
+        await api.updateReview(
           reviewId: reviewId,
           rating: rating,
           comment: comment,
@@ -68,7 +72,7 @@ class ReviewFormDialog {
             alignment: Alignment.center,
             child: ConstrainedBox(
               constraints: const BoxConstraints(
-                maxWidth: 680, // sama kayak max-w-[680px]
+                maxWidth: 680,
               ),
               child: Container(
                 decoration: BoxDecoration(
@@ -76,8 +80,7 @@ class ReviewFormDialog {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: const Color(0xFF2E2B55)),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,12 +130,11 @@ class ReviewFormDialog {
                             return GestureDetector(
                               onTap: () => ratingNotifier.value = starIndex,
                               child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 4),
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
                                 child: Text(
                                   '★',
                                   style: TextStyle(
-                                    fontSize: 30, // text-3xl vibes
+                                    fontSize: 30,
                                     color: filled
                                         ? ReviewColors.yellow
                                         : const Color(0xFF3C395F),
@@ -158,7 +160,7 @@ class ReviewFormDialog {
                     const SizedBox(height: 6),
                     TextField(
                       controller: textController,
-                      maxLines: 6, // rows="6" di Django
+                      maxLines: 6,
                       maxLength: 1000,
                       style: const TextStyle(
                         color: ReviewColors.white,
@@ -170,13 +172,11 @@ class ReviewFormDialog {
                         contentPadding: const EdgeInsets.all(12),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              const BorderSide(color: Color(0xFF2E2B55)),
+                          borderSide: const BorderSide(color: Color(0xFF2E2B55)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              const BorderSide(color: ReviewColors.yellow),
+                          borderSide: const BorderSide(color: ReviewColors.yellow),
                         ),
                         hintText: 'Share your experience…',
                         hintStyle: const TextStyle(
@@ -197,7 +197,7 @@ class ReviewFormDialog {
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 8,
-                            ), // px-4 py-2 vibes
+                            ),
                           ),
                           onPressed: () => Navigator.of(context).pop(false),
                           child: const Text(
@@ -215,16 +215,14 @@ class ReviewFormDialog {
                             padding: const EdgeInsets.symmetric(
                               horizontal: 18,
                               vertical: 8,
-                            ), // px-5 py-2 vibes
+                            ),
                           ),
                           onPressed: () async {
                             final rating = ratingNotifier.value;
                             if (rating < 1 || rating > 5) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text(
-                                    'Please select a rating (1–5).',
-                                  ),
+                                  content: Text('Please select a rating (1–5).'),
                                   behavior: SnackBarBehavior.floating,
                                 ),
                               );
@@ -239,9 +237,7 @@ class ReviewFormDialog {
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(
-                                    'Failed to submit review: $e',
-                                  ),
+                                  content: Text('Failed to submit review: $e'),
                                   behavior: SnackBarBehavior.floating,
                                 ),
                               );

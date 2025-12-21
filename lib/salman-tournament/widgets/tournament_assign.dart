@@ -10,7 +10,7 @@ class TournamentAssigner {
   ) async {
     final request = context.read<CookieRequest>();
 
-    final String url = "http://localhost:8000/tournament/json/$tournamentId/assign/";
+    final String url = "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/tournament/json/$tournamentId/assign/";
 
     try {
 

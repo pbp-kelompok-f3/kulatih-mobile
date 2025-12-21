@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 import '../services/review_api.dart';
 import '../models/review_models.dart';
@@ -18,19 +20,22 @@ class ReviewDetailPage extends StatefulWidget {
 }
 
 class _ReviewDetailPageState extends State<ReviewDetailPage> {
-  final _api = ReviewApi();
-
+  ReviewApi? _api;
   late Future<ReviewDetail> _future;
 
   @override
-  void initState() {
-    super.initState();
-    _future = _api.getReviewDetail(widget.reviewId);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // init sekali
+    _api ??= ReviewApi(context.read<CookieRequest>());
+
+    _future = _api!.getReviewDetail(widget.reviewId);
   }
 
   Future<void> _reload() async {
     setState(() {
-      _future = _api.getReviewDetail(widget.reviewId);
+      _future = _api!.getReviewDetail(widget.reviewId);
     });
   }
 
@@ -108,7 +113,7 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
     if (confirmed != true) return;
 
     try {
-      await _api.deleteReview(reviewId: int.parse(detail.id));
+      await _api!.deleteReview(reviewId: int.parse(detail.id));
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Review deleted'),
@@ -178,14 +183,11 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
             }
 
             return Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               child: Align(
                 alignment: Alignment.topCenter,
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: 640, // biar nggak sepanjang layar di web
-                  ),
+                  constraints: const BoxConstraints(maxWidth: 640),
                   child: Container(
                     decoration: BoxDecoration(
                       color: ReviewColors.indigoLight,
@@ -200,7 +202,6 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // avatar
                         Container(
                           width: 48,
                           height: 48,
@@ -227,7 +228,6 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // header row
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -266,16 +266,14 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                                       children: [
                                         TextButton(
                                           style: TextButton.styleFrom(
-                                            backgroundColor:
-                                                ReviewColors.yellow,
+                                            backgroundColor: ReviewColors.yellow,
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 12,
                                               vertical: 6,
                                             ),
                                             minimumSize: Size.zero,
                                             tapTargetSize:
-                                                MaterialTapTargetSize
-                                                    .shrinkWrap,
+                                                MaterialTapTargetSize.shrinkWrap,
                                           ),
                                           onPressed: () => _onEdit(detail),
                                           child: const Text(
@@ -296,11 +294,9 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                                             ),
                                             minimumSize: Size.zero,
                                             tapTargetSize:
-                                                MaterialTapTargetSize
-                                                    .shrinkWrap,
+                                                MaterialTapTargetSize.shrinkWrap,
                                           ),
-                                          onPressed: () =>
-                                              _onDelete(detail),
+                                          onPressed: () => _onDelete(detail),
                                           child: const Text(
                                             'DELETE',
                                             style: TextStyle(

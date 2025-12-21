@@ -158,30 +158,28 @@ class _LoginPageState extends State<LoginPage> {
 
                       final response = await request.login(
                         "http://localhost:8000/auth/login/",
-                        {
-                          'username': username,
-                          'password': password,
-                        },
+                        {'username': username, 'password': password},
                       );
 
                       if (request.loggedIn) {
                         String message = response['message'];
-                        
+
                         // Save user data to provider
                         userProvider.login(response);
-                        
+
                         if (context.mounted) {
-                          String roleName = userProvider.isCoach ? 'Coach' : 'Member';
-                          
+                          String roleName = userProvider.isCoach
+                              ? 'Coach'
+                              : 'Member';
+
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MyHomePage(
-                                title: 'KuLatih - $roleName',
-                              ),
+                              builder: (context) =>
+                                  MyHomePage(title: 'KuLatih - $roleName'),
                             ),
                           );
-                          
+
                           ScaffoldMessenger.of(context)
                             ..hideCurrentSnackBar()
                             ..showSnackBar(

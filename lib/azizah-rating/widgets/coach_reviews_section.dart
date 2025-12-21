@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 import '../services/review_api.dart';
 import '../models/review_models.dart';
@@ -22,16 +24,20 @@ class CoachReviewsSection extends StatefulWidget {
 }
 
 class _CoachReviewsSectionState extends State<CoachReviewsSection> {
-  final _api = ReviewApi();
-
+  ReviewApi? _api;
   late Future<CoachReviewsResponse> _future;
 
   static const int _previewPageSize = 3;
 
   @override
-  void initState() {
-    super.initState();
-    _future = _api.getCoachReviews(
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // init sekali
+    _api ??= ReviewApi(context.read<CookieRequest>());
+
+    // load awal (preview 3)
+    _future = _api!.getCoachReviews(
       coachId: widget.coachId,
       page: 1,
       pageSize: _previewPageSize,
@@ -40,7 +46,7 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
 
   Future<void> _reload() async {
     setState(() {
-      _future = _api.getCoachReviews(
+      _future = _api!.getCoachReviews(
         coachId: widget.coachId,
         page: 1,
         pageSize: _previewPageSize,
@@ -50,9 +56,11 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
 
   void _openDetail(ReviewItem item) {
     Navigator.of(context)
-        .push(MaterialPageRoute(
-      builder: (_) => ReviewDetailPage(reviewId: int.parse(item.id)),
-    ))
+        .push(
+      MaterialPageRoute(
+        builder: (_) => ReviewDetailPage(reviewId: int.parse(item.id)),
+      ),
+    )
         .then((changed) {
       if (changed == true) {
         _reload();
@@ -163,6 +171,7 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
                 ),
               );
             }
+
             final items = data.items;
 
             return Column(

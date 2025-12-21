@@ -3,9 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
-import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
-import 'package:kulatih_mobile/models/user_provider.dart'; 
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart';
+import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 class BookingFormPage extends StatefulWidget {
   final bool isReschedule;
@@ -40,27 +41,30 @@ class _BookingFormPageState extends State<BookingFormPage> {
   }
 
   Future<void> _pickDateTime() async {
-    final now = DateTime.now();
-
     final date = await showDatePicker(
       context: context,
-      firstDate: now,
-      lastDate: DateTime(now.year + 1),
-      initialDate: _selectedDateTime ?? now,
+      initialDate: _selectedDateTime ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
     );
 
     if (date == null) return;
 
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_selectedDateTime ?? now),
+      initialTime: TimeOfDay.fromDateTime(_selectedDateTime ?? DateTime.now()),
     );
 
     if (time == null) return;
 
     setState(() {
-      _selectedDateTime =
-          DateTime(date.year, date.month, date.day, time.hour, time.minute);
+      _selectedDateTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
     });
   }
 
@@ -75,15 +79,19 @@ class _BookingFormPageState extends State<BookingFormPage> {
       return;
     }
 
+    final request = context.read<CookieRequest>();
+
     bool success;
 
     if (widget.isReschedule) {
       success = await _service.rescheduleBooking(
+        request: request,
         id: widget.initialBooking!.id,
         newStart: _selectedDateTime!,
       );
     } else {
       success = await _service.createBooking(
+        request: request,
         coachId: widget.coachId ?? "1",
         location: _locationController.text.trim(),
         dateTime: _selectedDateTime!,
@@ -131,63 +139,51 @@ class _BookingFormPageState extends State<BookingFormPage> {
       appBar: AppBar(
         backgroundColor: AppColors.indigo,
         elevation: 0,
-        title: Text(
-          isEditing ? "Reschedule Booking" : "New Booking",
-          style: heading(20),
-        ),
+        title: Text(isEditing ? "Reschedule Booking" : "New Booking",
+            style: heading(20)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Choose Schedule",
-              style: body(16),
-            ),
-            const SizedBox(height: 8),
-
+            Text("Schedule", style: heading(18, color: AppColors.gold)),
+            const SizedBox(height: 10),
             InkWell(
               onTap: _pickDateTime,
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: AppColors.card,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   _selectedDateTime == null
-                      ? "Tap to pick date & time"
-                      : DateFormat("EEE, dd MMM yyyy • HH:mm")
+                      ? "Choose date & time"
+                      : DateFormat('EEEE, dd MMM yyyy HH:mm')
                           .format(_selectedDateTime!),
-                  style: body(14),
+                  style: body(14, color: Colors.white),
                 ),
               ),
             ),
-
-            const SizedBox(height: 24),
-            Text(
-              "Location",
-              style: body(16),
-            ),
-            const SizedBox(height: 8),
-
+            const SizedBox(height: 18),
+            Text("Location", style: heading(18, color: AppColors.gold)),
+            const SizedBox(height: 10),
             TextField(
               controller: _locationController,
-              style: body(14),
+              style: body(14, color: Colors.white),
               decoration: InputDecoration(
-                hintText: "Enter location",
-                hintStyle: body(14, color: Colors.white54),
                 filled: true,
                 fillColor: AppColors.card,
+                hintText: "Enter location",
+                hintStyle: body(14, color: Colors.white54),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
               ),
             ),
-
             const Spacer(),
-
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -196,16 +192,15 @@ class _BookingFormPageState extends State<BookingFormPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.gold,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
                 child: Text(
-                  isEditing ? "Save Changes" : "Book Now",
-                  style: heading(16, color: Colors.black),
+                  isEditing ? "Submit Reschedule" : "Create Booking",
+                  style: body(15, color: Colors.black),
                 ),
               ),
-            ),
-            const SizedBox(height: 40),
+            )
           ],
         ),
       ),

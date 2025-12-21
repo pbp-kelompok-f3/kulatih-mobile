@@ -32,7 +32,7 @@ class _ForumDetailsPageState extends State<ForumDetailsPage> {
 
   Future<CommentEntry> _fetchComments(CookieRequest request, int id) async {
     final response =
-        await request.get("http://localhost:8000/forum/json/$id/comments/");
+        await request.get("https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/forum/json/$id/comments/");
 
     final entry = CommentEntry.fromJson(response);
 
@@ -46,7 +46,7 @@ class _ForumDetailsPageState extends State<ForumDetailsPage> {
     final req = context.read<CookieRequest>();
 
     final res = await req.postJson(
-      "http://localhost:8000/forum/json/${widget.post.id}/comments/add/",
+      "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/forum/json/${widget.post.id}/comments/add/",
       jsonEncode({"content": text, "parent": parentId}),
     );
 
@@ -122,7 +122,7 @@ class _ForumDetailsPageState extends State<ForumDetailsPage> {
                       if (value == "delete") {
                         final req = context.read<CookieRequest>();
                         final res = await req.postJson(
-                          "http://localhost:8000/forum/json/${post.id}/delete/",
+                          "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/forum/json/${post.id}/delete/",
                           "{}",
                         );
                         if (res["ok"] == true) Navigator.pop(context);
@@ -171,7 +171,7 @@ class _ForumDetailsPageState extends State<ForumDetailsPage> {
                 if (text != null && text.isNotEmpty) {
                   final req = context.read<CookieRequest>();
                   final res = await req.postJson(
-                    "http://localhost:8000/forum/json/${post.id}/comments/add/",
+                    "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/forum/json/${post.id}/comments/add/",
                     jsonEncode({"content": text, "parent": null}),
                   );
 

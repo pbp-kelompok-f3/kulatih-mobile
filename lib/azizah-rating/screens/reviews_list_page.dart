@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 import '../services/review_api.dart';
 import '../models/review_models.dart';
@@ -21,7 +23,7 @@ class ReviewsListPage extends StatefulWidget {
 }
 
 class _ReviewsListPageState extends State<ReviewsListPage> {
-  final _api = ReviewApi();
+  ReviewApi? _api;
 
   int? _ratingFilter;
   int _page = 1;
@@ -30,13 +32,16 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
   late Future<CoachReviewsResponse> _future;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // init sekali
+    _api ??= ReviewApi(context.read<CookieRequest>());
     _future = _load();
   }
 
   Future<CoachReviewsResponse> _load() {
-    return _api.getCoachReviews(
+    return _api!.getCoachReviews(
       coachId: widget.coachId,
       rating: _ratingFilter,
       page: _page,
@@ -88,7 +93,6 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
         backgroundColor: ReviewColors.indigoDark,
         elevation: 0,
         iconTheme: const IconThemeData(color: ReviewColors.white),
-        // title dikosongin, kita bikin header di body biar sejajar sama Filter
         title: const SizedBox.shrink(),
       ),
       body: SafeArea(
@@ -200,7 +204,6 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
 
                     final data = snapshot.data;
                     if (data == null || data.items.isEmpty) {
-                      // ===== NO REVIEWS STATE (mirip web, gak tinggi menjulang) =====
                       return Align(
                         alignment: Alignment.topCenter,
                         child: Container(

@@ -4,7 +4,7 @@ class UserProfile {
   final String? lastName;
   final String? email;
   final String role;
-  final ProfileData? profile; // ✅ Ubah jadi nullable
+  final ProfileData? profile;
 
   UserProfile({
     required this.username,
@@ -12,7 +12,7 @@ class UserProfile {
     this.lastName,
     this.email,
     required this.role,
-    this.profile, // ✅ Ubah jadi optional
+    this.profile,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -22,7 +22,6 @@ class UserProfile {
       lastName: json['last_name'],
       email: json['email'],
       role: json['role'],
-      // ✅ Handle jika json['profile'] null
       profile: json['profile'] != null 
           ? ProfileData.fromJson(json['profile'], json['role']) 
           : null,
@@ -42,6 +41,15 @@ class UserProfile {
     }
     return username;
   }
+
+  Map<String, dynamic> toJson() => {
+        'username': username,
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+        'role': role,
+        'profile': profile?.toJson(),
+      };
 }
 
 class ProfileData {
@@ -73,9 +81,19 @@ class ProfileData {
       description: json['description'],
       profilePhoto: json['profile_photo'],
       sport: role == 'coach' ? json['sport'] : null,
-      hourlyFee: role == 'coach' ? json['hourly_fee'] : null,
+      hourlyFee: role == 'coach' ? (json['hourly_fee'] as num?)?.toInt() : null,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'city': city,
+        'phone': phone,
+        'description': description,
+        'profile_photo': profilePhoto,
+        'sport': sport,
+        'hourly_fee': hourlyFee,
+      };
 
   String get sportLabel {
     const sportLabels = {

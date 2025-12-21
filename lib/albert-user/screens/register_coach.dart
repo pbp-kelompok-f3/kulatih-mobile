@@ -48,6 +48,7 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
       backgroundColor: const Color(0xFF1A1625),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1625),
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
