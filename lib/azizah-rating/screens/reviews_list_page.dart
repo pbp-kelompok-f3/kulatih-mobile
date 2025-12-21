@@ -5,8 +5,10 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import '../services/review_api.dart';
 import '../models/review_models.dart';
 import '../widgets/review_card.dart';
-import '../widgets/review_theme.dart';
 import 'review_detail_page.dart';
+
+// TODO: sesuaikan path ini jika perlu
+import '/theme/app_colors.dart';
 
 class ReviewsListPage extends StatefulWidget {
   final String coachId;
@@ -34,8 +36,6 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    // init sekali
     _api ??= ReviewApi(context.read<CookieRequest>());
     _future = _load();
   }
@@ -79,102 +79,102 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
           ),
         )
         .then((changed) {
-      if (changed == true) {
-        _reload();
-      }
+      if (changed == true) _reload();
     });
+  }
+
+  Widget _buildFilterRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        const Text(
+          'Filter',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 13,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          decoration: BoxDecoration(
+            color: AppColors.bg,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.statusGrayIndigo),
+          ),
+          child: DropdownButton<int?>(
+            value: _ratingFilter,
+            borderRadius: BorderRadius.circular(12),
+            dropdownColor: AppColors.bg,
+            underline: const SizedBox.shrink(),
+            iconEnabledColor: AppColors.textPrimary,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 13,
+            ),
+            items: const [
+              DropdownMenuItem<int?>(
+                value: null,
+                child: Text('All'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 5,
+                child: Text('5★'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 4,
+                child: Text('4★'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('3★'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('2★'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('1★'),
+              ),
+            ],
+            onChanged: _changeRating,
+          ),
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ReviewColors.indigoDark,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: ReviewColors.indigoDark,
+        backgroundColor: AppColors.bg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: ReviewColors.white),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
         title: const SizedBox.shrink(),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ===== HEADER + FILTER (SEJAJAR) =====
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'RATING AND FEEDBACK',
-                    style: TextStyle(
-                      color: ReviewColors.yellow,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 24,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      const Text(
-                        'Filter',
-                        style: TextStyle(
-                          color: ReviewColors.white,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: ReviewColors.indigoDark,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: const Color(0xFF2E2B55)),
-                        ),
-                        child: DropdownButton<int?>(
-                          value: _ratingFilter,
-                          borderRadius: BorderRadius.circular(12),
-                          dropdownColor: ReviewColors.indigoDark,
-                          underline: const SizedBox.shrink(),
-                          iconEnabledColor: ReviewColors.white,
-                          style: const TextStyle(
-                            color: ReviewColors.white,
-                            fontSize: 13,
-                          ),
-                          items: const [
-                            DropdownMenuItem<int?>(
-                              value: null,
-                              child: Text('All'),
-                            ),
-                            DropdownMenuItem<int?>(
-                              value: 5,
-                              child: Text('5★'),
-                            ),
-                            DropdownMenuItem<int?>(
-                              value: 4,
-                              child: Text('4★'),
-                            ),
-                            DropdownMenuItem<int?>(
-                              value: 3,
-                              child: Text('3★'),
-                            ),
-                            DropdownMenuItem<int?>(
-                              value: 2,
-                              child: Text('2★'),
-                            ),
-                            DropdownMenuItem<int?>(
-                              value: 1,
-                              child: Text('1★'),
-                            ),
-                          ],
-                          onChanged: _changeRating,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              // ===== HEADER (JUDUL) =====
+              const Text(
+                'RATING AND FEEDBACK',
+                style: TextStyle(
+                  color: AppColors.textHeading,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                ),
               ),
+
+              const SizedBox(height: 10),
+
+              // ===== FILTER (TURUN KE BAWAH JUDUL) =====
+              _buildFilterRow(),
 
               const SizedBox(height: 16),
 
@@ -186,7 +186,7 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
                         child: CircularProgressIndicator(
-                          color: ReviewColors.yellow,
+                          color: AppColors.primary,
                         ),
                       );
                     }
@@ -195,9 +195,7 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                       return const Center(
                         child: Text(
                           'Failed to load reviews',
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                          ),
+                          style: TextStyle(color: Colors.redAccent),
                         ),
                       );
                     }
@@ -210,9 +208,9 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                           width: double.infinity,
                           margin: const EdgeInsets.only(top: 8),
                           decoration: BoxDecoration(
-                            color: ReviewColors.indigoLight,
+                            color: AppColors.cardBg,
                             borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: const Color(0xFF2E2B55)),
+                            border: Border.all(color: AppColors.statusGrayIndigo),
                           ),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
@@ -226,7 +224,7 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                                 'NO REVIEWS',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: ReviewColors.white,
+                                  color: AppColors.textPrimary,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -236,7 +234,7 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                                 'Be the first to leave a rating & feedback.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Colors.white70,
+                                  color: AppColors.textSecondary,
                                   fontSize: 14,
                                 ),
                               ),
@@ -274,31 +272,29 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                                     _changePage(data.pagination.page - 1),
                                 child: const Text(
                                   'Prev',
-                                  style: TextStyle(
-                                    color: ReviewColors.white,
-                                  ),
+                                  style: TextStyle(color: AppColors.textPrimary),
                                 ),
                               )
                             else
                               const SizedBox(width: 64),
+
                             Text(
                               data.pagination.totalPages > 1
                                   ? 'Page ${data.pagination.page} / ${data.pagination.totalPages}'
                                   : '',
                               style: const TextStyle(
-                                color: Colors.white70,
+                                color: AppColors.textSecondary,
                                 fontSize: 12,
                               ),
                             ),
+
                             if (data.pagination.hasNext)
                               TextButton(
                                 onPressed: () =>
                                     _changePage(data.pagination.page + 1),
                                 child: const Text(
                                   'Next',
-                                  style: TextStyle(
-                                    color: ReviewColors.white,
-                                  ),
+                                  style: TextStyle(color: AppColors.textPrimary),
                                 ),
                               )
                             else

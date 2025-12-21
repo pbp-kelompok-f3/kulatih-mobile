@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 import '../services/review_api.dart';
-import 'review_theme.dart';
+import '/theme/app_colors.dart';
 
 class ReviewFormDialog {
   static Future<bool?> showCreate(
@@ -71,14 +71,12 @@ class ReviewFormDialog {
           child: Align(
             alignment: Alignment.center,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 680,
-              ),
+              constraints: const BoxConstraints(maxWidth: 680),
               child: Container(
                 decoration: BoxDecoration(
-                  color: ReviewColors.indigo,
+                  color: AppColors.cardBg,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF2E2B55)),
+                  border: Border.all(color: AppColors.statusGrayIndigo),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 child: Column(
@@ -94,15 +92,16 @@ class ReviewFormDialog {
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
-                              color: ReviewColors.white,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 4),
+                          const SizedBox(height: 0),
                           Text(
                             subtitle,
                             style: const TextStyle(
                               fontSize: 13,
-                              color: Colors.white70,
+                              color: AppColors.textSecondary,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -116,7 +115,7 @@ class ReviewFormDialog {
                       'YOUR RATING',
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.white70,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -130,14 +129,15 @@ class ReviewFormDialog {
                             return GestureDetector(
                               onTap: () => ratingNotifier.value = starIndex,
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4),
                                 child: Text(
                                   '★',
                                   style: TextStyle(
                                     fontSize: 30,
                                     color: filled
-                                        ? ReviewColors.yellow
-                                        : const Color(0xFF3C395F),
+                                        ? AppColors.primary
+                                        : AppColors.statusGrayIndigo,
                                   ),
                                 ),
                               ),
@@ -154,7 +154,7 @@ class ReviewFormDialog {
                       'FEEDBACK (optional)',
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.white70,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -163,24 +163,25 @@ class ReviewFormDialog {
                       maxLines: 6,
                       maxLength: 1000,
                       style: const TextStyle(
-                        color: ReviewColors.white,
+                        color: AppColors.textPrimary,
                       ),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: ReviewColors.indigoLight,
+                        fillColor: AppColors.bg,
                         counterText: '',
                         contentPadding: const EdgeInsets.all(12),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Color(0xFF2E2B55)),
+                          borderSide:
+                              const BorderSide(color: AppColors.statusGrayIndigo),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: ReviewColors.yellow),
+                          borderSide: const BorderSide(color: AppColors.primary),
                         ),
                         hintText: 'Share your experience…',
                         hintStyle: const TextStyle(
-                          color: Colors.white54,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ),
@@ -193,7 +194,7 @@ class ReviewFormDialog {
                       children: [
                         TextButton(
                           style: TextButton.styleFrom(
-                            backgroundColor: const Color(0xFFBE3A3A),
+                            backgroundColor: AppColors.statusRed,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 8,
@@ -203,15 +204,16 @@ class ReviewFormDialog {
                           child: const Text(
                             'CANCEL',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               fontSize: 13,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
                         const SizedBox(width: 8),
                         TextButton(
                           style: TextButton.styleFrom(
-                            backgroundColor: ReviewColors.yellow,
+                            backgroundColor: AppColors.primary,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 18,
                               vertical: 8,
@@ -224,6 +226,7 @@ class ReviewFormDialog {
                                 const SnackBar(
                                   content: Text('Please select a rating (1–5).'),
                                   behavior: SnackBarBehavior.floating,
+                                  backgroundColor: AppColors.cardBg,
                                 ),
                               );
                               return;
@@ -233,12 +236,15 @@ class ReviewFormDialog {
                                 rating,
                                 textController.text.trim(),
                               );
+                              if (!context.mounted) return;
                               Navigator.of(context).pop(true);
                             } catch (e) {
+                              if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('Failed to submit review: $e'),
                                   behavior: SnackBarBehavior.floating,
+                                  backgroundColor: AppColors.cardBg,
                                 ),
                               );
                             }
@@ -246,8 +252,9 @@ class ReviewFormDialog {
                           child: const Text(
                             'SUBMIT',
                             style: TextStyle(
-                              color: Color(0xFF1A1834),
+                              color: AppColors.buttonText,
                               fontSize: 13,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/review_models.dart';
-import 'review_theme.dart';
+import '/theme/app_colors.dart';
 
 class ReviewCard extends StatelessWidget {
   final ReviewItem review;
@@ -21,7 +21,7 @@ class ReviewCard extends StatelessWidget {
           '★',
           style: TextStyle(
             fontSize: 14,
-            color: filled ? ReviewColors.yellow : const Color(0xFF3C395F),
+            color: filled ? AppColors.primary : AppColors.statusGrayIndigo,
           ),
         );
       }),
@@ -32,9 +32,9 @@ class ReviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: ReviewColors.indigoLight,
+        color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF2E2B55)),
+        border: Border.all(color: AppColors.statusGrayIndigo),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -44,8 +44,8 @@ class ReviewCard extends StatelessWidget {
           Container(
             width: 48,
             height: 48,
-            decoration: BoxDecoration(
-              color: const Color(0xFF2F2C56),
+            decoration: const BoxDecoration(
+              color: AppColors.statusGrayIndigo,
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
@@ -54,11 +54,12 @@ class ReviewCard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: ReviewColors.white,
+                color: AppColors.textPrimary,
               ),
             ),
           ),
           const SizedBox(width: 12),
+
           // Main content
           Expanded(
             child: Column(
@@ -72,7 +73,7 @@ class ReviewCard extends StatelessWidget {
                       child: Text(
                         review.reviewerUsername,
                         style: const TextStyle(
-                          color: ReviewColors.white,
+                          color: AppColors.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -84,7 +85,7 @@ class ReviewCard extends StatelessWidget {
                         child: const Text(
                           'view detail',
                           style: TextStyle(
-                            color: Color(0xFFC9C9D9),
+                            color: AppColors.textSecondary,
                             fontSize: 11,
                             decoration: TextDecoration.underline,
                           ),
@@ -93,13 +94,14 @@ class ReviewCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 2),
+
                 // rating + stars
                 Row(
                   children: [
                     Text(
                       review.rating.toString(),
                       style: const TextStyle(
-                        color: ReviewColors.white,
+                        color: AppColors.textPrimary,
                         fontSize: 13,
                       ),
                     ),
@@ -108,13 +110,14 @@ class ReviewCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
+
                 // Comment (3 lines clamp style)
                 Text(
                   review.comment,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: ReviewColors.white,
+                    color: AppColors.textPrimary,
                     fontSize: 13,
                   ),
                 ),
