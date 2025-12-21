@@ -45,27 +45,17 @@ class _TournamentEntryCardState extends State<TournamentEntryCard> {
               ),
               child: Stack(
                 children: [
-                  (widget.tournament.poster.isEmpty)
-                      ? Image.asset(
-                          "images/tournament_bg.png",
-                          height: 500,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.network(
-                          'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/tournament/proxy-image/?url=${Uri.encodeComponent(widget.tournament.poster)}',
-                          height: 500,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              "images/tournament_bg.png",
-                              height: 500,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            );
-                          },
-                        ),
+                  Image.network(
+                    'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/account/proxy-image/?url=${Uri.encodeComponent(widget.tournament.poster)}',
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (ctx, error, stackTrace) => Image.asset(
+                      "images/tournament_bg.png",
+                      height: 500,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
 
                   Positioned(
                     top: 0,
