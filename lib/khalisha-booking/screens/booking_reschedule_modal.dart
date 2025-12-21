@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:kulatih_mobile/theme/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
 import 'package:kulatih_mobile/khalisha-booking/style/text.dart';
@@ -48,7 +49,7 @@ class _RescheduleModalState extends State<RescheduleModal> {
         SnackBar(
           content: Text(
             "Please select new date & time",
-            style: body(14),
+            style: body(14, color: AppColors.textPrimary),
           ),
         ),
       );
@@ -82,7 +83,7 @@ class _RescheduleModalState extends State<RescheduleModal> {
         SnackBar(
           content: Text(
             "Waiting for coach confirmation...",
-            style: body(14),
+            style: body(14, color: AppColors.textPrimary),
           ),
         ),
       );
@@ -95,7 +96,7 @@ class _RescheduleModalState extends State<RescheduleModal> {
         SnackBar(
           content: Text(
             "Reschedule failed: $e",
-            style: body(14),
+            style: body(14, color: AppColors.textPrimary),
           ),
         ),
       );
@@ -107,32 +108,56 @@ class _RescheduleModalState extends State<RescheduleModal> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.black87,
-      title: Text("Reschedule", style: heading(18)),
+      backgroundColor: AppColors.cardBg,
+      title: Text(
+        "Reschedule",
+        style: heading(18, color: AppColors.textHeading),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+            ),
             onPressed: _pickDate,
-            child: Text("Pick new date", style: body(14)),
+            child: Text(
+              "Pick new date",
+              style: body(14, color: AppColors.buttonText),
+            ),
           ),
           const SizedBox(height: 10),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+            ),
             onPressed: _pickStart,
-            child: Text("Pick new time", style: body(14)),
+            child: Text(
+              "Pick new time",
+              style: body(14, color: AppColors.buttonText),
+            ),
           ),
           const SizedBox(height: 14),
-          if (_loading) const CircularProgressIndicator(),
+          if (_loading)
+            const CircularProgressIndicator(
+              color: AppColors.primary,
+            ),
         ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text("Cancel", style: body(14)),
+          child: Text(
+            "Cancel",
+            style: body(14, color: AppColors.textSecondary),
+          ),
         ),
         TextButton(
           onPressed: _loading ? null : _submit,
-          child: Text("Submit", style: body(14)),
+          child: Text(
+            "Submit",
+            style: body(14, color: AppColors.textHeading),
+          ),
         ),
       ],
     );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kulatih_mobile/constants/app_colors.dart';
+import 'package:kulatih_mobile/theme/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/style/text.dart';
 
 class TabSwitcher extends StatelessWidget {
@@ -20,10 +20,10 @@ class TabSwitcher extends StatelessWidget {
         width: MediaQuery.of(context).size.width * 0.9,
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: AppColors.indigoDark,
+          color: AppColors.navBarBg,
           borderRadius: BorderRadius.circular(40),
           border: Border.all(
-            color: Colors.white.withOpacity(0.25),
+            color: AppColors.textPrimary.withOpacity(0.25),
             width: 2,
           ),
         ),
@@ -37,11 +37,10 @@ class TabSwitcher extends StatelessWidget {
                   ? Alignment.centerLeft
                   : Alignment.centerRight,
               child: Container(
-                width:
-                    (MediaQuery.of(context).size.width * 0.9 - 8) / 2,
+                width: (MediaQuery.of(context).size.width * 0.9 - 8) / 2,
                 height: double.infinity,
                 decoration: BoxDecoration(
-                  color: AppColors.gold,
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(36),
                 ),
               ),
@@ -72,7 +71,7 @@ class TabSwitcher extends StatelessWidget {
             label,
             style: heading(
               14,
-              color: selected ? Colors.black : Colors.white,
+              color: selected ? AppColors.buttonText : AppColors.textPrimary,
             ),
           ),
         ),

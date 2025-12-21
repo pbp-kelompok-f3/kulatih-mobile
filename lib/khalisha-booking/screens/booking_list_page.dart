@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 
-import 'package:kulatih_mobile/constants/app_colors.dart';
+import 'package:kulatih_mobile/theme/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/booking_card.dart';
@@ -110,7 +110,7 @@ class _BookingListPageState extends State<BookingListPage>
     final isCoach = user.isCoach;
 
     return Scaffold(
-      backgroundColor: AppColors.indigo,
+      backgroundColor: AppColors.bg,
       body: SafeArea(
         child: Column(
           children: [
@@ -119,16 +119,16 @@ class _BookingListPageState extends State<BookingListPage>
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 "MY BOOKINGS",
-                style: heading(26, color: AppColors.gold),
+                style: heading(26, color: AppColors.textHeading),
               ),
             ),
             const SizedBox(height: 14),
 
             TabBar(
               controller: _tabController,
-              indicatorColor: AppColors.gold,
-              labelColor: AppColors.gold,
-              unselectedLabelColor: Colors.white54,
+              indicatorColor: AppColors.primary,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textSecondary,
               tabs: const [
                 Tab(text: "Upcoming"),
                 Tab(text: "History"),
@@ -158,7 +158,10 @@ class _BookingListPageState extends State<BookingListPage>
   Widget _buildList(List<Booking> list, bool isCoach) {
     if (list.isEmpty) {
       return Center(
-        child: Text("No bookings found", style: body(14, color: Colors.white70)),
+        child: Text(
+          "No bookings found",
+          style: body(14, color: AppColors.textSecondary),
+        ),
       );
     }
 
