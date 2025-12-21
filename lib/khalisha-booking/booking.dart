@@ -8,6 +8,7 @@ import 'package:kulatih_mobile/khalisha-booking/widgets/booking_card.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/tab_switcher.dart';
 import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
+import 'package:kulatih_mobile/app_bar.dart';
 
 class BookingPage extends StatefulWidget {
   const BookingPage({super.key});
@@ -185,14 +186,7 @@ class _BookingPageState extends State<BookingPage> {
 
     return Scaffold(
       backgroundColor: AppColors.indigo,
-      appBar: AppBar(
-        backgroundColor: AppColors.indigo,
-        elevation: 0,
-        title: const Text(
-          "MY BOOKINGS",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
+      appBar: const KulatihAppBar(),
 
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -269,15 +263,14 @@ class _BookingPageState extends State<BookingPage> {
             ),
 
       floatingActionButton: isCoach
-    ? null
-    : FloatingActionButton.extended(
-        backgroundColor: AppColors.gold,
-        foregroundColor: Colors.black,
-        onPressed: _openCreateBooking,
-        icon: const Icon(Icons.add),
-        label: const Text("New Booking"),
-      ),
+          ? null
+          : FloatingActionButton.extended(
+              backgroundColor: AppColors.gold,
+              foregroundColor: Colors.black,
+              onPressed: _openCreateBooking,
+              icon: const Icon(Icons.add),
+              label: const Text("New Booking"),
+            ),
     );
   }
 }
-// Booking confirm accept reject blm bisa
