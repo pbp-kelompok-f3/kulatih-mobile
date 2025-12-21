@@ -7,6 +7,10 @@ import 'package:kulatih_mobile/albert-user/widgets/coach_card.dart'; // Sport ca
 import 'package:kulatih_mobile/albert-user/screens/coach_profile.dart';
 import 'package:kulatih_mobile/albert-user/screens/member_profile.dart';
 import 'package:kulatih_mobile/azizah-rating/widgets/coach_reviews_section.dart';
+import 'package:kulatih_mobile/khalisha-booking/screens/booking_form.dart';
+
+
+
 
 class CoachDetail extends StatelessWidget {
   final Coach coach;
@@ -180,9 +184,14 @@ class CoachDetail extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: Implement Booking Logic
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Booking ${coach.fullName}...")),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BookingFormPage(
+                        isReschedule: false,
+                        coachId: coach.id.toString(), // Wajib dikirim
+                      ),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(

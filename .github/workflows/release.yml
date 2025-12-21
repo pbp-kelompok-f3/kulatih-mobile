@@ -35,13 +35,42 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: "stable"
+          flutter-version: "3.38.5"
+          cache: true
 
+      - name: Reset Flutter & Pub cache
+        run: |
+          flutter clean
+          rm -rf ~/.pub-cache
+
+      - name: Check Flutter & Dart version
+        run: |
+          flutter --version
+          dart --version
+          
       - name: Get packages
         run: flutter pub get
 
       - name: Build APK
         run: flutter build apk --split-per-abi
+
+      - name: Decode Keystore
+        run: echo "${{ secrets.KEY_JKS }}" | base64 -d > release-keystore.jks
+
+      - name: Sign APKs
+        run: |
+          for apk in build/app/outputs/flutter-apk/*.apk; do
+            echo "Signing $apk..."
+            jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+              -keystore release-keystore.jks \
+              -storepass "${{ secrets.KEY_PASSWORD }}" \
+              -keypass "${{ secrets.KEY_PASSWORD }}" \
+              "$apk" release
+          done
+
+      - name: Cleanup Keystore
+        if: always()
+        run: rm -f release-keystore.jks
 
       - name: Get current date
         id: date
