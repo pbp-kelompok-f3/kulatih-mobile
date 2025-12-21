@@ -4,8 +4,8 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 import '../services/review_api.dart';
 import '../models/review_models.dart';
-import '../widgets/review_theme.dart';
 import '../widgets/review_form_dialog.dart';
+import '/theme/app_colors.dart';
 
 class ReviewDetailPage extends StatefulWidget {
   final int reviewId;
@@ -26,10 +26,7 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    // init sekali
     _api ??= ReviewApi(context.read<CookieRequest>());
-
     _future = _api!.getReviewDetail(widget.reviewId);
   }
 
@@ -48,7 +45,7 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
           '★',
           style: TextStyle(
             fontSize: 16,
-            color: filled ? ReviewColors.yellow : const Color(0xFF3C395F),
+            color: filled ? AppColors.primary : AppColors.statusGrayIndigo,
           ),
         );
       }),
@@ -62,14 +59,19 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
       initialRating: detail.rating,
       initialComment: detail.comment,
     );
+
     if (updated == true) {
       await _reload();
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Review updated'),
+        SnackBar(
+          content: const Text('Review updated'),
           behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.cardBg,
         ),
       );
+
       Navigator.of(context).maybePop(true);
     }
   }
@@ -79,30 +81,28 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: ReviewColors.indigo,
+          backgroundColor: AppColors.cardBg,
           title: const Text(
             'Delete?',
-            style: TextStyle(color: ReviewColors.white),
+            style: TextStyle(color: AppColors.textPrimary),
           ),
           content: const Text(
             'This action cannot be undone.',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: AppColors.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               child: const Text(
                 'Cancel',
-                style: TextStyle(color: ReviewColors.white),
+                style: TextStyle(color: AppColors.textPrimary),
               ),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: const Text(
                 'Delete',
-                style: TextStyle(
-                  color: ReviewColors.yellow,
-                ),
+                style: TextStyle(color: AppColors.primary),
               ),
             ),
           ],
@@ -114,18 +114,25 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
 
     try {
       await _api!.deleteReview(reviewId: int.parse(detail.id));
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Review deleted'),
+        SnackBar(
+          content: const Text('Review deleted'),
           behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.cardBg,
         ),
       );
+
       Navigator.of(context).pop(true);
     } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to delete review: $e'),
           behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.cardBg,
         ),
       );
     }
@@ -134,18 +141,18 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ReviewColors.indigoDark,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: ReviewColors.indigoDark,
+        backgroundColor: AppColors.bg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: ReviewColors.white),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
         titleSpacing: 0,
         title: const Padding(
           padding: EdgeInsets.only(left: 16),
           child: Text(
             'RATING AND FEEDBACK',
             style: TextStyle(
-              color: ReviewColors.yellow,
+              color: AppColors.textHeading,
               fontWeight: FontWeight.w900,
               fontSize: 24,
               letterSpacing: 0.5,
@@ -160,10 +167,11 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
                 child: CircularProgressIndicator(
-                  color: ReviewColors.yellow,
+                  color: AppColors.primary,
                 ),
               );
             }
+
             if (snapshot.hasError) {
               return const Center(
                 child: Text(
@@ -172,12 +180,13 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                 ),
               );
             }
+
             final detail = snapshot.data;
             if (detail == null) {
               return const Center(
                 child: Text(
                   'Review not found',
-                  style: TextStyle(color: ReviewColors.white),
+                  style: TextStyle(color: AppColors.textPrimary),
                 ),
               );
             }
@@ -190,9 +199,9 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                   constraints: const BoxConstraints(maxWidth: 640),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: ReviewColors.indigoLight,
+                      color: AppColors.cardBg,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF2E2B55)),
+                      border: Border.all(color: AppColors.statusGrayIndigo),
                     ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -202,11 +211,12 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        // Avatar
                         Container(
                           width: 48,
                           height: 48,
                           decoration: const BoxDecoration(
-                            color: Color(0xFF2F2C56),
+                            color: AppColors.statusGrayIndigo,
                             shape: BoxShape.circle,
                           ),
                           alignment: Alignment.center,
@@ -216,13 +226,15 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                                     : '?')
                                 .toUpperCase(),
                             style: const TextStyle(
-                              color: ReviewColors.white,
+                              color: AppColors.textPrimary,
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                         const SizedBox(width: 12),
+
+                        // Content
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,7 +251,7 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                                         Text(
                                           '@${detail.reviewer.username}',
                                           style: const TextStyle(
-                                            color: ReviewColors.white,
+                                            color: AppColors.textPrimary,
                                             fontWeight: FontWeight.w600,
                                           ),
                                           overflow: TextOverflow.ellipsis,
@@ -250,7 +262,7 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                                             Text(
                                               detail.rating.toString(),
                                               style: const TextStyle(
-                                                color: ReviewColors.white,
+                                                color: AppColors.textPrimary,
                                                 fontSize: 13,
                                               ),
                                             ),
@@ -261,12 +273,14 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                                       ],
                                     ),
                                   ),
+
+                                  // Owner actions
                                   if (detail.isOwner)
                                     Row(
                                       children: [
                                         TextButton(
                                           style: TextButton.styleFrom(
-                                            backgroundColor: ReviewColors.yellow,
+                                            backgroundColor: AppColors.primary,
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 12,
                                               vertical: 6,
@@ -279,15 +293,16 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                                           child: const Text(
                                             'EDIT',
                                             style: TextStyle(
-                                              color: Color(0xFF28253E),
+                                              color: AppColors.buttonText,
                                               fontSize: 12,
+                                              fontWeight: FontWeight.w700,
                                             ),
                                           ),
                                         ),
                                         const SizedBox(width: 8),
                                         TextButton(
                                           style: TextButton.styleFrom(
-                                            backgroundColor: ReviewColors.red,
+                                            backgroundColor: AppColors.statusRed,
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 12,
                                               vertical: 6,
@@ -300,8 +315,9 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                                           child: const Text(
                                             'DELETE',
                                             style: TextStyle(
-                                              color: ReviewColors.white,
+                                              color: AppColors.textPrimary,
                                               fontSize: 12,
+                                              fontWeight: FontWeight.w700,
                                             ),
                                           ),
                                         ),
@@ -313,7 +329,7 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                               Text(
                                 detail.comment,
                                 style: const TextStyle(
-                                  color: ReviewColors.white,
+                                  color: AppColors.textPrimary,
                                   fontSize: 14,
                                 ),
                               ),
