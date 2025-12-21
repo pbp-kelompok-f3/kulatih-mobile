@@ -4,7 +4,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'booking_model.dart';
 
 class BookingService {
-  static const String baseUrl = 'http://localhost:8000';
+  static const String baseUrl = 'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id';
 
   bool _isOk(dynamic res) {
     if (res is Map) {

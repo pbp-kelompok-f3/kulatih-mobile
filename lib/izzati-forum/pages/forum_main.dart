@@ -44,7 +44,7 @@ class ForumMainPageState extends State<ForumMainPage> {
       {String query = "", bool mine = false}) async {
 
     final url =
-        "http://localhost:8000/forum/json/?q=$query&mine=${mine ? 1 : 0}";
+        "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/forum/json/?q=$query&mine=${mine ? 1 : 0}";
 
     final response = await request.get(url);
     return ForumEntry.fromJson(response);

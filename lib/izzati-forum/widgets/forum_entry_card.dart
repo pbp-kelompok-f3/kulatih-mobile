@@ -27,8 +27,8 @@ class _ForumEntryCardState extends State<ForumEntryCard> {
   Future<void> _vote(String type) async {
     final req = context.read<CookieRequest>();
     final url = type == "up"
-        ? "http://localhost:8000/forum/json/${widget.post.id}/upvote/"
-        : "http://localhost:8000/forum/json/${widget.post.id}/downvote/";
+        ? "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/forum/json/${widget.post.id}/upvote/"
+        : "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/forum/json/${widget.post.id}/downvote/";
 
     final res = await req.post(url, {});
 
@@ -75,7 +75,7 @@ class _ForumEntryCardState extends State<ForumEntryCard> {
 
   Future<void> _deletePost() async {
     final req = context.read<CookieRequest>();
-    final url = "http://localhost:8000/forum/json/${widget.post.id}/delete/";
+    final url = "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/forum/json/${widget.post.id}/delete/";
 
     final res = await req.postJson(url, jsonEncode({}));
 

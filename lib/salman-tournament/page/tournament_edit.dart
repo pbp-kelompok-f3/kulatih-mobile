@@ -229,7 +229,7 @@ class _TournamentEditPageState extends State<TournamentEditPage> {
                             setState(() => _isLoading = true);
 
                             final response = await request.postJson(
-                              "http://localhost:8000/tournament/json/tournaments/${widget.tournament.id}/edit/",
+                              "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/tournament/json/tournaments/${widget.tournament.id}/edit/",
                               jsonEncode({
                                 "namaTournaments": _namaController.text,
                                 "lokasiTournaments": _lokasiController.text,
