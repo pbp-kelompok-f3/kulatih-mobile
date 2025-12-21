@@ -105,5 +105,6 @@ fonts:
         weight: 500
 
 dependency_overrides:
-  web: ^0.5.1
+  http: 1.5.0
+  web: 0.5.1
 
