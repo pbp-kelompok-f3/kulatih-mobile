@@ -53,7 +53,7 @@ class _TournamentEntryCardState extends State<TournamentEntryCard> {
                           fit: BoxFit.cover,
                         )
                       : Image.network(
-                          'http://localhost:8000/tournament/proxy-image/?url=${Uri.encodeComponent(widget.tournament.poster)}',
+                          'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/tournament/proxy-image/?url=${Uri.encodeComponent(widget.tournament.poster)}',
                           height: 500,
                           width: double.infinity,
                           fit: BoxFit.cover,

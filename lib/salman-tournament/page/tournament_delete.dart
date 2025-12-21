@@ -10,7 +10,7 @@ class TournamentDeleteService {
     required String tournamentId,
   }) async {
     final request = context.read<CookieRequest>();
-    final url = "http://localhost:8000/tournament/json/tournaments/$tournamentId/delete/"; 
+    final url = "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/tournament/json/tournaments/$tournamentId/delete/"; 
 
     // 1. Tampilkan Loading
     showDialog(
