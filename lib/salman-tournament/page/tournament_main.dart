@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kulatih_mobile/app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:kulatih_mobile/salman-tournament/widgets/tournament_entry_list.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
@@ -33,6 +34,7 @@ class _TournamentMainPageState extends State<TournamentMainPage> {
     final isCoach = context.watch<UserProvider>().isCoach;
 
     return Scaffold(
+      appBar: KulatihAppBar(),
       backgroundColor: AppColor.indigoDark,
       floatingActionButton: AnimatedScale(
         scale: isCoach ? 1 : 0,

@@ -4,7 +4,7 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'booking_model.dart';
 
 class BookingService {
-  static const String baseUrl = 'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id';
+  static const String baseUrl = 'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id:8000';
 
   bool _isOk(dynamic res) {
     if (res is Map) {
@@ -37,7 +37,6 @@ class BookingService {
     required String location,
     required DateTime dateTime,
   }) async {
-    // ✅ sesuai urls.py: /booking/json/<uuid:coach_id>/create/
     final url = "$baseUrl/booking/json/$coachId/create/";
 
     // ✅ backend create_booking_json expect "datetime" format "%Y-%m-%dT%H:%M"
@@ -52,7 +51,6 @@ class BookingService {
 
   /* ===================== CANCEL ===================== */
   Future<bool> cancelBooking(CookieRequest request, int id) async {
-    // ✅ /booking/json/<int:booking_id>/cancel/
     final url = "$baseUrl/booking/api/cancel/$id/";
     final res = await request.postJson(url, jsonEncode({}));
     return _isOk(res);
@@ -64,7 +62,6 @@ class BookingService {
     required int id,
     required DateTime newStart,
   }) async {
-    // ✅ /booking/json/<int:booking_id>/reschedule/
     final url = "$baseUrl/booking/api/reschedule/$id/";
     final body = {
       "new_start_time": newStart.toIso8601String(),
@@ -77,21 +74,18 @@ class BookingService {
 
   /* ===================== COACH ACTIONS ===================== */
   Future<bool> confirmBooking(CookieRequest request, int id) async {
-    // ✅ /booking/json/<int:booking_id>/confirm/
     final url = "$baseUrl/booking/api/confirm/$id/";
     final res = await request.postJson(url, jsonEncode({}));
     return _isOk(res);
   }
 
   Future<bool> acceptReschedule(CookieRequest request, int id) async {
-    // ✅ /booking/json/<int:booking_id>/accept/
     final url = "$baseUrl/booking/api/accept/$id/";
     final res = await request.postJson(url, jsonEncode({}));
     return _isOk(res);
   }
 
   Future<bool> rejectReschedule(CookieRequest request, int id) async {
-    // ✅ /booking/json/<int:booking_id>/reject/
     final url = "$baseUrl/booking/api/reject/$id/";
     final res = await request.postJson(url, jsonEncode({}));
     return _isOk(res);

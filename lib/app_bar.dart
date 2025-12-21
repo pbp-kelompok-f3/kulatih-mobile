@@ -69,7 +69,7 @@ class KulatihAppBar extends StatelessWidget implements PreferredSizeWidget {
               // Jika ada URL foto, pakai NetworkImage. Jika null, null.
               backgroundImage: userProfile?.profile?.profilePhoto != null
                   ? NetworkImage(
-                      'http://localhost:8000/account/proxy-image/?url=${Uri.encodeComponent(userProfile?.profile?.profilePhoto ?? '')}',
+                      'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/account/proxy-image/?url=${Uri.encodeComponent(userProfile?.profile?.profilePhoto ?? '')}',
                     )
                   : null,
               // Jika tidak ada foto, tampilkan Icon Person

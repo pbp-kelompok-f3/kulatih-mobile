@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kulatih_mobile/app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 
@@ -110,6 +111,7 @@ class _BookingListPageState extends State<BookingListPage>
     final isCoach = user.isCoach;
 
     return Scaffold(
+      appBar: KulatihAppBar(),
       backgroundColor: AppColors.bg,
       body: SafeArea(
         child: Column(

@@ -11,6 +11,8 @@ import 'my_community_page.dart';
 import 'create_community_page.dart';
 import 'community_detail_page.dart';
 
+import 'package:kulatih_mobile/app_bar.dart';
+
 class CommunityPage extends StatefulWidget {
   const CommunityPage({super.key});
 
@@ -156,6 +158,7 @@ class _CommunityPageState extends State<CommunityPage> with AutomaticKeepAliveCl
     super.build(context);
     
     return Scaffold(
+      appBar: const KulatihAppBar(),
       backgroundColor: AppColors.indigo,
       body: SafeArea(
         child: Padding(

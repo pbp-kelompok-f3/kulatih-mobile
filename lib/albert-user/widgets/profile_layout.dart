@@ -29,7 +29,7 @@ class ProfileLayout extends StatelessWidget {
 
     if (rawPhotoUrl != null && rawPhotoUrl.isNotEmpty) {
       final proxyUrl =
-          'http://localhost:8000/account/proxy-image/?url=${Uri.encodeComponent(user.profile?.profilePhoto ?? '')}';
+          'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/account/proxy-image/?url=${Uri.encodeComponent(user.profile?.profilePhoto ?? '')}';
       imageProvider = NetworkImage(proxyUrl);
     }
 
@@ -256,7 +256,7 @@ class ProfileLayout extends StatelessWidget {
 
           // Panggil API logout
           // Ganti URL jika berbeda
-          await request.logout("http://localhost:8000/account/logout-flutter/");
+          await request.logout("https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/account/logout-flutter/");
 
           // Bersihkan data user dari state
           userProvider.logout();

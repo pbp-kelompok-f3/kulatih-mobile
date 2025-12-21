@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kulatih_mobile/albert-user/screens/login.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:kulatih_mobile/theme/app_colors.dart';
 
 class RegisterCoachPage extends StatefulWidget {
   const RegisterCoachPage({super.key});
@@ -21,9 +22,9 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
   final _cityController = TextEditingController();
   final _phoneController = TextEditingController();
   final _hourlyFeeController = TextEditingController();
-  
+
   String _selectedSport = 'gym';
-  
+
   final List<Map<String, String>> _sports = [
     {'value': 'gym', 'label': 'Gym & Fitness'},
     {'value': 'football', 'label': 'Football'},
@@ -43,22 +44,28 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
   @override
   Widget build(BuildContext context) {
     final request = context.watch<CookieRequest>();
-    
+
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1625),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1625),
+        backgroundColor: AppColors.bg,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.logoWhite),
           onPressed: () => Navigator.pop(context),
         ),
         title: RichText(
           text: const TextSpan(
             style: TextStyle(fontFamily: 'BebasNeue', fontSize: 32),
             children: [
-              TextSpan(text: 'KU', style: TextStyle(color: Colors.white)),
-              TextSpan(text: 'LATIH', style: TextStyle(color: Color(0xFFE8B923))),
+              TextSpan(
+                text: 'KU',
+                style: TextStyle(color: AppColors.logoWhite),
+              ),
+              TextSpan(
+                text: 'LATIH',
+                style: TextStyle(color: AppColors.logoYellow),
+              ),
             ],
           ),
         ),
@@ -70,10 +77,10 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
           child: Column(
             children: [
               const Text(
-                'Sign In to Continue',
+                'Create Your Coach Account',
                 style: TextStyle(
                   fontFamily: 'BeVietnamPro',
-                  color: Colors.white70,
+                  color: AppColors.textSecondary,
                   fontSize: 16,
                 ),
               ),
@@ -82,60 +89,80 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
               // Username
               _buildTextField(_usernameController, 'Username'),
               const SizedBox(height: 16),
-              
+
               // First name & Last name
               Row(
                 children: [
-                  Expanded(child: _buildTextField(_firstNameController, 'First name')),
+                  Expanded(
+                    child: _buildTextField(_firstNameController, 'First name'),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildTextField(_lastNameController, 'Last name')),
+                  Expanded(
+                    child: _buildTextField(_lastNameController, 'Last name'),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Email
-              _buildTextField(_emailController, 'Email', keyboardType: TextInputType.emailAddress),
+              _buildTextField(
+                _emailController,
+                'Email',
+                keyboardType: TextInputType.emailAddress,
+              ),
               const SizedBox(height: 16),
-              
+
               // Password
-              _buildTextField(_passwordController, 'Password', isPassword: true),
+              _buildTextField(
+                _passwordController,
+                'Password',
+                isPassword: true,
+              ),
               const SizedBox(height: 16),
-              
+
               // Confirm Password
-              _buildTextField(_confirmPasswordController, 'Confirm Password', isPassword: true),
+              _buildTextField(
+                _confirmPasswordController,
+                'Confirm Password',
+                isPassword: true,
+              ),
               const SizedBox(height: 16),
-              
+
               // City
               _buildTextField(_cityController, 'City'),
               const SizedBox(height: 16),
-              
+
               // Phone
-              _buildTextField(_phoneController, 'Phone', keyboardType: TextInputType.phone),
+              _buildTextField(
+                _phoneController,
+                'Phone',
+                keyboardType: TextInputType.phone,
+              ),
               const SizedBox(height: 16),
-              
+
               // Sport Dropdown
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: AppColors.cardBg,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFFE8B923),
-                    width: 2,
-                  ),
+                  border: Border.all(color: AppColors.primary, width: 2),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: _selectedSport,
                     isExpanded: true,
-                    dropdownColor: const Color(0xFF2A2438),
+                    dropdownColor: AppColors.cardBg,
                     style: const TextStyle(
                       fontFamily: 'BeVietnamPro',
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontSize: 16,
                     ),
                     icon: const Padding(
                       padding: EdgeInsets.only(right: 20),
-                      child: Icon(Icons.arrow_drop_down, color: Color(0xFFE8B923)),
+                      child: Icon(
+                        Icons.arrow_drop_down,
+                        color: AppColors.primary,
+                      ),
                     ),
                     items: _sports.map((sport) {
                       return DropdownMenuItem<String>(
@@ -155,9 +182,13 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Hourly Fee
-              _buildTextField(_hourlyFeeController, 'Hourly fee', keyboardType: TextInputType.number),
+              _buildTextField(
+                _hourlyFeeController,
+                'Hourly fee',
+                keyboardType: TextInputType.number,
+              ),
               const SizedBox(height: 32),
 
               // Sign Up Button
@@ -177,7 +208,9 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
                     String hourlyFee = _hourlyFeeController.text.trim();
 
                     // Validation
-                    if (username.isEmpty || password1.isEmpty || password2.isEmpty) {
+                    if (username.isEmpty ||
+                        password1.isEmpty ||
+                        password2.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
@@ -219,7 +252,7 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
                     // API Call
                     try {
                       final response = await request.postJson(
-                        "http://localhost:8000/auth/register/",
+                        "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/auth/register/",
                         jsonEncode({
                           "username": username,
                           "first_name": firstName,
@@ -241,9 +274,12 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
                             const SnackBar(
                               content: Text(
                                 'Registration successful! Please login.',
-                                style: TextStyle(fontFamily: 'BeVietnamPro'),
+                                style: TextStyle(
+                                  fontFamily: 'BeVietnamPro',
+                                  color: AppColors.buttonText,
+                                ),
                               ),
-                              backgroundColor: Color(0xFFE8B923),
+                              backgroundColor: AppColors.primary,
                             ),
                           );
                           Navigator.pushReplacement(
@@ -257,7 +293,9 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
                             SnackBar(
                               content: Text(
                                 'Registration failed: ${response['message']}',
-                                style: const TextStyle(fontFamily: 'BeVietnamPro'),
+                                style: const TextStyle(
+                                  fontFamily: 'BeVietnamPro',
+                                ),
                               ),
                               backgroundColor: Colors.red,
                             ),
@@ -270,7 +308,9 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
                           SnackBar(
                             content: Text(
                               'Error: $e',
-                              style: const TextStyle(fontFamily: 'BeVietnamPro'),
+                              style: const TextStyle(
+                                fontFamily: 'BeVietnamPro',
+                              ),
                             ),
                             backgroundColor: Colors.red,
                           ),
@@ -279,7 +319,7 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE8B923),
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -289,7 +329,7 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
                     style: TextStyle(
                       fontFamily: 'BebasNeue',
                       fontSize: 24,
-                      color: Color(0xFF1A1625),
+                      color: AppColors.buttonText,
                     ),
                   ),
                 ),
@@ -301,19 +341,17 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
                 onTap: () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginPage(),
-                    ),
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
                   );
                 },
                 child: const Text(
                   'Already have an account? Log In',
                   style: TextStyle(
                     fontFamily: 'BeVietnamPro',
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontSize: 16,
                     decoration: TextDecoration.underline,
-                    decorationColor: Colors.white,
+                    decorationColor: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -336,36 +374,27 @@ class _RegisterCoachPageState extends State<RegisterCoachPage> {
       keyboardType: keyboardType,
       style: const TextStyle(
         fontFamily: 'BeVietnamPro',
-        color: Colors.white,
+        color: AppColors.textPrimary,
       ),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(
           fontFamily: 'BeVietnamPro',
-          color: Colors.white54,
+          color: AppColors.textSecondary,
         ),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
+        fillColor: AppColors.cardBg,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Color(0xFFE8B923),
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Color(0xFFE8B923),
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Color(0xFFE8B923),
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
