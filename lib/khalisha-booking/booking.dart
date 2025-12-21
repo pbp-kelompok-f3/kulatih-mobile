@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+
 import 'package:kulatih_mobile/constants/app_colors.dart';
+import 'package:kulatih_mobile/models/user_provider.dart';
+import 'package:kulatih_mobile/app_bar.dart';
+
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_form.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_detail_page.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/booking_card.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/tab_switcher.dart';
-import 'package:provider/provider.dart';
-import 'package:kulatih_mobile/models/user_provider.dart';
 
 class BookingPage extends StatefulWidget {
   const BookingPage({super.key});
@@ -31,13 +35,14 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   // ================================
-  // FETCH BOOKINGS
+  // FETCH BOOKINGS (PBP AUTH)
   // ================================
   Future<void> _fetchBookings() async {
     setState(() => _loading = true);
 
     try {
-      final list = await _service.getBookings();
+      final request = context.read<CookieRequest>();
+      final list = await _service.getBookings(request);
       setState(() => _bookings = list);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -51,14 +56,11 @@ class _BookingPageState extends State<BookingPage> {
   // ================================
   // FILTER
   // ================================
-  List<Booking> get _upcoming =>
-      _bookings.where((b) => b.isUpcoming).toList();
+  List<Booking> get _upcoming => _bookings.where((b) => b.isUpcoming).toList();
 
-  List<Booking> get _history =>
-      _bookings.where((b) => b.isHistory).toList();
+  List<Booking> get _history => _bookings.where((b) => b.isHistory).toList();
 
-  List<Booking> get _filtered =>
-      _selectedTab == 0 ? _upcoming : _history;
+  List<Booking> get _filtered => _selectedTab == 0 ? _upcoming : _history;
 
   // ================================
   // USER ACTIONS
@@ -118,7 +120,8 @@ class _BookingPageState extends State<BookingPage> {
     if (confirm != true) return;
 
     try {
-      await _service.cancelBooking(booking.id);
+      final request = context.read<CookieRequest>();
+      await _service.cancelBooking(request, booking.id);
       _fetchBookings();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -128,11 +131,12 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   // ================================
-  // COACH ACTIONS
+  // COACH ACTIONS (PBP AUTH)
   // ================================
   Future<void> _acceptReschedule(Booking booking) async {
     try {
-      final ok = await _service.acceptReschedule(booking.id);
+      final request = context.read<CookieRequest>();
+      final ok = await _service.acceptReschedule(request, booking.id);
       if (ok) {
         _fetchBookings();
       } else {
@@ -147,7 +151,8 @@ class _BookingPageState extends State<BookingPage> {
 
   Future<void> _rejectReschedule(Booking booking) async {
     try {
-      final ok = await _service.rejectReschedule(booking.id);
+      final request = context.read<CookieRequest>();
+      final ok = await _service.rejectReschedule(request, booking.id);
       if (ok) {
         _fetchBookings();
       } else {
@@ -162,7 +167,8 @@ class _BookingPageState extends State<BookingPage> {
 
   Future<void> _confirmBooking(Booking booking) async {
     try {
-      final ok = await _service.confirmBooking(booking.id);
+      final request = context.read<CookieRequest>();
+      final ok = await _service.confirmBooking(request, booking.id);
       if (ok) {
         _fetchBookings();
       } else {
@@ -185,30 +191,19 @@ class _BookingPageState extends State<BookingPage> {
 
     return Scaffold(
       backgroundColor: AppColors.indigo,
-      appBar: AppBar(
-        backgroundColor: AppColors.indigo,
-        elevation: 0,
-        title: const Text(
-          "MY BOOKINGS",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
-
+      appBar: const KulatihAppBar(),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 const SizedBox(height: 12),
-
                 TabSwitcher(
                   selectedIndex: _selectedTab,
                   onTabSelected: (index) {
                     setState(() => _selectedTab = index);
                   },
                 ),
-
                 const SizedBox(height: 16),
-
                 Expanded(
                   child: _filtered.isEmpty
                       ? const Center(
@@ -218,8 +213,7 @@ class _BookingPageState extends State<BookingPage> {
                           ),
                         )
                       : ListView.builder(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 18),
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
                           itemCount: _filtered.length,
                           itemBuilder: (_, i) {
                             final b = _filtered[i];
@@ -252,32 +246,24 @@ class _BookingPageState extends State<BookingPage> {
                               onReschedule: () => _openReschedule(b),
 
                               // ===== COACH BUTTONS =====
-                              onAccept: isCoach
-                                  ? () => _acceptReschedule(b)
-                                  : null,
-                              onReject: isCoach
-                                  ? () => _rejectReschedule(b)
-                                  : null,
-                              onConfirm: isCoach
-                                  ? () => _confirmBooking(b)
-                                  : null,
+                              onAccept: isCoach ? () => _acceptReschedule(b) : null,
+                              onReject: isCoach ? () => _rejectReschedule(b) : null,
+                              onConfirm: isCoach ? () => _confirmBooking(b) : null,
                             );
                           },
                         ),
                 ),
               ],
             ),
-
       floatingActionButton: isCoach
-    ? null
-    : FloatingActionButton.extended(
-        backgroundColor: AppColors.gold,
-        foregroundColor: Colors.black,
-        onPressed: _openCreateBooking,
-        icon: const Icon(Icons.add),
-        label: const Text("New Booking"),
-      ),
+          ? null
+          : FloatingActionButton.extended(
+              backgroundColor: AppColors.gold,
+              foregroundColor: Colors.black,
+              onPressed: _openCreateBooking,
+              icon: const Icon(Icons.add),
+              label: const Text("New Booking"),
+            ),
     );
   }
 }
-// Booking confirm accept reject blm bisa

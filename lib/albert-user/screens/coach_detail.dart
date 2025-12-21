@@ -6,6 +6,7 @@ import 'package:kulatih_mobile/albert-user/models/coach.dart';
 import 'package:kulatih_mobile/albert-user/widgets/coach_card.dart'; // Sport category
 import 'package:kulatih_mobile/albert-user/screens/coach_profile.dart';
 import 'package:kulatih_mobile/albert-user/screens/member_profile.dart';
+import 'package:kulatih_mobile/azizah-rating/widgets/coach_reviews_section.dart';
 
 class CoachDetail extends StatelessWidget {
   final Coach coach;
@@ -37,14 +38,13 @@ class CoachDetail extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           "Coach Detail",
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: AppColors.textPrimary),
         ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 20.0),
-            
             child: GestureDetector(
               onTap: () {
                 // Logika navigasi ke halaman profil
@@ -119,8 +119,7 @@ class CoachDetail extends StatelessWidget {
                           coach.fullName,
                           style: const TextStyle(
                             color: AppColors.textHeading,
-                            fontSize:
-                                20, // Sedikit disesuaikan agar muat jika nama panjang
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 2,
@@ -206,39 +205,9 @@ class CoachDetail extends StatelessWidget {
             const SizedBox(height: 30),
 
             // --- RATING AND FEEDBACK ---
-            const Text(
-              "RATING AND FEEDBACK",
-              style: TextStyle(
-                color: AppColors.textHeading,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Karena data Review belum ada di Model Coach maupun API,
-            // Kita tampilkan placeholder kosong agar tidak menggunakan dummy data palsu.
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Column(
-                children: [
-                  Icon(
-                    Icons.rate_review_outlined,
-                    color: Colors.white54,
-                    size: 40,
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    "No reviews yet.",
-                    style: TextStyle(color: Colors.white54),
-                  ),
-                ],
-              ),
+            CoachReviewsSection(
+              coachId: coach.id, 
+              coachName: coach.fullName,
             ),
 
             const SizedBox(height: 30),
