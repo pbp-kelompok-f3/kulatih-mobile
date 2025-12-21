@@ -11,7 +11,7 @@ import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal
 import 'package:kulatih_mobile/azizah-rating/services/review_api.dart';
 import 'package:kulatih_mobile/azizah-rating/screens/review_detail_page.dart';
 import 'package:kulatih_mobile/azizah-rating/widgets/review_form_dialog.dart';
-import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; // ⬅️ FONT DARI SINI
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
 
 class BookingListPage extends StatefulWidget {
   const BookingListPage({super.key});

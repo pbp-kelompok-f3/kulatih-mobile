@@ -4,6 +4,8 @@ import 'package:kulatih_mobile/constants/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
 import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
+import 'package:kulatih_mobile/models/user_provider.dart'; 
+import 'package:provider/provider.dart';
 
 class BookingFormPage extends StatefulWidget {
   final bool isReschedule;
@@ -105,6 +107,24 @@ class _BookingFormPageState extends State<BookingFormPage> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.isReschedule;
+    final user = context.watch<UserProvider>();
+
+    if (user.isCoach) {
+      return Scaffold(
+        backgroundColor: AppColors.indigo,
+        appBar: AppBar(
+          backgroundColor: AppColors.indigo,
+          elevation: 0,
+          title: Text("New Booking", style: heading(20)),
+        ),
+        body: Center(
+          child: Text(
+            "Coaches cannot create bookings",
+            style: body(16),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.indigo,
