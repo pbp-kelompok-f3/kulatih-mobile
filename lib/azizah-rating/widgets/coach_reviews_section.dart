@@ -5,9 +5,9 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import '../services/review_api.dart';
 import '../models/review_models.dart';
 import 'review_card.dart';
-import 'review_theme.dart';
 import '../screens/reviews_list_page.dart';
 import '../screens/review_detail_page.dart';
+import '/theme/app_colors.dart';
 
 class CoachReviewsSection extends StatefulWidget {
   final String coachId;
@@ -57,30 +57,26 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
   void _openDetail(ReviewItem item) {
     Navigator.of(context)
         .push(
-      MaterialPageRoute(
-        builder: (_) => ReviewDetailPage(reviewId: int.parse(item.id)),
-      ),
-    )
+          MaterialPageRoute(
+            builder: (_) => ReviewDetailPage(reviewId: int.parse(item.id)),
+          ),
+        )
         .then((changed) {
-      if (changed == true) {
-        _reload();
-      }
+      if (changed == true) _reload();
     });
   }
 
   void _openSeeAll(CoachReviewsResponse initial) {
     Navigator.of(context)
         .push(
-      MaterialPageRoute(
-        builder: (_) => ReviewsListPage(
-          coachId: widget.coachId,
-          coachName: widget.coachName ?? initial.coach.username,
-        ),
-      ),
-    )
-        .then((_) {
-      _reload();
-    });
+          MaterialPageRoute(
+            builder: (_) => ReviewsListPage(
+              coachId: widget.coachId,
+              coachName: widget.coachName ?? initial.coach.username,
+            ),
+          ),
+        )
+        .then((_) => _reload());
   }
 
   @override
@@ -91,13 +87,13 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Header
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'RATING AND FEEDBACK',
               style: TextStyle(
-                color: ReviewColors.yellow,
+                color: AppColors.textHeading,
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
               ),
@@ -105,6 +101,7 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
           ],
         ),
         const SizedBox(height: 12),
+
         FutureBuilder<CoachReviewsResponse>(
           future: _future,
           builder: (context, snapshot) {
@@ -113,7 +110,7 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: Center(
                   child: CircularProgressIndicator(
-                    color: ReviewColors.yellow,
+                    color: AppColors.primary,
                   ),
                 ),
               );
@@ -137,9 +134,9 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
                 width: double.infinity,
                 margin: const EdgeInsets.only(top: 8),
                 decoration: BoxDecoration(
-                  color: ReviewColors.indigoLight,
+                  color: AppColors.cardBg,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFF2E2B55)),
+                  border: Border.all(color: AppColors.statusGrayIndigo),
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -153,7 +150,7 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
                       'NO REVIEWS',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: ReviewColors.white,
+                        color: AppColors.textPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
@@ -163,7 +160,7 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
                       'Be the first to leave a rating & feedback.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: AppColors.textSecondary,
                         fontSize: 14,
                       ),
                     ),
@@ -194,7 +191,7 @@ class _CoachReviewsSectionState extends State<CoachReviewsSection> {
                       child: const Text(
                         'See all reviews',
                         style: TextStyle(
-                          color: ReviewColors.yellow,
+                          color: AppColors.textHeading,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

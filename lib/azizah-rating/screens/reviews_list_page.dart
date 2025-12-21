@@ -5,8 +5,10 @@ import 'package:pbp_django_auth/pbp_django_auth.dart';
 import '../services/review_api.dart';
 import '../models/review_models.dart';
 import '../widgets/review_card.dart';
-import '../widgets/review_theme.dart';
 import 'review_detail_page.dart';
+
+// TODO: sesuaikan path ini jika perlu
+import '/theme/app_colors.dart';
 
 class ReviewsListPage extends StatefulWidget {
   final String coachId;
@@ -88,7 +90,7 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
         const Text(
           'Filter',
           style: TextStyle(
-            color: ReviewColors.white,
+            color: AppColors.textPrimary,
             fontSize: 13,
           ),
         ),
@@ -96,18 +98,18 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
           decoration: BoxDecoration(
-            color: ReviewColors.indigoDark,
+            color: AppColors.bg,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFF2E2B55)),
+            border: Border.all(color: AppColors.statusGrayIndigo),
           ),
           child: DropdownButton<int?>(
             value: _ratingFilter,
             borderRadius: BorderRadius.circular(12),
-            dropdownColor: ReviewColors.indigoDark,
+            dropdownColor: AppColors.bg,
             underline: const SizedBox.shrink(),
-            iconEnabledColor: ReviewColors.white,
+            iconEnabledColor: AppColors.textPrimary,
             style: const TextStyle(
-              color: ReviewColors.white,
+              color: AppColors.textPrimary,
               fontSize: 13,
             ),
             items: const [
@@ -146,11 +148,11 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ReviewColors.indigoDark,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: ReviewColors.indigoDark,
+        backgroundColor: AppColors.bg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: ReviewColors.white),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
         title: const SizedBox.shrink(),
       ),
       body: SafeArea(
@@ -163,7 +165,7 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
               const Text(
                 'RATING AND FEEDBACK',
                 style: TextStyle(
-                  color: ReviewColors.yellow,
+                  color: AppColors.textHeading,
                   fontWeight: FontWeight.w700,
                   fontSize: 24,
                 ),
@@ -184,7 +186,7 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
                         child: CircularProgressIndicator(
-                          color: ReviewColors.yellow,
+                          color: AppColors.primary,
                         ),
                       );
                     }
@@ -206,9 +208,9 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                           width: double.infinity,
                           margin: const EdgeInsets.only(top: 8),
                           decoration: BoxDecoration(
-                            color: ReviewColors.indigoLight,
+                            color: AppColors.cardBg,
                             borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: const Color(0xFF2E2B55)),
+                            border: Border.all(color: AppColors.statusGrayIndigo),
                           ),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
@@ -222,7 +224,7 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                                 'NO REVIEWS',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: ReviewColors.white,
+                                  color: AppColors.textPrimary,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -232,7 +234,7 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                                 'Be the first to leave a rating & feedback.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Colors.white70,
+                                  color: AppColors.textSecondary,
                                   fontSize: 14,
                                 ),
                               ),
@@ -270,27 +272,29 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                                     _changePage(data.pagination.page - 1),
                                 child: const Text(
                                   'Prev',
-                                  style: TextStyle(color: ReviewColors.white),
+                                  style: TextStyle(color: AppColors.textPrimary),
                                 ),
                               )
                             else
                               const SizedBox(width: 64),
+
                             Text(
                               data.pagination.totalPages > 1
                                   ? 'Page ${data.pagination.page} / ${data.pagination.totalPages}'
                                   : '',
                               style: const TextStyle(
-                                color: Colors.white70,
+                                color: AppColors.textSecondary,
                                 fontSize: 12,
                               ),
                             ),
+
                             if (data.pagination.hasNext)
                               TextButton(
                                 onPressed: () =>
                                     _changePage(data.pagination.page + 1),
                                 child: const Text(
                                   'Next',
-                                  style: TextStyle(color: ReviewColors.white),
+                                  style: TextStyle(color: AppColors.textPrimary),
                                 ),
                               )
                             else
