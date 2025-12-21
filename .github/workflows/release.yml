@@ -38,6 +38,16 @@ jobs:
           flutter-version: "3.38.5"
           cache: true
 
+      - name: Reset Flutter & Pub cache
+        run: |
+          flutter clean
+          rm -rf ~/.pub-cache
+
+      - name: Check Flutter & Dart version
+        run: |
+          flutter --version
+          dart --version
+          
       - name: Get packages
         run: flutter pub get
 
