@@ -7,6 +7,7 @@ import '../styles/text.dart';
 import '../widgets/forum_entry_list.dart';
 import '../models/forum_models.dart';
 import 'forum_create.dart';
+import 'package:kulatih_mobile/app_bar.dart';
 
 class ForumMainPage extends StatefulWidget {
   const ForumMainPage({super.key});
@@ -18,7 +19,7 @@ class ForumMainPage extends StatefulWidget {
 class ForumMainPageState extends State<ForumMainPage> {
   late Future<ForumEntry> _futurePosts;
   bool _loaded = false;
-  TextEditingController _search = TextEditingController();
+  final TextEditingController _search = TextEditingController();
   bool _mineOnly = false;
 
   void refreshPosts() {
@@ -40,12 +41,13 @@ class ForumMainPageState extends State<ForumMainPage> {
     }
   }
 
-  Future<ForumEntry> fetchPosts(CookieRequest request,
-      {String query = "", bool mine = false}) async {
-
+  Future<ForumEntry> fetchPosts(
+    CookieRequest request, {
+    String query = "", 
+    bool mine = false,
+    }) async {
     final url =
         "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/forum/json/?q=$query&mine=${mine ? 1 : 0}";
-
     final response = await request.get(url);
     return ForumEntry.fromJson(response);
   }
@@ -55,15 +57,7 @@ class ForumMainPageState extends State<ForumMainPage> {
     return Scaffold(
       backgroundColor: AppColor.indigo,
 
-      appBar: AppBar(
-        backgroundColor: AppColor.indigo,
-        elevation: 0,
-        centerTitle: false,
-        title: Text(
-          "FORUM",
-          style: heading(34, color: AppColor.yellow),
-        ),
-      ),
+      appBar: KulatihAppBar(),
 
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColor.yellow,
@@ -78,8 +72,8 @@ class ForumMainPageState extends State<ForumMainPage> {
 
           // Refresh list AFTER creating a new post
           if (created == true) {
+            final req = context.read<CookieRequest>();
             setState(() {
-              final req = context.read<CookieRequest>();
               _futurePosts = fetchPosts(req);
             });
           }
@@ -92,7 +86,7 @@ class ForumMainPageState extends State<ForumMainPage> {
           children: [
             // Subheading small (SHARE YOUR THOUGHTS)
             Padding(
-              padding: const EdgeInsets.only(top: 4, bottom: 12),
+              padding: const EdgeInsets.only(top: 8, bottom: 12),
               child: Text(
                 "SHARE YOUR THOUGHTS",
                 style: heading(23, color: AppColor.white),
@@ -227,10 +221,7 @@ class ForumMainPageState extends State<ForumMainPage> {
                   return ForumEntryList(
                     posts: snapshot.data!.items,
                     onRefresh: () {
-                      setState(() {
-                        final req = context.read<CookieRequest>();
-                        _futurePosts = fetchPosts(req);
-                      });
+                      refreshPosts();
                     },
                   );
                 },
