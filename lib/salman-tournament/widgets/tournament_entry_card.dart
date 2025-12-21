@@ -60,7 +60,7 @@ class _TournamentEntryCardState extends State<TournamentEntryCard> {
                           errorBuilder: (context, error, stackTrace) {
                             return Image.asset(
                               "images/tournament_bg.png",
-                              height: 500,
+                              height: 499,
                               width: double.infinity,
                               fit: BoxFit.cover,
                             );
