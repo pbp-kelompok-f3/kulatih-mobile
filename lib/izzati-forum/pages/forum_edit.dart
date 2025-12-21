@@ -86,7 +86,7 @@ class _ForumEditPageState extends State<ForumEditPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColor.yellow,
                   foregroundColor: AppColor.indigoDark,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 14,horizontal: 28),
                 ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
