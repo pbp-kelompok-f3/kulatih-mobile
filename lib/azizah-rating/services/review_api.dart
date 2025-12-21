@@ -1,29 +1,21 @@
 import 'dart:convert';
-import 'package:http/browser_client.dart';
-import 'package:http/http.dart' as http;
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 import '../models/review_models.dart';
 
 class ReviewApi {
-  ReviewApi()
-      : _client = BrowserClient()..withCredentials = true;
+  ReviewApi(this.request);
 
-  final http.Client _client;
+  final CookieRequest request;
 
   static const String baseUrl = 'http://localhost:8000';
 
-  Uri _uri(String path, [Map<String, dynamic>? query]) {
-    return Uri.parse(baseUrl).replace(
+  String _url(String path, [Map<String, dynamic>? query]) {
+    final uri = Uri.parse(baseUrl).replace(
       path: path.startsWith('/') ? path : '/$path',
       queryParameters: query,
     );
-  }
-
-  Map<String, String> _headers({bool jsonBody = false}) {
-    return {
-      'Accept': 'application/json',
-      if (jsonBody) 'Content-Type': 'application/json',
-    };
+    return uri.toString();
   }
 
   // ===================== COACH REVIEWS (LIST) =====================
@@ -39,30 +31,18 @@ class ReviewApi {
     };
     if (rating != null) query['rating'] = '$rating';
 
-    final uri = _uri('/reviews/coach/$coachId/', query);
-    final res = await _client.get(uri, headers: _headers());
+    final res = await request.get(_url('/reviews/coach/$coachId/', query));
 
-    if (res.statusCode != 200) {
-      throw Exception(res.body);
-    }
-
-    return CoachReviewsResponse.fromJson(
-      jsonDecode(utf8.decode(res.bodyBytes)),
-    );
+    // CookieRequest biasanya sudah decode JSON jadi Map/List
+    final jsonMap = (res is String) ? jsonDecode(res) : res;
+    return CoachReviewsResponse.fromJson(jsonMap);
   }
 
   // ===================== REVIEW DETAIL =====================
   Future<ReviewDetail> getReviewDetail(int reviewId) async {
-    final uri = _uri('/reviews/detail/$reviewId/');
-    final res = await _client.get(uri, headers: _headers());
-
-    if (res.statusCode != 200) {
-      throw Exception(res.body);
-    }
-
-    return ReviewDetail.fromJson(
-      jsonDecode(utf8.decode(res.bodyBytes)),
-    );
+    final res = await request.get(_url('/reviews/detail/$reviewId/'));
+    final jsonMap = (res is String) ? jsonDecode(res) : res;
+    return ReviewDetail.fromJson(jsonMap);
   }
 
   // ===================== CREATE =====================
@@ -71,18 +51,17 @@ class ReviewApi {
     required int rating,
     String? comment,
   }) async {
-    final uri = _uri('/reviews/coach/$coachId/create/');
-    final res = await _client.post(
-      uri,
-      headers: _headers(jsonBody: true),
-      body: jsonEncode({
+    final res = await request.postJson(
+      _url('/reviews/coach/$coachId/create/'),
+      jsonEncode({
         'rating': rating,
         'comment': comment ?? '',
       }),
     );
 
-    if (res.statusCode != 201) {
-      throw Exception(res.body);
+    // Kalau backend kamu balikin error info sebagai Map
+    if (res is Map && (res['status'] == 'error' || res['success'] == false)) {
+      throw Exception(res['message'] ?? 'Failed to create review');
     }
   }
 
@@ -92,19 +71,17 @@ class ReviewApi {
     int? rating,
     String? comment,
   }) async {
-    final uri = _uri('/reviews/update/$reviewId/');
     final payload = <String, dynamic>{};
     if (rating != null) payload['rating'] = rating;
     if (comment != null) payload['comment'] = comment;
 
-    final res = await _client.post(
-      uri,
-      headers: _headers(jsonBody: true),
-      body: jsonEncode(payload),
+    final res = await request.postJson(
+      _url('/reviews/update/$reviewId/'),
+      jsonEncode(payload),
     );
 
-    if (res.statusCode != 200) {
-      throw Exception(res.body);
+    if (res is Map && (res['status'] == 'error' || res['success'] == false)) {
+      throw Exception(res['message'] ?? 'Failed to update review');
     }
   }
 
@@ -112,11 +89,13 @@ class ReviewApi {
   Future<void> deleteReview({
     required int reviewId,
   }) async {
-    final uri = _uri('/reviews/delete/$reviewId/');
-    final res = await _client.post(uri, headers: _headers());
+    final res = await request.post(
+      _url('/reviews/delete/$reviewId/'),
+      {},
+    );
 
-    if (res.statusCode != 200) {
-      throw Exception(res.body);
+    if (res is Map && (res['status'] == 'error' || res['success'] == false)) {
+      throw Exception(res['message'] ?? 'Failed to delete review');
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
 import 'package:kulatih_mobile/constants/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
@@ -14,6 +15,8 @@ import 'package:kulatih_mobile/azizah-rating/services/review_api.dart';
 import 'package:kulatih_mobile/azizah-rating/screens/review_detail_page.dart';
 import 'package:kulatih_mobile/azizah-rating/widgets/review_form_dialog.dart';
 
+const String kBaseUrl = 'http://localhost:8000';
+
 class BookingDetailPage extends StatefulWidget {
   final Booking booking;
 
@@ -24,11 +27,17 @@ class BookingDetailPage extends StatefulWidget {
 }
 
 class _BookingDetailPageState extends State<BookingDetailPage> {
-  final ReviewApi _reviewApi = ReviewApi();
+  late ReviewApi _reviewApi;
 
-  String _fmtDate(DateTime dt) =>
-      DateFormat('EEEE, dd MMM yyyy').format(dt);
+  String _fmtDate(DateTime dt) => DateFormat('EEEE, dd MMM yyyy').format(dt);
   String _fmtTime(DateTime dt) => DateFormat('HH:mm').format(dt);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final request = context.read<CookieRequest>();
+    _reviewApi = ReviewApi(request);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +63,11 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back_ios,
-                        color: Colors.white, size: 18),
+                    child: const Icon(
+                      Icons.arrow_back_ios,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Text(
@@ -81,7 +93,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                           child: Image.network(
                             widget.booking.imageUrl != null &&
                                     widget.booking.imageUrl!.isNotEmpty
-                                ? 'http://localhost:8000/booking/proxy-image/?url=${Uri.encodeComponent(widget.booking.imageUrl!)}'
+                                ? '$kBaseUrl/booking/proxy-image/?url=${Uri.encodeComponent(widget.booking.imageUrl!)}'
                                 : 'https://via.placeholder.com/80',
                             width: 80,
                             height: 80,
@@ -91,8 +103,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                               height: 80,
                               color: Colors.grey.shade700,
                               alignment: Alignment.center,
-                              child: const Icon(Icons.person,
-                                  color: Colors.white),
+                              child: const Icon(Icons.person, color: Colors.white),
                             ),
                           ),
                         ),
@@ -258,7 +269,6 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
   // ================= HISTORY / REVIEW =================
 
   Widget _historyButtons(BuildContext context, bool isCoach) {
-    // Coach ga perlu review
     if (isCoach) {
       return Column(
         children: [
@@ -267,7 +277,6 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
       );
     }
 
-    // Kalau cancelled, ga bisa review
     if (widget.booking.status == BookingStatus.cancelled) {
       return Column(
         children: [
@@ -277,10 +286,10 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     }
 
     final sessionEnded = widget.booking.endTime.isBefore(DateTime.now());
-    final canReview = sessionEnded || widget.booking.status == BookingStatus.completed;
+    final canReview =
+        sessionEnded || widget.booking.status == BookingStatus.completed;
 
     if (!canReview) {
-      // masih upcoming beneran → jangan tampilin review
       return Column(
         children: [
           _dark("Book Again", () {}),
@@ -288,13 +297,16 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
       );
     }
 
-    // Coach ID wajib ada
     if (widget.booking.coachId.trim().isEmpty) {
       return Column(
         children: [
           _gold("Leave Review", () {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Coach ID not found (backend booking belum ngirim coach_id)")),
+              const SnackBar(
+                content: Text(
+                  "Coach ID not found (backend booking belum ngirim coach_id)",
+                ),
+              ),
             );
           }),
           const SizedBox(height: 12),
@@ -318,7 +330,6 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
 
         final reviewId = snap.data;
 
-        // Belum pernah review
         if (reviewId == null) {
           return Column(
             children: [
@@ -327,9 +338,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                   context,
                   coachId: widget.booking.coachId,
                 );
-                if (ok == true && context.mounted) {
-                  setState(() {}); // refresh → tombol berubah
-                }
+                if (ok == true && context.mounted) setState(() {});
               }),
               const SizedBox(height: 12),
               _dark("Book Again", () {}),
@@ -337,7 +346,6 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
           );
         }
 
-        // Sudah review → bisa view/edit/delete dari detail
         return Column(
           children: [
             _gold("View Your Review", () async {
@@ -347,9 +355,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                   builder: (_) => ReviewDetailPage(reviewId: reviewId),
                 ),
               );
-              if (changed == true && context.mounted) {
-                setState(() {});
-              }
+              if (changed == true && context.mounted) setState(() {});
             }),
             const SizedBox(height: 12),
             _dark("Book Again", () {}),

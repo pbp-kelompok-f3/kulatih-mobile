@@ -8,10 +8,7 @@ import 'package:kulatih_mobile/khalisha-booking/widgets/booking_card.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_detail_page.dart';
 import 'package:kulatih_mobile/khalisha-booking/screens/booking_reschedule_modal.dart';
-import 'package:kulatih_mobile/azizah-rating/services/review_api.dart';
-import 'package:kulatih_mobile/azizah-rating/screens/review_detail_page.dart';
-import 'package:kulatih_mobile/azizah-rating/widgets/review_form_dialog.dart';
-import 'package:kulatih_mobile/khalisha-booking/style/text.dart'; 
+import 'package:kulatih_mobile/khalisha-booking/style/text.dart';
 
 class BookingListPage extends StatefulWidget {
   const BookingListPage({super.key});
@@ -23,9 +20,6 @@ class BookingListPage extends StatefulWidget {
 class _BookingListPageState extends State<BookingListPage>
     with SingleTickerProviderStateMixin {
   final BookingService _service = BookingService();
-
-  // ===== REVIEW API (TETAP) =====
-  final ReviewApi _reviewApi = ReviewApi();
 
   late TabController _tabController;
 
@@ -54,11 +48,8 @@ class _BookingListPageState extends State<BookingListPage>
   }
 
   /* ---------------- FILTER LOGIC ---------------- */
-  List<Booking> get upcoming =>
-      _bookings.where((b) => b.isUpcoming).toList();
-
-  List<Booking> get history =>
-      _bookings.where((b) => b.isHistory).toList();
+  List<Booking> get upcoming => _bookings.where((b) => b.isUpcoming).toList();
+  List<Booking> get history => _bookings.where((b) => b.isHistory).toList();
 
   /* ---------------- CANCEL ---------------- */
   Future<void> _cancelBooking(Booking booking) async {
@@ -118,7 +109,6 @@ class _BookingListPageState extends State<BookingListPage>
         child: Column(
           children: [
             const SizedBox(height: 20),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
@@ -197,17 +187,13 @@ class _BookingListPageState extends State<BookingListPage>
           onReschedule: () => _openReschedule(b),
 
           // COACH BUTTONS
-          onAccept: b.status == BookingStatus.rescheduled
-              ? () => _accept(b)
-              : null,
-          onReject: b.status == BookingStatus.rescheduled
-              ? () => _reject(b)
-              : null,
-          onConfirm: b.status == BookingStatus.pending
-              ? () => _confirm(b)
-              : null,
+          onAccept:
+              b.status == BookingStatus.rescheduled ? () => _accept(b) : null,
+          onReject:
+              b.status == BookingStatus.rescheduled ? () => _reject(b) : null,
+          onConfirm: b.status == BookingStatus.pending ? () => _confirm(b) : null,
 
-          // HISTORY
+          // OPEN DETAIL (history juga boleh)
           onViewReview: () {
             Navigator.push(
               context,
