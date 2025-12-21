@@ -34,8 +34,6 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    // init sekali
     _api ??= ReviewApi(context.read<CookieRequest>());
     _future = _load();
   }
@@ -79,10 +77,70 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
           ),
         )
         .then((changed) {
-      if (changed == true) {
-        _reload();
-      }
+      if (changed == true) _reload();
     });
+  }
+
+  Widget _buildFilterRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        const Text(
+          'Filter',
+          style: TextStyle(
+            color: ReviewColors.white,
+            fontSize: 13,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          decoration: BoxDecoration(
+            color: ReviewColors.indigoDark,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFF2E2B55)),
+          ),
+          child: DropdownButton<int?>(
+            value: _ratingFilter,
+            borderRadius: BorderRadius.circular(12),
+            dropdownColor: ReviewColors.indigoDark,
+            underline: const SizedBox.shrink(),
+            iconEnabledColor: ReviewColors.white,
+            style: const TextStyle(
+              color: ReviewColors.white,
+              fontSize: 13,
+            ),
+            items: const [
+              DropdownMenuItem<int?>(
+                value: null,
+                child: Text('All'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 5,
+                child: Text('5★'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 4,
+                child: Text('4★'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 3,
+                child: Text('3★'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 2,
+                child: Text('2★'),
+              ),
+              DropdownMenuItem<int?>(
+                value: 1,
+                child: Text('1★'),
+              ),
+            ],
+            onChanged: _changeRating,
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -99,82 +157,22 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ===== HEADER + FILTER (SEJAJAR) =====
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'RATING AND FEEDBACK',
-                    style: TextStyle(
-                      color: ReviewColors.yellow,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 24,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      const Text(
-                        'Filter',
-                        style: TextStyle(
-                          color: ReviewColors.white,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: ReviewColors.indigoDark,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: const Color(0xFF2E2B55)),
-                        ),
-                        child: DropdownButton<int?>(
-                          value: _ratingFilter,
-                          borderRadius: BorderRadius.circular(12),
-                          dropdownColor: ReviewColors.indigoDark,
-                          underline: const SizedBox.shrink(),
-                          iconEnabledColor: ReviewColors.white,
-                          style: const TextStyle(
-                            color: ReviewColors.white,
-                            fontSize: 13,
-                          ),
-                          items: const [
-                            DropdownMenuItem<int?>(
-                              value: null,
-                              child: Text('All'),
-                            ),
-                            DropdownMenuItem<int?>(
-                              value: 5,
-                              child: Text('5★'),
-                            ),
-                            DropdownMenuItem<int?>(
-                              value: 4,
-                              child: Text('4★'),
-                            ),
-                            DropdownMenuItem<int?>(
-                              value: 3,
-                              child: Text('3★'),
-                            ),
-                            DropdownMenuItem<int?>(
-                              value: 2,
-                              child: Text('2★'),
-                            ),
-                            DropdownMenuItem<int?>(
-                              value: 1,
-                              child: Text('1★'),
-                            ),
-                          ],
-                          onChanged: _changeRating,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              // ===== HEADER (JUDUL) =====
+              const Text(
+                'RATING AND FEEDBACK',
+                style: TextStyle(
+                  color: ReviewColors.yellow,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                ),
               ),
+
+              const SizedBox(height: 10),
+
+              // ===== FILTER (TURUN KE BAWAH JUDUL) =====
+              _buildFilterRow(),
 
               const SizedBox(height: 16),
 
@@ -195,9 +193,7 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                       return const Center(
                         child: Text(
                           'Failed to load reviews',
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                          ),
+                          style: TextStyle(color: Colors.redAccent),
                         ),
                       );
                     }
@@ -274,9 +270,7 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                                     _changePage(data.pagination.page - 1),
                                 child: const Text(
                                   'Prev',
-                                  style: TextStyle(
-                                    color: ReviewColors.white,
-                                  ),
+                                  style: TextStyle(color: ReviewColors.white),
                                 ),
                               )
                             else
@@ -296,9 +290,7 @@ class _ReviewsListPageState extends State<ReviewsListPage> {
                                     _changePage(data.pagination.page + 1),
                                 child: const Text(
                                   'Next',
-                                  style: TextStyle(
-                                    color: ReviewColors.white,
-                                  ),
+                                  style: TextStyle(color: ReviewColors.white),
                                 ),
                               )
                             else
