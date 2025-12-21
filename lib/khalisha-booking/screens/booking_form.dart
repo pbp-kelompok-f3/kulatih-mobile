@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:kulatih_mobile/constants/app_colors.dart';
+import 'package:kulatih_mobile/theme/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_service.dart';
 import 'package:kulatih_mobile/khalisha-booking/style/text.dart';
@@ -52,7 +52,9 @@ class _BookingFormPageState extends State<BookingFormPage> {
 
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_selectedDateTime ?? DateTime.now()),
+      initialTime: TimeOfDay.fromDateTime(
+        _selectedDateTime ?? DateTime.now(),
+      ),
     );
 
     if (time == null) return;
@@ -108,7 +110,12 @@ class _BookingFormPageState extends State<BookingFormPage> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg, style: body(14))),
+      SnackBar(
+        content: Text(
+          msg,
+          style: body(14, color: AppColors.textPrimary),
+        ),
+      ),
     );
   }
 
@@ -119,42 +126,50 @@ class _BookingFormPageState extends State<BookingFormPage> {
 
     if (user.isCoach) {
       return Scaffold(
-        backgroundColor: AppColors.indigo,
+        backgroundColor: AppColors.bg,
         appBar: AppBar(
-          backgroundColor: AppColors.indigo,
+          backgroundColor: AppColors.bg,
           elevation: 0,
-          title: Text("New Booking", style: heading(20)),
+          title: Text(
+            "New Booking",
+            style: heading(20, color: AppColors.textHeading),
+          ),
         ),
         body: Center(
           child: Text(
             "Coaches cannot create bookings",
-            style: body(16),
+            style: body(16, color: AppColors.textPrimary),
           ),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: AppColors.indigo,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: AppColors.indigo,
+        backgroundColor: AppColors.bg,
         elevation: 0,
-        title: Text(isEditing ? "Reschedule Booking" : "New Booking",
-            style: heading(20)),
+        title: Text(
+          isEditing ? "Reschedule Booking" : "New Booking",
+          style: heading(20, color: AppColors.textHeading),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Schedule", style: heading(18, color: AppColors.gold)),
+            Text(
+              "Schedule",
+              style: heading(18, color: AppColors.textHeading),
+            ),
             const SizedBox(height: 10),
             InkWell(
               onTap: _pickDateTime,
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.card,
+                  color: AppColors.cardBg,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -162,21 +177,24 @@ class _BookingFormPageState extends State<BookingFormPage> {
                       ? "Choose date & time"
                       : DateFormat('EEEE, dd MMM yyyy HH:mm')
                           .format(_selectedDateTime!),
-                  style: body(14, color: Colors.white),
+                  style: body(14, color: AppColors.textPrimary),
                 ),
               ),
             ),
             const SizedBox(height: 18),
-            Text("Location", style: heading(18, color: AppColors.gold)),
+            Text(
+              "Location",
+              style: heading(18, color: AppColors.textHeading),
+            ),
             const SizedBox(height: 10),
             TextField(
               controller: _locationController,
-              style: body(14, color: Colors.white),
+              style: body(14, color: AppColors.textPrimary),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: AppColors.card,
+                fillColor: AppColors.cardBg,
                 hintText: "Enter location",
-                hintStyle: body(14, color: Colors.white54),
+                hintStyle: body(14, color: AppColors.textSecondary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -190,14 +208,14 @@ class _BookingFormPageState extends State<BookingFormPage> {
               child: ElevatedButton(
                 onPressed: _submit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.gold,
+                  backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
                 child: Text(
                   isEditing ? "Submit Reschedule" : "Create Booking",
-                  style: body(15, color: Colors.black),
+                  style: body(15, color: AppColors.buttonText),
                 ),
               ),
             )

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kulatih_mobile/constants/app_colors.dart';
+import 'package:kulatih_mobile/theme/app_colors.dart';
 import 'package:kulatih_mobile/khalisha-booking/booking_model.dart';
 import 'package:kulatih_mobile/khalisha-booking/widgets/booking_status_badge.dart';
 import 'package:kulatih_mobile/khalisha-booking/style/text.dart';
@@ -42,7 +42,7 @@ class BookingCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       margin: const EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -54,7 +54,7 @@ class BookingCard extends StatelessWidget {
             children: [
               Text(
                 booking.formattedDateTime,
-                style: body(12, color: AppColors.textLight),
+                style: body(12, color: AppColors.textSecondary),
               ),
               BookingStatusBadge(status: booking.status),
             ],
@@ -64,7 +64,7 @@ class BookingCard extends StatelessWidget {
 
           /// LINE SEPARATOR
           const Divider(
-            color: Colors.white12,
+            color: AppColors.statusGrayIndigo,
             thickness: 1,
           ),
 
@@ -84,9 +84,10 @@ class BookingCard extends StatelessWidget {
                   errorBuilder: (_, __, ___) => Container(
                     width: 80,
                     height: 80,
-                    color: Colors.grey.shade700,
+                    color: AppColors.navBarBg,
                     alignment: Alignment.center,
-                    child: const Icon(Icons.person, color: Colors.white),
+                    child: const Icon(Icons.person,
+                        color: AppColors.textPrimary),
                   ),
                 ),
               ),
@@ -96,11 +97,11 @@ class BookingCard extends StatelessWidget {
                 children: [
                   Text(
                     isCoach ? booking.memberName : booking.coachName,
-                    style: heading(22, color: AppColors.textWhite),
+                    style: heading(22, color: AppColors.textPrimary),
                   ),
                   Text(
                     booking.sport,
-                    style: body(16, color: AppColors.textLight),
+                    style: body(16, color: AppColors.textSecondary),
                   ),
                 ],
               )
@@ -112,17 +113,17 @@ class BookingCard extends StatelessWidget {
           Row(
             children: [
               const Icon(Icons.location_on,
-                  color: AppColors.textLight, size: 16),
+                  color: AppColors.textSecondary, size: 16),
               const SizedBox(width: 6),
               Text(
                 booking.location,
-                style: body(13, color: AppColors.textLight),
+                style: body(13, color: AppColors.textSecondary),
               ),
             ],
           ),
 
           const SizedBox(height: 16),
-          const Divider(color: Colors.white12),
+          const Divider(color: AppColors.statusGrayIndigo),
           const SizedBox(height: 12),
 
           if (historyMode)
@@ -144,8 +145,8 @@ class BookingCard extends StatelessWidget {
 
     return Row(
       children: [
-        _btn("Cancel", Colors.red, onCancel),
-        _btn("Reschedule", Colors.grey, onReschedule),
+        _btn("Cancel", AppColors.statusRed, onCancel),
+        _btn("Reschedule", AppColors.statusGrayIndigo, onReschedule),
       ],
     );
   }
@@ -155,7 +156,7 @@ class BookingCard extends StatelessWidget {
     if (booking.status == BookingStatus.pending) {
       return Row(
         children: [
-          _btn("Confirm", AppColors.gold, onConfirm ?? () {}),
+          _btn("Confirm", AppColors.primary, onConfirm ?? () {}),
         ],
       );
     }
@@ -163,8 +164,8 @@ class BookingCard extends StatelessWidget {
     if (booking.status == BookingStatus.rescheduled) {
       return Row(
         children: [
-          _btn("Accept", Colors.green, onAccept ?? () {}),
-          _btn("Reject", Colors.red, onReject ?? () {}),
+          _btn("Accept", AppColors.statusGreen, onAccept ?? () {}),
+          _btn("Reject", AppColors.statusRed, onReject ?? () {}),
         ],
       );
     }
@@ -176,8 +177,8 @@ class BookingCard extends StatelessWidget {
   Widget _historyButtons() {
     return Row(
       children: [
-        _btn("View Review", AppColors.gold, onViewReview ?? () {}),
-        _btn("Book Again", Colors.grey.shade700, onBookAgain ?? () {}),
+        _btn("View Review", AppColors.primary, onViewReview ?? () {}),
+        _btn("Book Again", AppColors.navBarBg, onBookAgain ?? () {}),
       ],
     );
   }
@@ -196,7 +197,7 @@ class BookingCard extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             text,
-            style: heading(12, color: Colors.white),
+            style: heading(12, color: AppColors.textPrimary),
           ),
         ),
       ),
