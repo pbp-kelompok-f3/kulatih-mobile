@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const indigo = Color(0xFF0F0F38);
-  static const indigoDark = Color(0xFF17173F);
-  static const card = Color(0xFF1C1C4A);
+  static const indigo = Color(0xFF191831);
+  static const indigoDark = Color(0xFF111024);
+  static const card = Color(0xFF242244);
 
-  static const gold = Color(0xFFD4BC4E);
+  static const gold = Color(0xFFFFD500);
 
-  static const textLight = Colors.white70;
-  static const textWhite = Colors.white;
+ 
+  static const textLight = Color(0xFFD9D9D9);   
+  static const textWhite = Color(0xFFFFFFFF);   
 
   // ===========================
   //     BOOKING STATUS COLORS
