@@ -66,31 +66,39 @@ class Booking {
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) {
-    DateTime parseDT(String dt) =>
-        DateTime.tryParse(dt) ?? DateTime.parse(dt.split('.').first);
-
-    final date = json['date'];
-    final start = json['start_time'];
-    final end = json['end_time'];
-
-    final startDT = parseDT("$date $start");
-    final endDT = end != null
-        ? parseDT("$date $end")
-        : startDT.add(const Duration(hours: 1));
-
-    return Booking(
-      id: json['id'],
-      memberName: json['member_name'] ?? "-", // DARI BACKEND
-      coachId: json['coach_id']?.toString() ?? '',
-      coachName: json['coach_name'] ?? "-",
-      sport: json['sport'] ?? "-",
-      location: json['location'] ?? "-",
-      startTime: startDT,
-      endTime: endDT,
-      status: bookingStatusFromString(json['status']),
-      imageUrl: json['image_url'],
-    );
+  String _isoDT(String date, String time) {
+    final t = (time.length == 5) ? "$time:00" : time;
+    return "${date}T$t";
   }
+
+  final date = json['date']?.toString() ?? '';
+  final start = json['start_time']?.toString() ?? '00:00';
+  final end = json['end_time']?.toString();
+
+  final startDT = DateTime.parse(_isoDT(date, start));
+  final endDT = end != null
+      ? DateTime.parse(_isoDT(date, end))
+      : startDT.add(const Duration(hours: 1));
+
+  final coachIdVal =
+      json['coach_id'] ??
+      json['coachId'] ??
+      json['coach_uuid'] ??
+      (json['coach'] is Map ? (json['coach']['id'] ?? json['coach']['pk']) : null);
+
+  return Booking(
+    id: json['id'],
+    memberName: json['member_name'] ?? "-",
+    coachId: coachIdVal?.toString() ?? '',
+    coachName: json['coach_name'] ?? "-",
+    sport: json['sport'] ?? "-",
+    location: json['location'] ?? "-",
+    startTime: startDT,
+    endTime: endDT,
+    status: bookingStatusFromString(json['status']),
+    imageUrl: json['image_url'] ?? json['imageUrl'] ?? json['coach_image_url'],
+  );
+}
 
   String get formattedDate => DateFormat('EEEE, dd MMM yyyy').format(startTime);
 

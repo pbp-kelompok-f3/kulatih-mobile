@@ -46,6 +46,7 @@ class BookingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          
           /// DATE + STATUS
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -59,6 +60,14 @@ class BookingCard extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
+
+          /// LINE SEPARATOR (kayak desain)
+          const Divider(
+            color: Colors.white12,
+            thickness: 1,
+          ),
+
+          const SizedBox(height: 14),
 
           /// PROFILE INFO
                     Row(

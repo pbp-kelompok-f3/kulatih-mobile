@@ -38,12 +38,7 @@ class BookingService {
     final body = {
       "coach_id": coachId,
       "location": location,
-      "date":
-          "${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}",
-      "start_time":
-          "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}",
-      "end_time":
-          "${(dateTime.hour + 1).toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}",
+      "date": dateTime.toIso8601String().split('.').first, // ISO
     };
 
     final res = await http.post(
@@ -73,13 +68,8 @@ class BookingService {
     final url = Uri.parse("$baseUrl/booking/api/reschedule/$id/");
 
     final body = {
-      "new_start_time":
-          "${newStart.year}-${newStart.month.toString().padLeft(2, '0')}-${newStart.day.toString().padLeft(2, '0')} "
-              "${newStart.hour.toString().padLeft(2, '0')}:${newStart.minute.toString().padLeft(2, '0')}",
-
-      "new_end_time":
-          "${newStart.year}-${newStart.month.toString().padLeft(2, '0')}-${newStart.day.toString().padLeft(2, '0')} "
-              "${(newStart.hour + 1).toString().padLeft(2, '0')}:${newStart.minute.toString().padLeft(2, '0')}",
+      "new_start_time": newStart.toIso8601String().split('.').first,
+      "new_end_time": newStart.add(const Duration(hours: 1)).toIso8601String().split('.').first,
     };
 
     final res = await http.post(
@@ -90,6 +80,7 @@ class BookingService {
 
     return res.statusCode == 200;
   }
+
 
   /* ===================== COACH ACTIONS (FIXED) ===================== */
 

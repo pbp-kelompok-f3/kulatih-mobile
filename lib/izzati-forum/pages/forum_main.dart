@@ -12,13 +12,22 @@ class ForumMainPage extends StatefulWidget {
   const ForumMainPage({super.key});
 
   @override
-  State<ForumMainPage> createState() => _ForumMainPageState();
+  State<ForumMainPage> createState() => ForumMainPageState();
 }
 
-class _ForumMainPageState extends State<ForumMainPage> {
+class ForumMainPageState extends State<ForumMainPage> {
   late Future<ForumEntry> _futurePosts;
   bool _loaded = false;
+  TextEditingController _search = TextEditingController();
+  bool _mineOnly = false;
 
+  void refreshPosts() {
+    final req = context.read<CookieRequest>();
+    setState(() {
+      _futurePosts = fetchPosts(req);
+    });
+  }
+  
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -31,10 +40,13 @@ class _ForumMainPageState extends State<ForumMainPage> {
     }
   }
 
-  Future<ForumEntry> fetchPosts(CookieRequest request) async {
-    final response = await request.get(
-      "http://localhost:8000/forum/json/",
-    );
+  Future<ForumEntry> fetchPosts(CookieRequest request,
+      {String query = "", bool mine = false}) async {
+
+    final url =
+        "http://localhost:8000/forum/json/?q=$query&mine=${mine ? 1 : 0}";
+
+    final response = await request.get(url);
     return ForumEntry.fromJson(response);
   }
 
@@ -83,7 +95,105 @@ class _ForumMainPageState extends State<ForumMainPage> {
               padding: const EdgeInsets.only(top: 4, bottom: 12),
               child: Text(
                 "SHARE YOUR THOUGHTS",
-                style: heading(18, color: AppColor.white),
+                style: heading(23, color: AppColor.white),
+              ),
+            ),
+
+            // ===================== FILTER BAR =====================
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Row(
+                children: [
+                  // SEARCH BAR
+                  Expanded(
+                    child: TextField(
+                      controller: _search,
+                      style: body(14, color: Colors.white),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: AppColor.indigoLight,
+                        hintText: "Search posts or author...",
+                        hintStyle: body(14, color: Colors.white54),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // MY POSTS CHECKBOX
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _mineOnly,
+                        onChanged: (v) {
+                          setState(() => _mineOnly = v ?? false);
+                        },
+                      ),
+                      Text("My posts", style: body(14, color: Colors.white)),
+                    ],
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // APPLY BUTTON
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.yellow,
+                      foregroundColor: AppColor.indigoDark,
+                    ),
+                    onPressed: () {
+                      final req = context.read<CookieRequest>();
+                      setState(() {
+                        _futurePosts = fetchPosts(
+                          req,
+                          query: _search.text.trim(),
+                          mine: _mineOnly,
+                        );
+                      });
+                    },
+                    child: Text(
+                      "APPLY",
+                      style: body(14, color: AppColor.indigoDark).copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 10),
+
+                  // CLEAR BUTTON
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                    ),
+                    onPressed: () {
+                      _search.clear();
+                      _mineOnly = false;
+
+                      final req = context.read<CookieRequest>();
+                      setState(() {
+                        _futurePosts = fetchPosts(req);
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    child: Text(
+                        "CLEAR",
+                        style: body(14, color: Colors.white).copyWith(
+                          fontWeight: FontWeight.w700,       // bold seperti APPLY
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
 
@@ -114,8 +224,15 @@ class _ForumMainPageState extends State<ForumMainPage> {
                       ),
                     );
                   }
-
-                  return ForumEntryList(posts: snapshot.data!.items);
+                  return ForumEntryList(
+                    posts: snapshot.data!.items,
+                    onRefresh: () {
+                      setState(() {
+                        final req = context.read<CookieRequest>();
+                        _futurePosts = fetchPosts(req);
+                      });
+                    },
+                  );
                 },
               ),
             ),

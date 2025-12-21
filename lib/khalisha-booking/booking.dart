@@ -268,7 +268,9 @@ class _BookingPageState extends State<BookingPage> {
               ],
             ),
 
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: isCoach
+    ? null
+    : FloatingActionButton.extended(
         backgroundColor: AppColors.gold,
         foregroundColor: Colors.black,
         onPressed: _openCreateBooking,
@@ -278,3 +280,4 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 }
+// Booking confirm accept reject blm bisa

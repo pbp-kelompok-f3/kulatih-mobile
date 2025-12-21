@@ -43,6 +43,7 @@ class ItemComment {
     List<ItemComment> replies;
     int repliesCount;
     bool isOwner;
+    String? repliesTo;
 
     ItemComment({
         required this.id,
@@ -55,6 +56,7 @@ class ItemComment {
         required this.replies,
         required this.repliesCount,
         required this.isOwner,
+        this.repliesTo,
     });
 
     factory ItemComment.fromJson(Map<String, dynamic> json) => ItemComment(
@@ -68,6 +70,7 @@ class ItemComment {
         replies: List<ItemComment>.from(json["replies"].map((x) => ItemComment.fromJson(x))),
         repliesCount: json["replies_count"],
         isOwner: json["is_owner"],
+        repliesTo: json["replies_to"],
     );
 
     Map<String, dynamic> toJson() => {
@@ -81,5 +84,6 @@ class ItemComment {
         "replies": List<dynamic>.from(replies.map((x) => x.toJson())),
         "replies_count": repliesCount,
         "is_owner": isOwner,
+        "replies_to": repliesTo,
     };
 }
