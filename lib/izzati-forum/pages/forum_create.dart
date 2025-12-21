@@ -68,7 +68,7 @@ class _ForumCreatePageState extends State<ForumCreatePage> {
                 onPressed: () async {
                   if (!_formKey.currentState!.validate()) return;
                   final response = await request.postJson(
-                    "http://localhost:8000/forum/json/create/",
+                    "https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id/forum/json/create/",
                     jsonEncode({"content": _content}),
                   );
 

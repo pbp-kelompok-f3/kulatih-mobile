@@ -8,7 +8,7 @@ class ReviewApi {
 
   final CookieRequest request;
 
-  static const String baseUrl = 'http://localhost:8000';
+  static const String baseUrl = 'https://muhammad-salman42-kulatih.pbp.cs.ui.ac.id';
 
   String _url(String path, [Map<String, dynamic>? query]) {
     final uri = Uri.parse(baseUrl).replace(
