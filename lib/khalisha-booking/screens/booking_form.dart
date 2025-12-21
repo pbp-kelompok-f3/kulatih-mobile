@@ -109,15 +109,18 @@ class _BookingFormPageState extends State<BookingFormPage> {
   }
 
   void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          msg,
-          style: body(14, color: AppColors.textPrimary),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.statusRed,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          content: Text(
+            msg,
+            style: body(14, color: AppColors.textPrimary),
+          ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
   @override
   Widget build(BuildContext context) {

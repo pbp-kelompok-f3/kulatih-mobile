@@ -45,14 +45,7 @@ class _RescheduleModalState extends State<RescheduleModal> {
 
   Future<void> _submit() async {
     if (_newDate == null || _newStart == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Please select new date & time",
-            style: body(14, color: AppColors.textPrimary),
-          ),
-        ),
-      );
+      _showToast("Please select new date & time", isError: true);
       return;
     }
 
@@ -79,30 +72,30 @@ class _RescheduleModalState extends State<RescheduleModal> {
 
       Navigator.pop(context, false); // JANGAN REFRESH LIST
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Waiting for coach confirmation...",
-            style: body(14, color: AppColors.textPrimary),
-          ),
-        ),
-      );
+      _showToast("Waiting for coach confirmation...", isError: false);
     } catch (e) {
       if (!mounted) return;
 
       Navigator.pop(context);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Reschedule failed: $e",
-            style: body(14, color: AppColors.textPrimary),
-          ),
-        ),
-      );
+      _showToast("Reschedule failed: $e", isError: true);
     }
 
     setState(() => _loading = false);
+  }
+
+  void _showToast(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: isError ? AppColors.statusRed : AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        content: Text(
+          message,
+          style: body(14, color: AppColors.buttonText),
+        ),
+      ),
+    );
   }
 
   @override
