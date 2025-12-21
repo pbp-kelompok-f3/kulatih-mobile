@@ -8,10 +8,10 @@ class BookingService {
 
   bool _isOk(dynamic res) {
     if (res is Map) {
-      if (res['ok'] is bool) return res['ok'];
-      if (res['success'] is bool) return res['success'];
+      if (res['ok'] is bool) return res['ok'] as bool;
+      if (res['success'] is bool) return res['success'] as bool;
       if (res['status'] is String) {
-        final s = res['status'].toString().toLowerCase();
+        final s = (res['status'] as String).toLowerCase();
         return s == 'ok' || s == 'success';
       }
     }
@@ -20,13 +20,11 @@ class BookingService {
 
   /* ===================== LIST ===================== */
   Future<List<Booking>> getBookings(CookieRequest request) async {
-    final url = "$baseUrl/booking/list/json/";
+    final url = "$baseUrl/booking/json/list/";
     final res = await request.get(url);
 
     if (res is Map && res["items"] is List) {
-      return (res["items"] as List)
-          .map((e) => Booking.fromJson(e))
-          .toList();
+      return (res["items"] as List).map((e) => Booking.fromJson(e)).toList();
     }
 
     throw Exception("Invalid response when fetching bookings");
@@ -35,12 +33,14 @@ class BookingService {
   /* ===================== CREATE ===================== */
   Future<bool> createBooking({
     required CookieRequest request,
-    required String coachId,
+    required String coachId, // UUID string
     required String location,
     required DateTime dateTime,
   }) async {
-    final url = "$baseUrl/booking/create/json/$coachId/";
+    // ✅ sesuai urls.py: /booking/json/<uuid:coach_id>/create/
+    final url = "$baseUrl/booking/json/$coachId/create/";
 
+    // ✅ backend create_booking_json expect "datetime" format "%Y-%m-%dT%H:%M"
     final body = {
       "location": location,
       "datetime": dateTime.toIso8601String().substring(0, 16),
@@ -52,7 +52,8 @@ class BookingService {
 
   /* ===================== CANCEL ===================== */
   Future<bool> cancelBooking(CookieRequest request, int id) async {
-    final url = "$baseUrl/booking/cancel/json/$id/";
+    // ✅ /booking/json/<int:booking_id>/cancel/
+    final url = "$baseUrl/booking/api/cancel/$id/";
     final res = await request.postJson(url, jsonEncode({}));
     return _isOk(res);
   }
@@ -63,10 +64,11 @@ class BookingService {
     required int id,
     required DateTime newStart,
   }) async {
-    final url = "$baseUrl/booking/reschedule/json/$id/";
-
+    // ✅ /booking/json/<int:booking_id>/reschedule/
+    final url = "$baseUrl/booking/api/reschedule/$id/";
     final body = {
-      "datetime": newStart.toIso8601String().substring(0, 16),
+      "new_start_time": newStart.toIso8601String(),
+      "new_end_time": newStart.add(Duration(hours: 1)).toIso8601String(),
     };
 
     final res = await request.postJson(url, jsonEncode(body));
@@ -74,20 +76,23 @@ class BookingService {
   }
 
   /* ===================== COACH ACTIONS ===================== */
+  Future<bool> confirmBooking(CookieRequest request, int id) async {
+    // ✅ /booking/json/<int:booking_id>/confirm/
+    final url = "$baseUrl/booking/api/confirm/$id/";
+    final res = await request.postJson(url, jsonEncode({}));
+    return _isOk(res);
+  }
+
   Future<bool> acceptReschedule(CookieRequest request, int id) async {
-    final url = "$baseUrl/booking/accept-reschedule/json/$id/";
+    // ✅ /booking/json/<int:booking_id>/accept/
+    final url = "$baseUrl/booking/api/accept/$id/";
     final res = await request.postJson(url, jsonEncode({}));
     return _isOk(res);
   }
 
   Future<bool> rejectReschedule(CookieRequest request, int id) async {
-    final url = "$baseUrl/booking/reject-reschedule/json/$id/";
-    final res = await request.postJson(url, jsonEncode({}));
-    return _isOk(res);
-  }
-
-  Future<bool> confirmBooking(CookieRequest request, int id) async {
-    final url = "$baseUrl/booking/confirm-booking/json/$id/";
+    // ✅ /booking/json/<int:booking_id>/reject/
+    final url = "$baseUrl/booking/api/reject/$id/";
     final res = await request.postJson(url, jsonEncode({}));
     return _isOk(res);
   }
