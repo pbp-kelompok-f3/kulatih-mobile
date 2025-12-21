@@ -1,43 +1,32 @@
 import 'dart:convert';
+import 'package:http/browser_client.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/review_models.dart';
 
 class ReviewApi {
-  ReviewApi({http.Client? client}) : _client = client ?? http.Client();
+  ReviewApi()
+      : _client = BrowserClient()..withCredentials = true;
 
   final http.Client _client;
+
   static const String baseUrl = 'http://localhost:8000';
 
   Uri _uri(String path, [Map<String, dynamic>? query]) {
-    final uri = Uri.parse(baseUrl).replace(
+    return Uri.parse(baseUrl).replace(
       path: path.startsWith('/') ? path : '/$path',
-      queryParameters:
-          query?.map((k, v) => MapEntry(k, v?.toString() ?? '')) ?? {},
+      queryParameters: query,
     );
-    return uri;
   }
 
-  Map<String, String> _headers({
-    bool jsonBody = false,
-    String? cookie,
-    String? csrfToken,
-  }) {
-    final headers = <String, String>{
+  Map<String, String> _headers({bool jsonBody = false}) {
+    return {
       'Accept': 'application/json',
+      if (jsonBody) 'Content-Type': 'application/json',
     };
-    if (jsonBody) {
-      headers['Content-Type'] = 'application/json';
-    }
-    if (cookie != null && cookie.isNotEmpty) {
-      headers['Cookie'] = cookie;
-    }
-    if (csrfToken != null && csrfToken.isNotEmpty) {
-      headers['X-CSRFToken'] = csrfToken;
-    }
-    return headers;
   }
 
+  // ===================== COACH REVIEWS (LIST) =====================
   Future<CoachReviewsResponse> getCoachReviews({
     required String coachId,
     int? rating,
@@ -45,76 +34,63 @@ class ReviewApi {
     int pageSize = 10,
   }) async {
     final query = <String, dynamic>{
-      'page': page,
-      'page_size': pageSize,
+      'page': '$page',
+      'page_size': '$pageSize',
     };
-    if (rating != null) {
-      query['rating'] = rating;
-    }
+    if (rating != null) query['rating'] = '$rating';
 
     final uri = _uri('/reviews/coach/$coachId/', query);
     final res = await _client.get(uri, headers: _headers());
+
     if (res.statusCode != 200) {
-      throw Exception(
-          'Failed to load reviews (${res.statusCode}): ${res.body}');
+      throw Exception(res.body);
     }
-    final data =
-        jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
-    return CoachReviewsResponse.fromJson(data);
+
+    return CoachReviewsResponse.fromJson(
+      jsonDecode(utf8.decode(res.bodyBytes)),
+    );
   }
 
+  // ===================== REVIEW DETAIL =====================
   Future<ReviewDetail> getReviewDetail(int reviewId) async {
     final uri = _uri('/reviews/detail/$reviewId/');
     final res = await _client.get(uri, headers: _headers());
+
     if (res.statusCode != 200) {
-      throw Exception(
-          'Failed to load review detail (${res.statusCode}): ${res.body}');
+      throw Exception(res.body);
     }
-    final data =
-        jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
-    return ReviewDetail.fromJson(data);
+
+    return ReviewDetail.fromJson(
+      jsonDecode(utf8.decode(res.bodyBytes)),
+    );
   }
 
-  Future<ReviewDetail> createReview({
+  // ===================== CREATE =====================
+  Future<void> createReview({
     required String coachId,
     required int rating,
     String? comment,
-    String? cookie,
-    String? csrfToken,
   }) async {
     final uri = _uri('/reviews/coach/$coachId/create/');
-    final body = jsonEncode({
-      'rating': rating,
-      'comment': comment ?? '',
-    });
-
     final res = await _client.post(
       uri,
-      headers: _headers(jsonBody: true, cookie: cookie, csrfToken: csrfToken),
-      body: body,
+      headers: _headers(jsonBody: true),
+      body: jsonEncode({
+        'rating': rating,
+        'comment': comment ?? '',
+      }),
     );
 
     if (res.statusCode != 201) {
-      throw Exception(
-          'Failed to create review (${res.statusCode}): ${res.body}');
+      throw Exception(res.body);
     }
-
-    final data =
-        jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
-
-    final newId = int.tryParse(data['id']?.toString() ?? '');
-    if (newId == null) {
-      throw Exception('Invalid review id in create response');
-    }
-    return getReviewDetail(newId);
   }
 
-  Future<ReviewDetail> updateReview({
+  // ===================== UPDATE =====================
+  Future<void> updateReview({
     required int reviewId,
     int? rating,
     String? comment,
-    String? cookie,
-    String? csrfToken,
   }) async {
     final uri = _uri('/reviews/update/$reviewId/');
     final payload = <String, dynamic>{};
@@ -123,32 +99,48 @@ class ReviewApi {
 
     final res = await _client.post(
       uri,
-      headers: _headers(jsonBody: true, cookie: cookie, csrfToken: csrfToken),
+      headers: _headers(jsonBody: true),
       body: jsonEncode(payload),
     );
-    if (res.statusCode != 200) {
-      throw Exception(
-          'Failed to update review (${res.statusCode}): ${res.body}');
-    }
 
-    final data =
-        jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
-    return getReviewDetail(reviewId);
+    if (res.statusCode != 200) {
+      throw Exception(res.body);
+    }
   }
 
+  // ===================== DELETE =====================
   Future<void> deleteReview({
     required int reviewId,
-    String? cookie,
-    String? csrfToken,
   }) async {
     final uri = _uri('/reviews/delete/$reviewId/');
-    final res = await _client.post(
-      uri,
-      headers: _headers(cookie: cookie, csrfToken: csrfToken),
-    );
+    final res = await _client.post(uri, headers: _headers());
+
     if (res.statusCode != 200) {
-      throw Exception(
-          'Failed to delete review (${res.statusCode}): ${res.body}');
+      throw Exception(res.body);
+    }
+  }
+
+  // ===================== FIND MY REVIEW ID =====================
+  Future<int?> getMyReviewIdForCoach({
+    required String coachId,
+    int pageSize = 50,
+  }) async {
+    int page = 1;
+
+    while (true) {
+      final res = await getCoachReviews(
+        coachId: coachId,
+        page: page,
+        pageSize: pageSize,
+      );
+
+      final mine = res.items.where((it) => it.isOwner).toList();
+      if (mine.isNotEmpty) {
+        return int.tryParse(mine.first.id);
+      }
+
+      if (!res.pagination.hasNext) return null;
+      page++;
     }
   }
 }
