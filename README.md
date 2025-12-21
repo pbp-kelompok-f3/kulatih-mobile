@@ -1,9 +1,12 @@
 #  KuLatih
 
+[![Build Status](https://app.bitrise.io/app/4a391b08-240a-45d4-afc1-bcadff5d0ed5/status.svg?token=3M06LIznX2-jf4m4FOAEIA&branch=main)](https://app.bitrise.io/app/4a391b08-240a-45d4-afc1-bcadff5d0ed5)
+
 Halo! 👋 Selamat datang di repository **Kelompok F03 PBP**.  
 Di sini kami mengembangkan **aplikasi mobile KuLatih** yang terhubung dengan *backend* Django sebagai bagian dari mata kuliah **Pemrograman Berbasis Platform (PBP)**.
 
----
+## Download
+Download aplikasi versi terbaru: [Download APK](https://app.bitrise.io/app/4a391b08-240a-45d4-afc1-bcadff5d0ed5/installable-artifacts/6e018e827da0935f/public-install-page/09e58d0922c1872c023a1a929efb5e2c)
 
 ## 👨‍👩‍👧‍👦 Anggota Kelompok
 | No | Nama                          | NPM        |
