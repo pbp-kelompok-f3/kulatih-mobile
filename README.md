@@ -6,7 +6,7 @@ Halo! 👋 Selamat datang di repository **Kelompok F03 PBP**.
 Di sini kami mengembangkan **aplikasi mobile KuLatih** yang terhubung dengan *backend* Django sebagai bagian dari mata kuliah **Pemrograman Berbasis Platform (PBP)**.
 
 ## Download
-Download aplikasi versi terbaru: [Download APK](https://app.bitrise.io/app/4a391b08-240a-45d4-afc1-bcadff5d0ed5/installable-artifacts/5f2eab41f17b6e10/public-install-page/017db34249ed0c6c339a754c0cf38e21)
+Download aplikasi versi terbaru: [Download APK](https://app.bitrise.io/app/4a391b08-240a-45d4-afc1-bcadff5d0ed5/installable-artifacts/8af8423f419643e8/public-install-page/d421d25bbb5f8eab1718f37cfd07da7f)
 
 ## 👨‍👩‍👧‍👦 Anggota Kelompok
 | No | Nama                          | NPM        |
