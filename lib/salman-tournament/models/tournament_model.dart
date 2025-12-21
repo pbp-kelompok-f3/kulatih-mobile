@@ -1,133 +1,149 @@
-// To parse this JSON data, do
-//
-//     final tournamentEntry = tournamentEntryFromJson(jsonString);
-
 import 'dart:convert';
 
-TournamentEntry tournamentEntryFromJson(String str) => TournamentEntry.fromJson(json.decode(str));
+TournamentEntry tournamentEntryFromJson(String str) =>
+    TournamentEntry.fromJson(json.decode(str));
 
-String tournamentEntryToJson(TournamentEntry data) => json.encode(data.toJson());
+String tournamentEntryToJson(TournamentEntry data) =>
+    json.encode(data.toJson());
 
 class TournamentEntry {
-    String role;
-    List<Tournament> tournaments;
-    String namaUser;
+  final String role;
+  final List<Tournament> tournaments;
+  final String namaUser;
 
-    TournamentEntry({
-        required this.role,
-        required this.tournaments,
-        required this.namaUser,
-    });
+  TournamentEntry({
+    required this.role,
+    required this.tournaments,
+    required this.namaUser,
+  });
 
-    factory TournamentEntry.fromJson(Map<String, dynamic> json) => TournamentEntry(
-        role: json["role"],
-        tournaments: List<Tournament>.from(json["tournaments"].map((x) => Tournament.fromJson(x))),
-        namaUser: json["namaUser"],
+  factory TournamentEntry.fromJson(Map<String, dynamic> json) {
+    return TournamentEntry(
+      role: json['role']?.toString() ?? 'unknown',
+      namaUser: json['username']?.toString() ??
+          json['namaUser']?.toString() ??
+          '',
+      tournaments: (json['tournaments'] as List? ?? [])
+          .map((e) => Tournament.fromJson(e))
+          .toList(),
     );
+  }
 
-    Map<String, dynamic> toJson() => {
-        "role": role,
-        "tournaments": List<dynamic>.from(tournaments.map((x) => x.toJson())),
-        "namaUser": namaUser,
-    };
+  Map<String, dynamic> toJson() => {
+        'role': role,
+        'username': namaUser,
+        'tournaments': tournaments.map((e) => e.toJson()).toList(),
+      };
 }
 
 class Tournament {
-    String id;
-    String nama;
-    String tipe;
-    DateTime tanggal;
-    String lokasi;
-    String poster;
-    String deskripsi;
-    String pembuat;
-    String pembuatFoto;
-    List<Participant> participants;
-    int participantCount;
+  final String id;
+  final String nama;
+  final String tipe;
+  final DateTime tanggal;
+  final String lokasi;
+  final String poster;
+  final String deskripsi;
+  final String pembuat;
+  final String pembuatFoto;
+  final List<Participant> participants;
+  final int participantCount;
 
-    Tournament({
-        required this.id,
-        required this.nama,
-        required this.tipe,
-        required this.tanggal,
-        required this.lokasi,
-        required this.poster,
-        required this.deskripsi,
-        required this.pembuat,
-        required this.pembuatFoto,
-        required this.participants,
-        required this.participantCount,
-    });
+  Tournament({
+    required this.id,
+    required this.nama,
+    required this.tipe,
+    required this.tanggal,
+    required this.lokasi,
+    required this.poster,
+    required this.deskripsi,
+    required this.pembuat,
+    required this.pembuatFoto,
+    required this.participants,
+    required this.participantCount,
+  });
 
-    factory Tournament.fromJson(Map<String, dynamic> json) => Tournament(
-        id: json["id"],
-        nama: json["nama"],
-        tipe: json["tipe"],
-        tanggal: DateTime.parse(json["tanggal"]),
-        lokasi: json["lokasi"],
-        poster: json["poster"],
-        deskripsi: json["deskripsi"],
-        pembuat: json["pembuat"],
-        pembuatFoto: json["pembuat_foto"],
-        participants: List<Participant>.from(json["participants"].map((x) => Participant.fromJson(x))),
-        participantCount: json["participant_count"],
+  factory Tournament.fromJson(Map<String, dynamic> json) {
+    return Tournament(
+      id: json['id']?.toString() ?? '',
+      nama: json['nama']?.toString() ?? '',
+      tipe: json['tipe']?.toString() ?? '',
+      tanggal: json['tanggal'] != null
+          ? DateTime.tryParse(json['tanggal'].toString()) ??
+              DateTime(1970)
+          : DateTime(1970),
+      lokasi: json['lokasi']?.toString() ?? '',
+      poster: json['poster']?.toString() ?? '',
+      deskripsi: json['deskripsi']?.toString() ?? '',
+      pembuat: json['pembuat']?.toString() ?? '',
+      pembuatFoto: json['pembuat_foto']?.toString() ?? '',
+      participants: (json['participants'] as List? ?? [])
+          .map((e) => Participant.fromJson(e))
+          .toList(),
+      participantCount: json['participant_count'] is int
+          ? json['participant_count']
+          : int.tryParse(json['participant_count']?.toString() ?? '0') ??
+              0,
     );
+  }
 
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "nama": nama,
-        "tipe": tipe,
-        "tanggal": "${tanggal.year.toString().padLeft(4, '0')}-${tanggal.month.toString().padLeft(2, '0')}-${tanggal.day.toString().padLeft(2, '0')}",
-        "lokasi": lokasi,
-        "poster": poster,
-        "deskripsi": deskripsi,
-        "pembuat": pembuat,
-        "pembuat_foto": pembuatFoto,
-        "participants": List<dynamic>.from(participants.map((x) => x.toJson())),
-        "participant_count": participantCount,
-    };
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'nama': nama,
+        'tipe': tipe,
+        'tanggal': tanggal.toIso8601String(),
+        'lokasi': lokasi,
+        'poster': poster,
+        'deskripsi': deskripsi,
+        'pembuat': pembuat,
+        'pembuat_foto': pembuatFoto,
+        'participants': participants.map((e) => e.toJson()).toList(),
+        'participant_count': participantCount,
+      };
 }
 
 class Participant {
-    Member member;
+  final Member member;
 
-    Participant({
-        required this.member,
-    });
+  Participant({required this.member});
 
-    factory Participant.fromJson(Map<String, dynamic> json) => Participant(
-        member: Member.fromJson(json["member"]),
+  factory Participant.fromJson(Map<String, dynamic> json) {
+    return Participant(
+      member: Member.fromJson(json['member'] ?? {}),
     );
+  }
 
-    Map<String, dynamic> toJson() => {
-        "member": member.toJson(),
-    };
+  Map<String, dynamic> toJson() => {
+        'member': member.toJson(),
+      };
 }
 
 class Member {
-    String id;
-    String username;
-    String city;
-    String photo;
+  final String id;
+  final String username;
+  final String city;
+  final String photo;
 
-    Member({
-        required this.id,
-        required this.username,
-        required this.city,
-        required this.photo,
-    });
+  Member({
+    required this.id,
+    required this.username,
+    required this.city,
+    required this.photo,
+  });
 
-    factory Member.fromJson(Map<String, dynamic> json) => Member(
-        id: json["id"],
-        username: json["username"],
-        city: json["city"],
-        photo: json["photo"],
+  factory Member.fromJson(Map<String, dynamic> json) {
+    return Member(
+      id: json['id']?.toString() ?? '',
+      username: json['username']?.toString() ?? '',
+      city: json['city']?.toString() ?? '',
+      photo: json['photo']?.toString() ?? '',
     );
+  }
 
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "username": username,
-        "city": city,
-        "photo": photo,
-    };
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'username': username,
+        'city': city,
+        'photo': photo,
+      };
 }
