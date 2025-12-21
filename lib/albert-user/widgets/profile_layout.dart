@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kulatih_mobile/main.dart';
 import 'package:kulatih_mobile/models/user_model.dart';
 import 'package:kulatih_mobile/theme/app_colors.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,8 @@ import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/albert-user/screens/login.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:kulatih_mobile/albert-user/screens/edit_profile.dart';
+
+import 'package:kulatih_mobile/azizah-rating/screens/reviews_list_page.dart';
 
 class ProfileLayout extends StatelessWidget {
   final UserProfile user;
@@ -148,12 +151,24 @@ class ProfileLayout extends StatelessWidget {
             }),
             const SizedBox(height: 20),
             _buildMenuButton(context, "My Bookings", Icons.calendar_today, () {
-              // Navigasi Booking
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MyHomePage(
+                    title: "KuLatih",
+                    initialIndex: 2,
+                  ),
+                ),
+                (route) => false,
+              );
             }),
             const SizedBox(height: 20),
             if (user.isCoach)
               _buildMenuButton(context, "My Ratings", Icons.star_border, () {
-                // Navigasi Ratings
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ReviewsListPage(coachId: user.profile!.id ?? ''))
+                );
               }),
             if (user.isCoach) const SizedBox(height: 20),
 
