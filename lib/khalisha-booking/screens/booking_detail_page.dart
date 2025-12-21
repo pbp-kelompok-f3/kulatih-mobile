@@ -27,7 +27,14 @@ class BookingDetailPage extends StatefulWidget {
 }
 
 class _BookingDetailPageState extends State<BookingDetailPage> {
-  final ReviewApi _reviewApi = ReviewApi();
+  late final ReviewApi _reviewApi;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final request = context.read<CookieRequest>();
+    _reviewApi = ReviewApi(request);
+  }
 
   String _fmtDate(DateTime dt) => DateFormat('EEEE, dd MMM yyyy').format(dt);
   String _fmtTime(DateTime dt) => DateFormat('HH:mm').format(dt);
