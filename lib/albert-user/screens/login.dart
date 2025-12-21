@@ -5,6 +5,7 @@ import 'package:kulatih_mobile/main.dart';
 import 'package:kulatih_mobile/models/user_provider.dart';
 import 'package:kulatih_mobile/albert-user/screens/register_member.dart';
 import 'package:kulatih_mobile/albert-user/screens/register_coach.dart';
+import 'package:kulatih_mobile/theme/app_colors.dart'; // Import AppColors
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -23,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
     final userProvider = context.watch<UserProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1625),
+      backgroundColor: AppColors.bg,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -36,16 +37,15 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(
                       fontFamily: 'BebasNeue',
                       fontSize: 64,
-                      fontWeight: FontWeight.bold,
                     ),
                     children: [
                       TextSpan(
                         text: 'KU',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: AppColors.logoWhite),
                       ),
                       TextSpan(
                         text: 'LATIH',
-                        style: TextStyle(color: Color(0xFFE8B923)),
+                        style: TextStyle(color: AppColors.logoYellow),
                       ),
                     ],
                   ),
@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
                   'Sign In to Continue',
                   style: TextStyle(
                     fontFamily: 'BeVietnamPro',
-                    color: Colors.white70,
+                    color: AppColors.textSecondary,
                     fontSize: 16,
                   ),
                 ),
@@ -65,34 +65,34 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _usernameController,
                   style: const TextStyle(
                     fontFamily: 'BeVietnamPro',
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Username',
                     hintStyle: const TextStyle(
                       fontFamily: 'BeVietnamPro',
-                      color: Colors.white54,
+                      color: AppColors.textSecondary,
                     ),
                     filled: true,
-                    fillColor: Colors.white.withOpacity(0.1),
+                    fillColor: AppColors.cardBg,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                        color: Color(0xFFE8B923),
+                        color: AppColors.primary,
                         width: 2,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                        color: Color(0xFFE8B923),
+                        color: AppColors.primary,
                         width: 2,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                        color: Color(0xFFE8B923),
+                        color: AppColors.primary,
                         width: 2,
                       ),
                     ),
@@ -109,34 +109,34 @@ class _LoginPageState extends State<LoginPage> {
                   obscureText: true,
                   style: const TextStyle(
                     fontFamily: 'BeVietnamPro',
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                   ),
                   decoration: InputDecoration(
                     hintText: 'Password',
                     hintStyle: const TextStyle(
                       fontFamily: 'BeVietnamPro',
-                      color: Colors.white54,
+                      color: AppColors.textSecondary,
                     ),
                     filled: true,
-                    fillColor: Colors.white.withOpacity(0.1),
+                    fillColor: AppColors.cardBg,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                        color: Color(0xFFE8B923),
+                        color: AppColors.primary,
                         width: 2,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                        color: Color(0xFFE8B923),
+                        color: AppColors.primary,
                         width: 2,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                        color: Color(0xFFE8B923),
+                        color: AppColors.primary,
                         width: 2,
                       ),
                     ),
@@ -188,9 +188,10 @@ class _LoginPageState extends State<LoginPage> {
                                   "$message Welcome, ${userProvider.userProfile?.fullName ?? username}!",
                                   style: const TextStyle(
                                     fontFamily: 'BeVietnamPro',
+                                    color: AppColors.buttonText,
                                   ),
                                 ),
-                                backgroundColor: const Color(0xFFE8B923),
+                                backgroundColor: AppColors.primary,
                               ),
                             );
                         }
@@ -199,19 +200,19 @@ class _LoginPageState extends State<LoginPage> {
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              backgroundColor: const Color(0xFF2A2438),
+                              backgroundColor: AppColors.cardBg,
                               title: const Text(
                                 'Login Failed',
                                 style: TextStyle(
                                   fontFamily: 'BebasNeue',
-                                  color: Colors.white,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                               content: Text(
                                 response['message'],
                                 style: const TextStyle(
                                   fontFamily: 'BeVietnamPro',
-                                  color: Colors.white70,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                               actions: [
@@ -220,7 +221,7 @@ class _LoginPageState extends State<LoginPage> {
                                     'OK',
                                     style: TextStyle(
                                       fontFamily: 'BeVietnamPro',
-                                      color: Color(0xFFE8B923),
+                                      color: AppColors.primary,
                                     ),
                                   ),
                                   onPressed: () {
@@ -234,7 +235,7 @@ class _LoginPageState extends State<LoginPage> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE8B923),
+                      backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -244,7 +245,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(
                         fontFamily: 'BebasNeue',
                         fontSize: 24,
-                        color: Color(0xFF1A1625),
+                        color: AppColors.buttonText,
                       ),
                     ),
                   ),
@@ -267,10 +268,10 @@ class _LoginPageState extends State<LoginPage> {
                         'Member Sign Up',
                         style: TextStyle(
                           fontFamily: 'BeVietnamPro',
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           fontSize: 16,
                           decoration: TextDecoration.underline,
-                          decorationColor: Colors.white,
+                          decorationColor: AppColors.textPrimary,
                         ),
                       ),
                     ),
@@ -288,10 +289,10 @@ class _LoginPageState extends State<LoginPage> {
                         'Coach Sign Up',
                         style: TextStyle(
                           fontFamily: 'BeVietnamPro',
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           fontSize: 16,
                           decoration: TextDecoration.underline,
-                          decorationColor: Colors.white,
+                          decorationColor: AppColors.textPrimary,
                         ),
                       ),
                     ),
